@@ -1,9 +1,25 @@
-"use client";
-import Link from "next/link";
-import React, { useState } from "react";
+'use client';
+import React, { useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 
 const Navbar = () => {
+  const pathname = usePathname(); // Get the current path
+  const router = useRouter();
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Check if the current path starts with "/dashboard"
+  const shouldHideNavbar = pathname.startsWith('/dashboard');
+
+  if (shouldHideNavbar) {
+    return null; // Do not render the Navbar if the path starts with "/dashboard"
+  }
+
+  const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedCategory = event.target.value;
+    if (selectedCategory) {
+      router.push(`/login/${selectedCategory}`);
+    }
+  };
 
   return (
     <div>
@@ -34,17 +50,32 @@ const Navbar = () => {
 
           {/* Logo */}
           <div className="flex-1 text-center text-2xl text-black font-bold">
-            <Link href="/">MySite</Link>
+            <a href="/">MySite</a>
           </div>
 
           {/* Login/Signup Links (visible on larger screens) */}
           <div className="absolute right-4 hidden md:flex space-x-4">
-            <Link href="/login" className="text-black text-xl hover:text-gray-600">
-              Login
-            </Link>
-            <Link href="/userRegister" className="text-black text-xl hover:text-gray-600">
+            <label
+              htmlFor="login-select"
+              className="block text-lg font-medium mb-2"
+            ></label>
+            <select
+              id="login-select"
+              onChange={handleSelectChange}
+              className="p-1"
+            >
+              <option value="">Login</option>
+              <option value="adminlogin">Admin</option>
+              <option value="spalogin">SPA</option>
+              <option value="foodlogin">Food</option>
+              <option value="userlogin">User</option>
+            </select>
+            <a
+              href="/userRegister"
+              className="text-black text-xl hover:text-gray-600"
+            >
               Signup
-            </Link>
+            </a>
           </div>
         </div>
 
@@ -52,14 +83,24 @@ const Navbar = () => {
         <div className="bg-slate-800">
           <div className="hidden md:flex justify-center text-white">
             <ul className="flex space-x-8 p-4">
-              {["OVERVIEW", "ROOMS", "DINING", "SPA", "GALLERY", "AMENITIES", "LOCATION", "CONTACT", "ABOUT US"].map((item) => (
+              {[
+                "OVERVIEW",
+                "ROOMS",
+                "DINING",
+                "SPA",
+                "GALLERY",
+                "AMENITIES",
+                "LOCATION",
+                "CONTACT",
+                "ABOUT US",
+              ].map((item) => (
                 <li key={item}>
-                  <Link
-                    href={`/${item.toLowerCase().replace(/ /g, '-')}`}
+                  <a
+                    href={`/${item.toLowerCase().replace(/ /g, "-")}`}
                     className="no-underline hover:underline hover:text-gray-300"
                   >
                     {item}
-                  </Link>
+                  </a>
                 </li>
               ))}
             </ul>
@@ -106,25 +147,102 @@ const Navbar = () => {
               <div className="space-y-5">
                 <h2 className="text-xl font-bold">Our Locations</h2>
                 <ul className="space-y-1">
-                  <li><Link href="/our-locations" className="no-underline hover:underline hover:text-gray-300">Our Locations</Link></li>
-                  <li><Link href="/our-hotels" className="no-underline hover:underline hover:text-gray-300">Our Hotels</Link></li>
-                  <li><Link href="/our-brands" className="no-underline hover:underline hover:text-gray-300">Our Brands</Link></li>
-                  <li><Link href="/offers" className="no-underline hover:underline hover:text-gray-300">Offers</Link></li>
+                  <li>
+                    <a
+                      href="/our-locations"
+                      className="no-underline hover:underline hover:text-gray-300"
+                    >
+                      Our Locations
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/our-hotels"
+                      className="no-underline hover:underline hover:text-gray-300"
+                    >
+                      Our Hotels
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/our-brands"
+                      className="no-underline hover:underline hover:text-gray-300"
+                    >
+                      Our Brands
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/offers"
+                      className="no-underline hover:underline hover:text-gray-300"
+                    >
+                      Offers
+                    </a>
+                  </li>
                 </ul>
 
                 <h2 className="text-xl font-bold">Rooms</h2>
                 <ul className="space-y-1">
-                  <li><Link href="/rooms/grande-room" className="no-underline hover:underline hover:text-gray-300">Grande Room</Link></li>
-                  <li><Link href="/rooms/studio-room" className="no-underline hover:underline hover:text-gray-300">Studio Room</Link></li>
-                  <li><Link href="/rooms/premium-grande-room" className="no-underline hover:underline hover:text-gray-300">Premium Grande Room</Link></li>
-                  <li><Link href="/rooms/suite-room" className="no-underline hover:underline hover:text-gray-300">Suite Room</Link></li>
-                  <li><Link href="/rooms/premium-suite-room" className="no-underline hover:underline hover:text-gray-300">Premium Suite Room</Link></li>
+                  <li>
+                    <a
+                      href="/rooms/grande-room"
+                      className="no-underline hover:underline hover:text-gray-300"
+                    >
+                      Grande Room
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/rooms/studio-room"
+                      className="no-underline hover:underline hover:text-gray-300"
+                    >
+                      Studio Room
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/rooms/premium-grande-room"
+                      className="no-underline hover:underline hover:text-gray-300"
+                    >
+                      Premium Grande Room
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/rooms/suite-room"
+                      className="no-underline hover:underline hover:text-gray-300"
+                    >
+                      Suite Room
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/rooms/premium-suite-room"
+                      className="no-underline hover:underline hover:text-gray-300"
+                    >
+                      Premium Suite Room
+                    </a>
+                  </li>
                 </ul>
 
                 <h2 className="text-xl font-bold">Dining</h2>
                 <ul className="space-y-1">
-                  <li><Link href="/dining" className="no-underline hover:underline hover:text-gray-300">Dining</Link></li>
-                  <li><Link href="/banquets" className="no-underline hover:underline hover:text-gray-300">Banquets</Link></li>
+                  <li>
+                    <a
+                      href="/dining"
+                      className="no-underline hover:underline hover:text-gray-300"
+                    >
+                      Dining
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/banquets"
+                      className="no-underline hover:underline hover:text-gray-300"
+                    >
+                      Banquets
+                    </a>
+                  </li>
                 </ul>
               </div>
 
@@ -132,14 +250,70 @@ const Navbar = () => {
               <div className="space-y-5">
                 <h2 className="text-xl font-bold">About Us</h2>
                 <ul className="space-y-1">
-                  <li><Link href="/about-us" className="no-underline hover:underline hover:text-gray-300">About Us</Link></li>
-                  <li><Link href="/contact-us" className="no-underline hover:underline hover:text-gray-300">Contact Us</Link></li>
-                  <li><Link href="/partner-with-us" className="no-underline hover:underline hover:text-gray-300">Partner with Us</Link></li>
-                  <li><Link href="/factsheet" className="no-underline hover:underline hover:text-gray-300">Factsheet</Link></li>
-                  <li><Link href="/investors" className="no-underline hover:underline hover:text-gray-300">Investors</Link></li>
-                  <li><Link href="/news-events" className="no-underline hover:underline hover:text-gray-300">News & Events</Link></li>
-                  <li><Link href="/blog" className="no-underline hover:underline hover:text-gray-300">Blog</Link></li>
-                  <li><Link href="/careers" className="no-underline hover:underline hover:text-gray-300">Careers</Link></li>
+                  <li>
+                    <a
+                      href="/about-us"
+                      className="no-underline hover:underline hover:text-gray-300"
+                    >
+                      About Us
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/contact-us"
+                      className="no-underline hover:underline hover:text-gray-300"
+                    >
+                      Contact Us
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/partner-with-us"
+                      className="no-underline hover:underline hover:text-gray-300"
+                    >
+                      Partner with Us
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/factsheet"
+                      className="no-underline hover:underline hover:text-gray-300"
+                    >
+                      Factsheet
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/investors"
+                      className="no-underline hover:underline hover:text-gray-300"
+                    >
+                      Investors
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/news-events"
+                      className="no-underline hover:underline hover:text-gray-300"
+                    >
+                      News & Events
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/blog"
+                      className="no-underline hover:underline hover:text-gray-300"
+                    >
+                      Blog
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/careers"
+                      className="no-underline hover:underline hover:text-gray-300"
+                    >
+                      Careers
+                    </a>
+                  </li>
                 </ul>
 
                 <h2 className="text-xl font-bold">Book Now</h2>
