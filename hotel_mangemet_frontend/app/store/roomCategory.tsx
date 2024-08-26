@@ -5,8 +5,19 @@ export interface RoomCategoryStoreState {
   roomCategory: RoomCategory;
   getAllRoomCategories: () => Promise<void>;
   deleteRoomCategory: (id: number) => Promise<void>;
-  updateRoomCategory: (data: { id: number; name: string; description?: string; price?: number; imageUrl?: string }) => Promise<void>;
-  addRoomCategory: (data: { name: string; description?: string; price?: number; imageUrl?: string }) => Promise<void>;
+  updateRoomCategory: (data: {
+    id: number;
+    name: string;
+    description?: string;
+    price?: number;
+    imageUrl?: string;
+  }) => Promise<void>;
+  addRoomCategory: (data: {
+    name: string;
+    description?: string;
+    price?: number;
+    imageUrl?: string;
+  }) => Promise<void>;
   getRoomCategory: (id: number) => Promise<void>;
 }
 
@@ -15,12 +26,11 @@ interface RoomCategory {
   name: string;
   description?: string;
   price?: number;
-  imageUrl?: string;
-  amenities?: { id: number; name: string }[]; 
+  imageUrl?: string ;
+  amenities?: { id: number; name: string }[];
   noOfChildren?: number;
   noOfAdults?: number;
 }
-
 
 const baseUrl = "http://localhost:5000";
 
@@ -61,7 +71,13 @@ const useRoomCategoryStore = create<RoomCategoryStoreState>((set) => ({
       console.error("Failed to fetch room category:", error);
     }
   },
-  addRoomCategory: async (data: { name: string; description?: string; price?: number; imageUrl?: string }) => {
+  addRoomCategory: async (data: {
+    name: string;
+    description?: string;
+    price?: number;
+    imageUrl?: string;
+    amenities?: { id: number; name: string }[];
+  }) => {
     try {
       const response = await fetch(`${baseUrl}/room-categories`, {
         method: "POST",
@@ -72,15 +88,25 @@ const useRoomCategoryStore = create<RoomCategoryStoreState>((set) => ({
         body: JSON.stringify(data),
       });
       const newRoomCategory = await response.json();
-      set((state) => ({ roomCategories: [...state.roomCategories, newRoomCategory] }));
+      set((state) => ({
+        roomCategories: [...state.roomCategories, newRoomCategory],
+      }));
     } catch (error) {
       console.error("Failed to add room category:", error);
     }
   },
-  updateRoomCategory: async (data: { id: number; name: string; description?: string; price?: number; imageUrl?: string }) => {
+
+  updateRoomCategory: async (data: {
+    id: number;
+    name: string;
+    description?: string;
+    price?: number;
+    imageUrl?: string;
+    amenities?: { id: number; name: string }[];
+  }) => {
     try {
       const response = await fetch(`${baseUrl}/room-categories/${data.id}`, {
-        method: "PATCH",
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
           authorization: sessionStorage.token || "",

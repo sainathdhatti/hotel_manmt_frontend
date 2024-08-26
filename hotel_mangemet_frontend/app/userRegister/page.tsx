@@ -63,7 +63,7 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-100 flex flex-col justify-center  sm:px-6 lg:px-8 pt-28">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="text-center text-3xl font-extrabold text-gray-900">Register</h2>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
@@ -205,7 +205,7 @@ const Register = () => {
         <p className="mt-4 text-center text-sm">
           Already have an account?
           <Link
-            href="/login"
+            href="/login/userlogin"
             className="font-medium text-indigo-600 hover:text-indigo-500"
           >
             Login

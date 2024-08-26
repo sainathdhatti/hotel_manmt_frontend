@@ -11,6 +11,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import Navbar from "../navbar";
+import Footer from "../footer/page";
 
 const Overview = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -23,7 +24,7 @@ const Overview = () => {
   ];
   const [selectedCategory, setSelectedCategory] = useState("rooms");
 
-  const categories = {
+  const categories: { [key: string]: string } = {
     rooms: "/images/room.jpg",
     dinner: "/images/dinner.jpg",
     banquets: "/images/banquets.jpg",
@@ -295,6 +296,7 @@ const Overview = () => {
           </div>
         </div>
       </div>
+      <Footer/>
     </div>
   );
 };
