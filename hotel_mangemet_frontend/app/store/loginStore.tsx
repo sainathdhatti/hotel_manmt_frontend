@@ -11,6 +11,7 @@ interface AuthState {
 }
 
 const useAuthStore = create<AuthState>((set) => {
+
   let token = '';
   let userId: number | null = null;
 

@@ -2,8 +2,9 @@
 import useRoomCategoryStore from "../store/roomCategory";
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBed, faVectorSquare } from "@fortawesome/free-solid-svg-icons"; // Import the icons you need
+import { faBed, faVectorSquare } from "@fortawesome/free-solid-svg-icons";
 import Footer from "../footer/page";
+import useAuthStore from "../store/loginStore";
 
 const Rooms = () => {
   const {
@@ -19,21 +20,25 @@ const Rooms = () => {
   }));
 
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const { isAuthenticated, userId } = useAuthStore((state) => ({
+    isAuthenticated: state.isAuthenticated,
+    userId: state.userId,
+  }));
+
+  console.log(userId);
 
   useEffect(() => {
     const initializeData = async () => {
+      setIsLoading(true);
+
       try {
-        await getAllRoomCategories(); // Fetch all categories
-        
-        // Automatically select the first room category if no roomCategory is set
+        await getAllRoomCategories();
+
         if (roomCategories.length > 0 && !roomCategory) {
-          // Ensure roomCategories is updated before fetching roomCategory
-          // Using setTimeout to ensure roomCategories is updated in Zustand store
-          setTimeout(async () => {
-            if (roomCategories.length > 0) {
-              await getRoomCategory(roomCategories[0].id);
-            }
-          }, 0);
+          const firstCategoryId = roomCategories[0].id;
+          setSelectedCategoryId(firstCategoryId);
+          await getRoomCategory(firstCategoryId);
         }
       } catch (error) {
         console.error("Error initializing data:", error);
@@ -47,6 +52,7 @@ const Rooms = () => {
 
   const handleCategoryClick = (id: number) => {
     getRoomCategory(id);
+    setSelectedCategoryId(id);
   };
 
   const displayRoomCategory = roomCategory || (roomCategories.length > 0 ? roomCategories[0] : null);
@@ -62,7 +68,7 @@ const Rooms = () => {
                 <li key={category.id} className="mb-4">
                   <button
                     onClick={() => handleCategoryClick(category.id)}
-                    className="text-3xl font-semibold hover:text-red-500 transition duration-300 ease-in-out ml-10"
+                    className="text-xl font-semibold hover:text-red-500 transition duration-300 ease-in-out ml-10"
                   >
                     {category.name}
                   </button>
@@ -78,7 +84,6 @@ const Rooms = () => {
             <p className="text-lg">Loading...</p>
           ) : displayRoomCategory ? (
             <div className="flex-0">
-              {/* Display image */}
               {displayRoomCategory.imageUrl ? (
                 <img
                   src={displayRoomCategory.imageUrl}
@@ -88,7 +93,6 @@ const Rooms = () => {
               ) : (
                 <p className="text-lg text-center">Image not available</p>
               )}
-              {/* Display details below the image in a single line */}
               <div className="flex items-center space-x-10 mb-6 pr-10">
                 <div className="flex-0">
                   <h1 className="text-2xl font-bold">
@@ -117,9 +121,7 @@ const Rooms = () => {
                   </p>
                 </div>
               </div>
-              {/* Display description */}
               <p className="text-lg mb-4">{displayRoomCategory.description}</p>
-              {/* Display policies */}
               <div className="mt-8 border-t pt-4 border-gray-300 flex justify-between">
                 <div className="flex items-center mb-2">
                   <input
@@ -158,7 +160,6 @@ const Rooms = () => {
                   </label>
                 </div>
               </div>
-              {/* Display amenities */}
               <div className="mt-8 flex-1">
                 <h2 className="text-xl font-semibold mb-2">Amenities:</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -168,7 +169,6 @@ const Rooms = () => {
                         key={amenity.id}
                         className="flex items-center space-x-2"
                       >
-                        {/* Checkbox */}
                         <input
                           type="checkbox"
                           id={`amenity-${amenity.id}`}
@@ -176,7 +176,6 @@ const Rooms = () => {
                           readOnly
                           className="form-checkbox h-5 w-5 text-blue-600"
                         />
-                        {/* Label */}
                         <label
                           htmlFor={`amenity-${amenity.id}`}
                           className="text-lg"
@@ -190,10 +189,9 @@ const Rooms = () => {
                   )}
                 </div>
               </div>
-              {/* Book Now Button */}
               <div className="mt-8 flex justify-end">
                 <a
-                  href="#"
+                  href={`/bookingForm/${selectedCategoryId}`}
                   className="bg-red-500 text-white text-lg font-semibold py-3 px-6 rounded-full shadow-lg hover:bg-red-600 transition duration-300"
                 >
                   Book Now
@@ -205,9 +203,7 @@ const Rooms = () => {
           )}
         </main>
       </div>
-      <div>
-        <Footer />
-      </div>
+      <Footer />
     </>
   );
 };

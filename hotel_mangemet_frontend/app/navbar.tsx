@@ -88,6 +88,7 @@ const Navbar = () => {
                 "ROOMS",
                 "Food",
                 "SPA",
+                "Bookings",
                 "GALLERY",
                 "AMENITIES",
                 "LOCATION",
