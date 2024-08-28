@@ -1,4 +1,5 @@
-import Image from "next/image";
+
+import { ToastContainer } from "react-toastify";
 import Overview from "./overview/page";
 
 export default function Home() {
@@ -6,6 +7,7 @@ export default function Home() {
     <main>
     
         <Overview/>    
+    
     </main>
   );
 }

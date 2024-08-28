@@ -11,7 +11,7 @@ interface AuthState {
 }
 
 const useAuthStore = create<AuthState>((set) => {
-  // Initialize state from session storage (client-side only)
+
   let token = '';
   let userId: number | null = null;
 

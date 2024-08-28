@@ -2,7 +2,7 @@
 import useRoomCategoryStore from "../store/roomCategory";
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBed, faVectorSquare } from "@fortawesome/free-solid-svg-icons"; // Import the icons you need
+import { faBed, faVectorSquare } from "@fortawesome/free-solid-svg-icons";
 import Footer from "../footer/page";
 import useAuthStore from "../store/loginStore";
 
@@ -23,20 +23,22 @@ const Rooms = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   const { isAuthenticated, userId } = useAuthStore((state) => ({
     isAuthenticated: state.isAuthenticated,
-    userId: state.userId
+    userId: state.userId,
   }));
 
-console.log(userId)
+  console.log(userId);
 
   useEffect(() => {
     const initializeData = async () => {
-      try {
-        await getAllRoomCategories(); // Fetch all categories
+      setIsLoading(true);
 
-        // Automatically select the first room category if no roomCategory is set
+      try {
+        await getAllRoomCategories();
+
         if (roomCategories.length > 0 && !roomCategory) {
-          await getRoomCategory(roomCategories[0].id);
-          setSelectedCategoryId(roomCategories[0].id);
+          const firstCategoryId = roomCategories[0].id;
+          setSelectedCategoryId(firstCategoryId);
+          await getRoomCategory(firstCategoryId);
         }
       } catch (error) {
         console.error("Error initializing data:", error);
@@ -50,169 +52,159 @@ console.log(userId)
 
   const handleCategoryClick = (id: number) => {
     getRoomCategory(id);
-    setSelectedCategoryId(id); 
+    setSelectedCategoryId(id);
   };
 
-  const displayRoomCategory = roomCategory || roomCategories[0];
+  const displayRoomCategory = roomCategory || (roomCategories.length > 0 ? roomCategories[0] : null);
 
   return (
     <>
-    <div className="flex pt-24 overflow-hidden justify-center  min-h-screen">
-      <nav className=" w-1/4 min-h-screen p-4 py-5 ">
-        <h2 className="text-2xl font-semibold mb-6 ml-10">Enhance Your Stay</h2>
-        <ul className="space-y-4 ">
-          {roomCategories.length > 0 ? (
-            roomCategories.map((category) => (
-              <li key={category.id} className="mb-4">
-                <button
-                  onClick={() => handleCategoryClick(category.id)}
-                  className="text-xl  font-semibold hover:text-red-500 transition duration-300 ease-in-out ml-10"
-                >
-                  {category.name}
-                </button>
-              </li>
-            ))
-          ) : (
-            <li className="text-lg">Loading categories...</li>
-          )}
-        </ul>
-      </nav>
-      <main className="ml-1/4 w-3/4 p-6 flex flex-col relative">
-        {isLoading ? (
-          <p className="text-lg">Loading...</p>
-        ) : displayRoomCategory ? (
-          <div className="flex-0">
-            {/* Display image */}
-            {displayRoomCategory.imageUrl ? (
-              <img
-                src={displayRoomCategory.imageUrl}
-                alt={displayRoomCategory.name}
-                className="w-full h-[70vh] mb-4"
-              />
+      <div className="flex pt-24 overflow-hidden justify-center min-h-screen">
+        <nav className="w-1/4 min-h-screen p-4 py-5">
+          <h2 className="text-2xl font-semibold mb-6 ml-10">Enhance Your Stay</h2>
+          <ul className="space-y-4">
+            {roomCategories.length > 0 ? (
+              roomCategories.map((category) => (
+                <li key={category.id} className="mb-4">
+                  <button
+                    onClick={() => handleCategoryClick(category.id)}
+                    className="text-xl font-semibold hover:text-red-500 transition duration-300 ease-in-out ml-10"
+                  >
+                    {category.name}
+                  </button>
+                </li>
+              ))
             ) : (
-              <p className="text-lg text-center">Image not available</p>
+              <li className="text-lg">Loading categories...</li>
             )}
-            {/* Display details below the image in a single line */}
-            <div className="flex items-center space-x-10 mb-6 pr-10">
-              <div className="flex-0">
-                <h1 className="text-xl font-bold">
-                  {displayRoomCategory.name}
-                </h1>
-              </div>
-              <div >
-                <p className="text-xl flex items-center font-bold">
-                  Price: ${displayRoomCategory.price}
-                </p>
-              </div>
-              <div >
-                <p className="text-xl flex items-center font-bold">
-                  <FontAwesomeIcon icon={faBed} className="mr-2 text-xl" />
-                  {displayRoomCategory.noOfAdults} Adults + {displayRoomCategory.noOfChildren} Children
-                </p>
-              </div>
-              <div>
-                <p className="text-xl flex items-center">
-                  <strong>Size:</strong>{" "}
-                  <FontAwesomeIcon
-                    icon={faVectorSquare}
-                    className="mr-2 text-xl"
-                  />{" "}
-                  424 Sq. Ft.
-                </p>
-              </div>
-            </div>
-            {/* Display description */}
-            <p className="text-lg mb-4">{displayRoomCategory.description}</p>
-            {/* Display policies */}
-            <div className="mt-8 border-t pt-4 border-gray-300 flex justify-between">
-              <div className="flex items-center mb-2">
-                <input
-                  type="checkbox"
-                  id="check-in"
-                  checked
-                  readOnly
-                  className="form-checkbox h-5 w-5 text-green-600"
+          </ul>
+        </nav>
+        <main className="ml-1/4 w-3/4 p-6 flex flex-col relative">
+          {isLoading ? (
+            <p className="text-lg">Loading...</p>
+          ) : displayRoomCategory ? (
+            <div className="flex-0">
+              {displayRoomCategory.imageUrl ? (
+                <img
+                  src={displayRoomCategory.imageUrl}
+                  alt={displayRoomCategory.name}
+                  className="w-full h-[70vh] mb-4"
                 />
-                <label htmlFor="check-in" className="ml-2 text-lg">
-                  Check-in: 12:00 NOON
-                </label>
+              ) : (
+                <p className="text-lg text-center">Image not available</p>
+              )}
+              <div className="flex items-center space-x-10 mb-6 pr-10">
+                <div className="flex-0">
+                  <h1 className="text-2xl font-bold">
+                    {displayRoomCategory.name}
+                  </h1>
+                </div>
+                <div>
+                  <p className="text-2xl flex items-center font-bold">
+                    Price: ${displayRoomCategory.price}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-2xl flex items-center font-bold">
+                    <FontAwesomeIcon icon={faBed} className="mr-2 text-xl" />
+                    {displayRoomCategory.noOfAdults} Adults + {displayRoomCategory.noOfChildren} Children
+                  </p>
+                </div>
+                <div>
+                  <p className="text-2xl flex items-center">
+                    <strong>Size:</strong>{" "}
+                    <FontAwesomeIcon
+                      icon={faVectorSquare}
+                      className="mr-2 text-xl"
+                    />{" "}
+                    424 Sq. Ft.
+                  </p>
+                </div>
               </div>
-              <div className="flex items-center mb-2">
-                <input
-                  type="checkbox"
-                  id="check-out"
-                  checked
-                  readOnly
-                  className="form-checkbox h-5 w-5 text-green-600"
-                />
-                <label htmlFor="check-out" className="ml-2 text-lg">
-                  Check-out: 10:00 AM
-                </label>
+              <p className="text-lg mb-4">{displayRoomCategory.description}</p>
+              <div className="mt-8 border-t pt-4 border-gray-300 flex justify-between">
+                <div className="flex items-center mb-2">
+                  <input
+                    type="checkbox"
+                    id="check-in"
+                    checked
+                    readOnly
+                    className="form-checkbox h-5 w-5 text-green-600"
+                  />
+                  <label htmlFor="check-in" className="ml-2 text-lg">
+                    Check-in: 12:00 NOON
+                  </label>
+                </div>
+                <div className="flex items-center mb-2">
+                  <input
+                    type="checkbox"
+                    id="check-out"
+                    checked
+                    readOnly
+                    className="form-checkbox h-5 w-5 text-green-600"
+                  />
+                  <label htmlFor="check-out" className="ml-2 text-lg">
+                    Check-out: 10:00 AM
+                  </label>
+                </div>
+                <div className="flex items-center mb-2">
+                  <input
+                    type="checkbox"
+                    id="cancellation"
+                    checked
+                    readOnly
+                    className="form-checkbox h-5 w-5 text-green-600"
+                  />
+                  <label htmlFor="cancellation" className="ml-2 text-lg">
+                    Cancellation: 48 Hours
+                  </label>
+                </div>
               </div>
-              <div className="flex items-center mb-2">
-                <input
-                  type="checkbox"
-                  id="cancellation"
-                  checked
-                  readOnly
-                  className="form-checkbox h-5 w-5 text-green-600"
-                />
-                <label htmlFor="cancellation" className="ml-2 text-lg">
-                  Cancellation: 48 Hours
-                </label>
-              </div>
-            </div>
-            {/* Display amenities */}
-            <div className="mt-8 flex-1">
-              <h2 className="text-xl font-semibold mb-2">Amenities:</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {displayRoomCategory.amenities?.length ? (
-                  displayRoomCategory.amenities.map((amenity) => (
-                    <div
-                      key={amenity.id}
-                      className="flex items-center space-x-2"
-                    >
-                      {/* Checkbox */}
-                      <input
-                        type="checkbox"
-                        id={`amenity-${amenity.id}`}
-                        checked
-                        readOnly
-                        className="form-checkbox h-5 w-5 text-blue-600"
-                      />
-                      {/* Label */}
-                      <label
-                        htmlFor={`amenity-${amenity.id}`}
-                        className="text-lg"
+              <div className="mt-8 flex-1">
+                <h2 className="text-xl font-semibold mb-2">Amenities:</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {displayRoomCategory.amenities?.length ? (
+                    displayRoomCategory.amenities.map((amenity) => (
+                      <div
+                        key={amenity.id}
+                        className="flex items-center space-x-2"
                       >
-                        {amenity.name}
-                      </label>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-lg">No amenities listed</p>
-                )}
+                        <input
+                          type="checkbox"
+                          id={`amenity-${amenity.id}`}
+                          checked
+                          readOnly
+                          className="form-checkbox h-5 w-5 text-blue-600"
+                        />
+                        <label
+                          htmlFor={`amenity-${amenity.id}`}
+                          className="text-lg"
+                        >
+                          {amenity.name}
+                        </label>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-lg">No amenities listed</p>
+                  )}
+                </div>
+              </div>
+              <div className="mt-8 flex justify-end">
+                <a
+                  href={`/bookingForm/${selectedCategoryId}`}
+                  className="bg-red-500 text-white text-lg font-semibold py-3 px-6 rounded-full shadow-lg hover:bg-red-600 transition duration-300"
+                >
+                  Book Now
+                </a>
               </div>
             </div>
-            {/* Book Now Button */}
-            <div className="mt-8 flex justify-end">
-              <a
-                href={`/bookingForm/${selectedCategoryId}`}
-                className="bg-red-500 text-white text-lg font-semibold py-3 px-6 rounded-full shadow-lg hover:bg-red-600 transition duration-300"
-              >
-                Book Now
-              </a>
-            </div>
-          </div>
-        ) : (
-          <p className="text-lg">Please select a category</p>
-        )}
-      </main>
-    </div>
-    <div>
-      <Footer/>
-    </div>
-   </>
+          ) : (
+            <p className="text-lg">Please select a category</p>
+          )}
+        </main>
+      </div>
+      <Footer />
+    </>
   );
 };
 

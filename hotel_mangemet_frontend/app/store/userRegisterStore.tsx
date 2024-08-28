@@ -17,6 +17,7 @@ interface UserStore {
   users: User[];
   loading: boolean;
   registrationStatus: string | null;
+  error: string | null;
   getAllUsers: () => Promise<void>;
   checkEmailExists: (email: string) => Promise<boolean>;
   registerUser: (userData: {
@@ -27,12 +28,15 @@ interface UserStore {
     password: string;
     aadharCardNumber: string;
   }) => Promise<void>;
+  updateUser: (id: number, userData: Partial<User>) => Promise<void>;
+  deleteUser: (userId: number) => Promise<void>;
 }
 
 const useUserStore = create<UserStore>((set) => ({
   users: [],
   loading: false,
   registrationStatus: null,
+  error: null,
 
   getAllUsers: async () => {
     set({ loading: true });
@@ -48,7 +52,7 @@ const useUserStore = create<UserStore>((set) => ({
       set({ users: response.data, loading: false });
     } catch (error) {
       console.error('Error fetching users:', error);
-      set({ loading: false });
+      set({ loading: false, error: 'Failed to fetch users.' });
     }
   },
 
@@ -60,6 +64,7 @@ const useUserStore = create<UserStore>((set) => ({
       return response.data.exists;
     } catch (error) {
       console.error('Error checking email existence:', error);
+      set({ error: 'Error checking email existence.' });
       return false;
     }
   },
@@ -82,10 +87,56 @@ const useUserStore = create<UserStore>((set) => ({
           Authorization: `Bearer ${token}`,
         },
       });
-      set({ registrationStatus: 'User registered successfully' });
+      set({ registrationStatus: 'User registered successfully', error: null });
     } catch (error:any) {
       console.error('Error registering user:', error);
-      set({ registrationStatus: `Error registering user: ${error.message}` });
+      set({ registrationStatus: `Error registering user: ${error.message}`, error: null });
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  updateUser: async (id, userData) => {
+    set({ loading: true });
+    try {
+      if (!id || !userData) {
+        throw new Error('User ID and data are required');
+      }
+
+      const token = sessionStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
+      await axios.put(`${API_URL}/users/${id}`, userData, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `${token}`,
+        },
+      });
+
+      set({ registrationStatus: 'User updated successfully', error: null });
+    } catch (error:any) {
+      console.error('Error updating user:', error);
+      set({ error: `Error updating user: ${error.message}`, registrationStatus: null });
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  deleteUser: async (userId) => {
+    set({ loading: true });
+    try {
+      const token = sessionStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
+      await axios.delete(`${API_URL}/users/${userId}`, {
+        headers: {
+          Authorization: `${token}`,
+        },
+      });
+      set({ registrationStatus: 'User deleted successfully', error: null });
+    } catch (error:any) {
+      console.error('Error deleting user:', error);
+      set({ error: `Error deleting user: ${error.message}`, registrationStatus: null });
     } finally {
       set({ loading: false });
     }
