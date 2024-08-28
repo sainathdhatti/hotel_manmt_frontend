@@ -8,11 +8,11 @@ const Navbar = () => {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Check if the current path starts with "/dashboard"
-  const shouldHideNavbar = pathname.startsWith('/dashboard');
+  //const shouldHideNavbar = pathname.startsWith('/dashboard');
 
-  if (shouldHideNavbar) {
-    return null; // Do not render the Navbar if the path starts with "/dashboard"
-  }
+  // if (shouldHideNavbar) {
+  //   return null; // Do not render the Navbar if the path starts with "/dashboard"
+  // }
 
   const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedCategory = event.target.value;
@@ -86,7 +86,7 @@ const Navbar = () => {
               {[
                 "OVERVIEW",
                 "ROOMS",
-                "DINING",
+                "Food",
                 "SPA",
                 "GALLERY",
                 "AMENITIES",

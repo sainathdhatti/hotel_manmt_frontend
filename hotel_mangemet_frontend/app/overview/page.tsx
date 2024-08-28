@@ -19,7 +19,7 @@ const Overview = () => {
   const images = [
     "/images/reciption.jpg",
     "/images/room.jpg",
-    "/images/room2.jpg",
+    "/images/room2.jpg", 
     "/images/sswimmingpool.jpg",
   ];
   const [selectedCategory, setSelectedCategory] = useState("rooms");

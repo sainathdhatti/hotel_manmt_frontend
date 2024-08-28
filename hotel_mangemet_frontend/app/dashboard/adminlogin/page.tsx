@@ -1,10 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation"; // Update based on your Next.js version
+import { useRouter } from "next/navigation"; 
 import useAuthStore from "@/app/store/loginStore";
 import useAmenitiesStore from "@/app/store/amenitiesStore";
 import useRoomCategoryStore from "@/app/store/roomCategory";
-import useContactStore from "@/app/store/contactStore"; // Import the contact store
+import useContactStore from "@/app/store/contactStore"; 
 import useFoodItemsStore from "@/app/store/foodItemsStore";
 
 const AdminDashboard = () => {
@@ -15,15 +15,15 @@ const AdminDashboard = () => {
   const handleLogout = async () => {
     if (window.confirm("Are you sure you want to log out?")) {
       logout();
-      router.push("/"); // Redirect to home page
+      router.push("/");
     }
   };
 
   const { amenities, getAllAmenities, deleteAmenity } = useAmenitiesStore();
   const { roomCategories, getAllRoomCategories, deleteRoomCategory } =
     useRoomCategoryStore();
-  const { contacts, getAllContacts, deleteContact } = useContactStore();
-  const { foodItems, getAllFoodItems, deleteFoodItem } = useFoodItemsStore(); // Add contact store functions
+  const { contacts, getAllContacts} = useContactStore();
+  const { foodItems, getAllFoodItems, deleteFoodItem } = useFoodItemsStore(); 
 
   useEffect(() => {
     if (activeSection === "amenities") {
@@ -31,7 +31,7 @@ const AdminDashboard = () => {
     } else if (activeSection === "roomCategories") {
       getAllRoomCategories();
     } else if (activeSection === "UserQueries") {
-      getAllContacts(); // Fetch contacts when in UserQueries section
+      getAllContacts(); 
     } else if (activeSection === "foodItems") {
       getAllFoodItems();
     }
@@ -66,10 +66,6 @@ const AdminDashboard = () => {
         return (
           <div className="flex flex-col items-center justify-center p-4">
             <div className="w-full max-w-6xl p-6 bg-white shadow-lg rounded-lg">
-              <h1 className="text-2xl font-bold mb-6 text-center">
-                Room Categories
-              </h1>
-
               <div className="mb-6 flex justify-center">
                 <button
                   onClick={() =>
@@ -190,8 +186,6 @@ const AdminDashboard = () => {
         return (
           <div className="flex flex-col items-center justify-center">
             <div className="w-full max-w-2xl ">
-              <h1 className="text-2xl font-bold mb-6 text-center">Amenities</h1>
-
               <div className="mb-6 flex justify-center">
                 <button
                   onClick={() =>
@@ -251,10 +245,6 @@ const AdminDashboard = () => {
         return (
           <div className="flex flex-col items-center justify-center">
             <div className="w-full max-w-2xl">
-              <h1 className="text-2xl font-bold mb-6 text-center">
-                Food Items
-              </h1>
-
               <div className="mb-6 flex justify-center">
                 <button
                   onClick={() =>
@@ -345,10 +335,6 @@ const AdminDashboard = () => {
         return (
           <div className="flex flex-col items-center justify-center">
             <div className="w-full max-w-2xl p-6 ">
-              <h1 className="text-2xl font-bold mb-6 text-center">
-                User Queries
-              </h1>
-
               <div className="flex justify-center">
                 <table className="w-full border border-gray-300 bg-blue-50 rounded-lg overflow-hidden">
                   <thead className="bg-gray-200 text-gray-700">
@@ -416,7 +402,7 @@ const AdminDashboard = () => {
 
   return (
     <>
-      <header className="flex items-center justify-between p-4 bg-blue-600 text-white">
+      <header className="flex items-center justify-between p-4 bg-blue-600 text-white pt-32">
         <div className="text-xl font-bold">Hotel Name</div>
         <button className="bg-red-500 px-4 py-2 rounded" onClick={handleLogout}>
           Logout
