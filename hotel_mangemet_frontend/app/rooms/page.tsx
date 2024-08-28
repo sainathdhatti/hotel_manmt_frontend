@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBed, faVectorSquare } from "@fortawesome/free-solid-svg-icons"; // Import the icons you need
 import Footer from "../footer/page";
+import useAuthStore from "../store/loginStore";
 
 const Rooms = () => {
   const {
@@ -19,6 +20,13 @@ const Rooms = () => {
   }));
 
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const { isAuthenticated, userId } = useAuthStore((state) => ({
+    isAuthenticated: state.isAuthenticated,
+    userId: state.userId
+  }));
+
+console.log(userId)
 
   useEffect(() => {
     const initializeData = async () => {
@@ -28,6 +36,7 @@ const Rooms = () => {
         // Automatically select the first room category if no roomCategory is set
         if (roomCategories.length > 0 && !roomCategory) {
           await getRoomCategory(roomCategories[0].id);
+          setSelectedCategoryId(roomCategories[0].id);
         }
       } catch (error) {
         console.error("Error initializing data:", error);
@@ -41,6 +50,7 @@ const Rooms = () => {
 
   const handleCategoryClick = (id: number) => {
     getRoomCategory(id);
+    setSelectedCategoryId(id); 
   };
 
   const displayRoomCategory = roomCategory || roomCategories[0];
@@ -56,7 +66,7 @@ const Rooms = () => {
               <li key={category.id} className="mb-4">
                 <button
                   onClick={() => handleCategoryClick(category.id)}
-                  className="text-3xl  font-semibold hover:text-red-500 transition duration-300 ease-in-out ml-10"
+                  className="text-xl  font-semibold hover:text-red-500 transition duration-300 ease-in-out ml-10"
                 >
                   {category.name}
                 </button>
@@ -85,23 +95,23 @@ const Rooms = () => {
             {/* Display details below the image in a single line */}
             <div className="flex items-center space-x-10 mb-6 pr-10">
               <div className="flex-0">
-                <h1 className="text-2xl font-bold">
+                <h1 className="text-xl font-bold">
                   {displayRoomCategory.name}
                 </h1>
               </div>
               <div >
-                <p className="text-2xl flex items-center font-bold">
+                <p className="text-xl flex items-center font-bold">
                   Price: ${displayRoomCategory.price}
                 </p>
               </div>
               <div >
-                <p className="text-2xl flex items-center font-bold">
+                <p className="text-xl flex items-center font-bold">
                   <FontAwesomeIcon icon={faBed} className="mr-2 text-xl" />
                   {displayRoomCategory.noOfAdults} Adults + {displayRoomCategory.noOfChildren} Children
                 </p>
               </div>
               <div>
-                <p className="text-2xl flex items-center">
+                <p className="text-xl flex items-center">
                   <strong>Size:</strong>{" "}
                   <FontAwesomeIcon
                     icon={faVectorSquare}
@@ -187,7 +197,7 @@ const Rooms = () => {
             {/* Book Now Button */}
             <div className="mt-8 flex justify-end">
               <a
-                href="#"
+                href={`/bookingForm/${selectedCategoryId}`}
                 className="bg-red-500 text-white text-lg font-semibold py-3 px-6 rounded-full shadow-lg hover:bg-red-600 transition duration-300"
               >
                 Book Now
@@ -198,7 +208,6 @@ const Rooms = () => {
           <p className="text-lg">Please select a category</p>
         )}
       </main>
-      
     </div>
     <div>
       <Footer/>
