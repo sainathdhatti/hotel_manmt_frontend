@@ -5,8 +5,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBed, faVectorSquare } from "@fortawesome/free-solid-svg-icons";
 import Footer from "../footer/page";
 import Navbar from "../navbar";
+import { useRouter } from "next/navigation";
 
 const Rooms = () => {
+  const router=useRouter()
   const {
     roomCategories,
     roomCategory,
@@ -40,7 +42,15 @@ const Rooms = () => {
     setSelectedCategoryId(id);
     getRoomCategory(id);
   };
-
+ const sessionItem=sessionStorage.getItem('yourSessionItem')
+  const handleClick=()=>{
+    if(sessionItem){
+      router.push(`bookingForm/${selectedCategoryId}`)
+    }
+    else{
+      alert("Please login first")
+    }
+  }
   return (
     <>
       <Navbar className="absolute top-0 left-0 w-full z-10" />
@@ -174,12 +184,12 @@ const Rooms = () => {
                   </div>
                 </div>
                 <div className="mt-8 flex justify-end">
-                  <a
-                    href={`/bookingForm/${selectedCategoryId}`}
+                  <button
+                   onClick={handleClick}
                     className="bg-red-500 text-white text-lg font-semibold py-3 px-6 rounded-full shadow-lg hover:bg-red-600 transition duration-300"
                   >
                     Book Now
-                  </a>
+                  </button>
                 </div>
               </div>
             ) : (
