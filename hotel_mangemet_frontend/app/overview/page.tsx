@@ -17,10 +17,10 @@ const Overview = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const images = [
-    "/images/reciption.jpg",
-    "/images/room.jpg",
-    "/images/room2.jpg", 
-    "/images/sswimmingpool.jpg",
+    "/images/OFrontview.jpg",
+    "/images/Oroom.jpg",
+    "/images/Orecepetint.jpg",
+    "/images/Oroom1.jpg",
   ];
   const [selectedCategory, setSelectedCategory] = useState("rooms");
 
@@ -43,13 +43,13 @@ const Overview = () => {
   }, [images.length]);
 
   return (
-    <div className="relative">
-      <Navbar />
-
+    <div className="relative bg-custom-light-gray">
       {/* Ensure content starts below navbar */}
-      <div className="pt-24 relative overflow-hidden">
+      <div className="relative overflow-hidden bg-custom-light-gray">
         {/* Carousel Section */}
-        <div className="carousel-container">
+        <div className="carousel-container relative">
+          {/* Navbar placed here with absolute positioning */}
+          <Navbar className="absolute top-0 left-0 w-full z-10" />
           <div
             className="carousel-wrapper"
             style={{ transform: `translateX(-${currentIndex * 100}%)` }}
@@ -61,6 +61,7 @@ const Overview = () => {
                   alt={`Image ${index + 1}`}
                   layout="fill"
                   objectFit="cover"
+                  className="opacity-70 "
                 />
               </div>
             ))}
@@ -90,7 +91,7 @@ const Overview = () => {
         {/* Contact Information Section */}
         <div className="bg-amber-950">
           <div className="text-center text-white bg-custom-blue shadow-lg rounded-lg mx-auto max-w-lg px-4 py-6">
-            <h2 className="text-3xl font-bold mb-4">Hotel Kanayarashi</h2>
+            <h2 className="text-3xl font-bold mb-4">Hotel Enhance</h2>
             <p className="text-lg mb-2">
               135/136, Mumbai-Bangalore Bypass Highway, Wakad, Pune, Maharashtra
               - 411057
@@ -103,24 +104,21 @@ const Overview = () => {
                 href="mailto:reservations@Kanayarashi.com"
                 className="text-white hover:underline"
               >
-                reservations@Kanayarashi.com
+                reservations@HotelEnhance.com
               </a>
-            </p>
-            <p className="text-lg text-gray-300">
-              We look forward to welcoming you!
             </p>
           </div>
         </div>
 
         {/* Welcome Message Section */}
-        <div className="bg-gray-100 py-10 px-4">
+        <div className=" py-10 px-4">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-3xl font-bold mb-4">
-              Welcome to Hotel Kanayarashi
+              Welcome to Hotel Enhance
             </h2>
             <p className="text-lg mb-4">
               As you enter Pune from the Mumbai-Bangalore Highway, you will
-              witness a beacon of luxury, towering over others. Kanayarashi Pune
+              witness a beacon of luxury, towering over others. Hotel Enhance Pune
               is a favourite 5-star destination of all the jet-setters who visit
               Pune to experience the famed hospitality of the city of the
               Peshwas. The iconic facade of the hotel welcomes you to a superior
@@ -137,7 +135,7 @@ const Overview = () => {
         </div>
 
         {/* Features Section */}
-        <div className="py-10 bg-gray-100">
+        <div className="py-10">
           <div className="container mx-auto px-4">
             <div className="flex flex-wrap justify-center gap-8">
               <div className="text-center bg-white rounded-full shadow-lg p-6 w-36 flex flex-col items-center">
@@ -226,7 +224,7 @@ const Overview = () => {
         <div className="py-2">
           <div className="flex flex-wrap">
             {/* Left Side with Category Text */}
-            <div className="w-full lg:w-1/4 flex flex-col  bg-gray-100 p-4 h-[70vh] ">
+            <div className="w-full lg:w-1/4 flex flex-col bg-gray-100 p-4 h-[70vh] ">
               <p
                 onClick={() => handleCategoryClick("rooms")}
                 className=" cursor-pointer mb-4 hover:underline text-2xl hover:text-amber-900"
@@ -268,7 +266,7 @@ const Overview = () => {
             <div className="relative w-1/3  h-[75vh] m-2">
               <Image
                 src="/images/gallery front desk.jpg"
-                alt="Live Music Offer"
+                alt="Gallery Front Desk"
                 layout="fill"
                 objectFit="cover"
                 className="object-cover"
@@ -278,7 +276,7 @@ const Overview = () => {
             <div className="relative w-1/3 lg:w-1/3 h-[75vh] m-2">
               <Image
                 src="/images/galleryroom.jpg"
-                alt="Sunday Brunch Offer"
+                alt="Gallery Room"
                 layout="fill"
                 objectFit="cover"
                 className="object-cover"
@@ -287,7 +285,7 @@ const Overview = () => {
             <div className="relative w-1/3 lg:w-1/3 h-[75vh] m-2">
               <Image
                 src="/images/gympic.jpg"
-                alt="Sunday Brunch Offer"
+                alt="Gym"
                 layout="fill"
                 objectFit="cover"
                 className="object-cover"

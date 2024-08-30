@@ -46,7 +46,7 @@ const useUserStore = create<UserStore>((set) => ({
 
       const response = await axios.get(`${API_URL}/users`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `${token}`,
         },
       });
       set({ users: response.data, loading: false });

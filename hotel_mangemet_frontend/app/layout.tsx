@@ -20,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Navbar />
+        {/* <Navbar /> */}
         {children}
         <ToastContainer
           position="top-right"
@@ -34,6 +34,7 @@ export default function RootLayout({
           pauseOnHover
           theme="colored"
         />
+        {/* <main>{children}</main> */}
       </body>
     </html>
   );

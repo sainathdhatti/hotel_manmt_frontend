@@ -74,6 +74,7 @@ const BookingForm = () => {
         userId:userId,
         categoryId: roomCategory.id
       });
+      console.log(addBooking)
          router.push(`/bookings/${userId}`)
         } else {
           alert('Please complete all required fields and ensure you are logged in.');
@@ -203,16 +204,5 @@ export default BookingForm;
 
 
 
-import { create } from 'zustand';
-import axios from 'axios';
 
-enum BookingStatus {
-  AVAILABLE = 'AVAILABLE',
-  BOOKED = 'BOOKED',
-  CHECKED_OUT = 'CHECKED_OUT',
-  CANCELLED = 'CANCELLED',
-  CHECKED_IN = 'CHECKED_IN'
-}
-
-const API_URL = 'http://localhost:5000';
 

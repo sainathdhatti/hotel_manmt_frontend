@@ -6,6 +6,7 @@ import FoodItemCard from "../FoodItemCard/page";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import useAuthStore from "../store/loginStore";
+import Navbar from "../navbar";
 
 const FoodOrderPage = () => {
   const { foodItems, getAllFoodItems } = useFoodItemsStore();
@@ -13,7 +14,7 @@ const FoodOrderPage = () => {
     createOrder: state.createOrder,
   }));
 
-  const { isAuthenticated, userId } = useAuthStore(); 
+  const { isAuthenticated, userId } = useAuthStore();
   const [selectedItems, setSelectedItems] = useState<
     { foodItemId: number; quantity: number }[]
   >([]);
@@ -75,11 +76,11 @@ const FoodOrderPage = () => {
     try {
       // Prepare the data in the correct format
       const orderData = {
-        userId, 
+        userId,
         orderItems: selectedItems,
       };
- 
-      console.log(orderData)
+
+      console.log(orderData);
       await createOrder(userId, orderData.orderItems);
 
       // Clear selected items and other states
@@ -114,8 +115,22 @@ const FoodOrderPage = () => {
   };
 
   return (
-    <div className="relative container mx-auto py-10 pt-32">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <div className="relative container mx-auto ">
+      <Navbar className="absolute top-0 left-0 w-full z-10" />
+      <div className="relative w-full h-[60vh] overflow-hidden">
+        <img
+          src="/images/orderFood.jpg"
+          alt="Order Food"
+          className="absolute inset-0 object-cover w-full h-full brightness-60 opacity-80"
+        />
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-black text-center">
+          <h1 className="text-4xl font-bold mb-4">Delicious Food Awaits!</h1>
+          <p className="text-lg">
+            Choose your favorite dishes and place your order now.
+          </p>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 py-5">
         {foodItems.map((foodItem) => (
           <FoodItemCard
             key={foodItem.food_id}
@@ -134,7 +149,7 @@ const FoodOrderPage = () => {
 
       {/* Place Order Button */}
       <button
-        className="fixed pt-48 top-5 right-12 p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors transform rotate-90 origin-bottom-right"
+        className="fixed pt-96 top-5 right-12 p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors transform rotate-90 origin-bottom-right"
         onClick={() => setShowPopup(true)}
         style={{ transformOrigin: "bottom right" }}
       >

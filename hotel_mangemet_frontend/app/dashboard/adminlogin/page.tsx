@@ -1,11 +1,13 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
 import useAuthStore from "@/app/store/loginStore";
 import useAmenitiesStore from "@/app/store/amenitiesStore";
 import useRoomCategoryStore from "@/app/store/roomCategory";
-import useContactStore from "@/app/store/contactStore"; 
+import useContactStore from "@/app/store/contactStore";
 import useFoodItemsStore from "@/app/store/foodItemsStore";
+import useRoomStore from "@/app/store/roomStore";
+import useUserStore from "@/app/store/userRegisterStore";
 
 const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState<string>("dashboard");
@@ -22,8 +24,10 @@ const AdminDashboard = () => {
   const { amenities, getAllAmenities, deleteAmenity } = useAmenitiesStore();
   const { roomCategories, getAllRoomCategories, deleteRoomCategory } =
     useRoomCategoryStore();
-  const { contacts, getAllContacts} = useContactStore();
-  const { foodItems, getAllFoodItems, deleteFoodItem } = useFoodItemsStore(); 
+  const { contacts, getAllContacts } = useContactStore();
+  const { foodItems, getAllFoodItems, deleteFoodItem } = useFoodItemsStore();
+  const { rooms, getAllRooms, deleteRoom } = useRoomStore();
+  const { users, getAllUsers } = useUserStore();
 
   useEffect(() => {
     if (activeSection === "amenities") {
@@ -31,11 +35,23 @@ const AdminDashboard = () => {
     } else if (activeSection === "roomCategories") {
       getAllRoomCategories();
     } else if (activeSection === "UserQueries") {
-      getAllContacts(); 
+      getAllContacts();
     } else if (activeSection === "foodItems") {
       getAllFoodItems();
+    } else if (activeSection === "rooms") {
+      getAllRooms();
     }
-  }, [activeSection, getAllAmenities, getAllRoomCategories, getAllContacts]);
+    else if(activeSection === "users"){
+      getAllUsers();
+    }
+  }, [
+    activeSection,
+    getAllAmenities,
+    getAllRoomCategories,
+    getAllContacts,
+    getAllFoodItems,
+    getAllRooms,
+  ]);
 
   const handleDelete = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this amenity?")) {
@@ -54,6 +70,13 @@ const AdminDashboard = () => {
       await deleteFoodItem(id);
     }
   };
+
+  const handleDeleteRoom = async (id: number) => {
+    if (window.confirm("Are you sure you want to delete this room?")) {
+      await deleteRoom(id);
+    }
+  };
+
   const renderContent = () => {
     const tableColorClass =
       activeSection === "dashboard" ? "bg-blue-50" : "bg-white";
@@ -181,7 +204,72 @@ const AdminDashboard = () => {
         );
 
       case "rooms":
-        return <div>Rooms Details</div>;
+        return (
+          <div className="flex flex-col items-center justify-center">
+            <div className="w-full max-w-2xl ">
+              <div className="mb-6 flex justify-center">
+                <button
+                  onClick={() =>
+                    router.push("/dashboard/adminlogin/rooms/new")
+                  }
+                  className="bg-blue-500 text-white px-6 py-1.5 rounded-md shadow-md hover:bg-blue-600 transition duration-300"
+                >
+                  Add Rooms
+                </button>
+              </div>
+
+              <div className="flex justify-center">
+                <table
+                  className={`w-3/4 border border-gray-300 ${tableColorClass} rounded-lg overflow-hidden`}
+                >
+                  <thead className="bg-gray-200 text-gray-700">
+                    <tr>
+                      <th className="px-6 py-1.5 text-left font-semibold">
+                        Room Number
+                      </th>
+                      <th className="px-6 py-1.5 text-left font-semibold">
+                        Room Status
+                      </th>
+                      <th className="px-6 py-1.5 text-left font-semibold">
+                        Room Category Name
+                      </th>
+                      <th className="px-6 py-1.5 text-center font-semibold">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rooms.map((r) => (
+                      <tr key={r.id} className="border-b hover:bg-gray-100">
+                        <td className="px-6 py-1.5 text-gray-900">{r.roomNumber}</td>
+                        <td className="px-6 py-1.5 text-gray-900">{r.status}</td>
+                        <td className="px-6 py-1.5 text-gray-900">{r.roomCategory.name}</td>
+                        <td className="px-6 py-1.5 text-center flex">
+                          <button
+                            onClick={() =>
+                              router.push(
+                                `/dashboard/adminlogin/rooms/${r.id}`
+                              )
+                            }
+                            className="bg-yellow-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-yellow-600 transition duration-300 mr-2"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteRoom(r.id)}
+                            className="bg-red-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-red-600 transition duration-300"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        );
       case "amenities":
         return (
           <div className="flex flex-col items-center justify-center">
@@ -330,7 +418,59 @@ const AdminDashboard = () => {
           </div>
         );
       case "users":
-        return <div>Users Details</div>;
+        return (
+          <div className="flex flex-col items-center justify-center">
+            <div className="w-full max-w-2xl p-6 ">
+              <div className="flex justify-center">
+                <table className="w-full border border-gray-300 bg-blue-50 rounded-lg overflow-hidden">
+                  <thead className="bg-gray-200 text-gray-700">
+                    <tr>
+                      <th className="px-4 py-2 text-left font-semibold">
+                        First Name
+                      </th>
+                      <th className="px-4 py-2 text-left font-semibold">
+                        Last Name
+                      </th>
+                      <th className="px-4 py-2 text-left font-semibold">
+                        PhoneNumber
+                      </th>
+                      <th className="px-4 py-2 text-left font-semibold">
+                        Email
+                      </th>
+                      <th className="px-4 py-2 text-left font-semibold">
+                      aadharCardNumber
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {users.map((u) => (
+                      <tr
+                        key={u.id}
+                        className="border-b hover:bg-gray-100"
+                      >
+                        <td className="px-4 py-2 text-gray-900">
+                          {u.firstName}
+                        </td>
+                        <td className="px-4 py-2 text-gray-900">
+                          {u.lastName}
+                        </td>
+                        <td className="px-4 py-2 text-gray-900">
+                          {u.phoneNumber}
+                        </td>
+                        <td className="px-4 py-2 text-gray-900">
+                          {u.email}
+                        </td>
+                        <td className="px-4 py-2 text-gray-900">
+                          {u.aadharCardNumber}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        );
       case "UserQueries":
         return (
           <div className="flex flex-col items-center justify-center">
@@ -339,7 +479,6 @@ const AdminDashboard = () => {
                 <table className="w-full border border-gray-300 bg-blue-50 rounded-lg overflow-hidden">
                   <thead className="bg-gray-200 text-gray-700">
                     <tr>
-                      <th className="px-4 py-2 text-left font-semibold">ID</th>
                       <th className="px-4 py-2 text-left font-semibold">
                         First Name
                       </th>
@@ -366,9 +505,6 @@ const AdminDashboard = () => {
                         key={contact.id}
                         className="border-b hover:bg-gray-100"
                       >
-                        <td className="px-4 py-2 text-gray-900">
-                          {contact.id}
-                        </td>
                         <td className="px-4 py-2 text-gray-900">
                           {contact.firstName}
                         </td>
