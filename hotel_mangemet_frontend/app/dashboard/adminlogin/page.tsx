@@ -538,8 +538,8 @@ const AdminDashboard = () => {
 
   return (
     <>
-      <header className="flex items-center justify-between p-4 bg-blue-600 text-white pt-32">
-        <div className="text-xl font-bold">Hotel Name</div>
+      <header className="flex items-center justify-between p-4 bg-blue-600 text-white">
+        <div className="text-xl font-bold">Hotel Enhance</div>
         <button className="bg-red-500 px-4 py-2 rounded" onClick={handleLogout}>
           Logout
         </button>
