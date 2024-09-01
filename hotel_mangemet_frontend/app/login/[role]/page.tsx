@@ -35,7 +35,13 @@ const Login = ({ params: { role } }: LoginProps) => {
     try {
       await login(data, role);
       reset(); // Clear the form fields
-      router.push(`/dashboard/${role}`);
+      if (role === 'userlogin') {
+        // If role is userlogin, redirect to the home page
+        router.push('/');
+      } else {
+        // Redirect to the dashboard or any other page for different roles
+        router.push(`/dashboard/${role}`);
+      }
     } catch (error: any) {
       console.error(error);
       alert(error.message || 'Login failed');
