@@ -6,25 +6,28 @@ interface AuthState {
   isAuthenticated: boolean;
   error: string | null;
   userId: number | null;
+  userName: string | null;
   login: (data: any, role: string) => Promise<void>;
   logout: () => void;
 }
 
 const useAuthStore = create<AuthState>((set) => {
-
   let token = '';
   let userId: number | null = null;
+  let userName: string | null = null;
 
   if (typeof window !== 'undefined') {
     token = sessionStorage.getItem('token') || '';
     userId = Number(sessionStorage.getItem('userId')) || null;
+    userName = sessionStorage.getItem('userName') || null;
   }
 
   return {
-    token: token,
+    token,
     isAuthenticated: !!token,
     error: null,
-    userId: userId,
+    userId,
+    userName,
 
     login: async (data, role) => {
       try {
@@ -36,28 +39,30 @@ const useAuthStore = create<AuthState>((set) => {
 
         const accessToken = response.data.access_token;
         const userId = response.data.userId;
-        console.log(userId);
+        const userName = response.data.userName;
 
         set({ 
           token: accessToken, 
           isAuthenticated: true, 
           error: null,
-          userId: userId 
+          userId, 
+          userName
         });
 
         if (typeof window !== 'undefined') {
           sessionStorage.setItem('token', accessToken);
-          sessionStorage.setItem('userId', userId);
+          sessionStorage.setItem('userId', String(userId));
+          sessionStorage.setItem('userName', userName);
         }
-
-        console.log(sessionStorage);
+        console.log(userId, userName);
       } catch (error: any) {
         console.error(error);
         set({ 
           token: '', 
           isAuthenticated: false, 
           error: error.response?.data?.message || 'Login failed',
-          userId: null 
+          userId: null,
+          userName: null
         });
         throw new Error(error.response?.data?.message || 'Login failed');
       }
@@ -68,11 +73,13 @@ const useAuthStore = create<AuthState>((set) => {
         token: '', 
         isAuthenticated: false, 
         error: null, 
-        userId: null 
+        userId: null, 
+        userName: null
       });
       if (typeof window !== 'undefined') {
         sessionStorage.removeItem('token');
         sessionStorage.removeItem('userId');
+        sessionStorage.removeItem('userName');
       }
     },
   };

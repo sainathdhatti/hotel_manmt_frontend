@@ -8,7 +8,7 @@ import Navbar from "../navbar";
 import { useRouter } from "next/navigation";
 
 const Rooms = () => {
-  const router=useRouter()
+  const router = useRouter();
   const {
     roomCategories,
     roomCategory,
@@ -22,6 +22,7 @@ const Rooms = () => {
   }));
 
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [isClient, setIsClient] = useState<boolean>(false);
 
   useEffect(() => {
     const initializeData = async () => {
@@ -38,27 +39,33 @@ const Rooms = () => {
     }
   }, [roomCategories, selectedCategoryId, getRoomCategory]);
 
+  useEffect(() => {
+    setIsClient(true); // Ensure that sessionStorage is accessed only on the client side
+  }, []);
+
   const handleCategoryClick = (id: number) => {
     setSelectedCategoryId(id);
     getRoomCategory(id);
   };
- const sessionItem=sessionStorage.getItem('yourSessionItem')
-  const handleClick=()=>{
-    if(sessionItem){
-      router.push(`bookingForm/${selectedCategoryId}`)
+
+  const handleClick = () => {
+    if (isClient) {
+      const sessionItem = sessionStorage.getItem('token');
+      if (sessionItem) {
+        router.push(`bookingForm/${selectedCategoryId}`);
+      } else {
+        alert("Please login first");
+      }
     }
-    else{
-      alert("Please login first")
-    }
-  }
+  };
+
   return (
     <>
       <Navbar className="absolute top-0 left-0 w-full z-10" />
-      <div className="relative flex overflow-hidden justify-center min-h-screen  pt-16">
+      <div className="relative flex overflow-hidden justify-center min-h-screen pt-16">
         <div className="absolute inset-0">
           <img
             src='images/Oroom1.jpg'
-            //alt={roomCategory?.name || 'Room Image'}
             className="opacity-80 w-full h-full object-cover"
           />
         </div>
@@ -93,7 +100,7 @@ const Rooms = () => {
               )}
             </ul>
           </nav>
-          <main className="ml-4 w-3/4 p-6 flex flex-col relative  rounded-lg">
+          <main className="ml-4 w-3/4 p-6 flex flex-col relative rounded-lg">
             {roomCategory ? (
               <div className="flex flex-col">
                 {roomCategory.imageUrl ? (
@@ -185,7 +192,7 @@ const Rooms = () => {
                 </div>
                 <div className="mt-8 flex justify-end">
                   <button
-                   onClick={handleClick}
+                    onClick={handleClick}
                     className="bg-red-500 text-white text-lg font-semibold py-3 px-6 rounded-full shadow-lg hover:bg-red-600 transition duration-300"
                   >
                     Book Now

@@ -113,7 +113,7 @@ const Amenities = () => {
 
   return (
     <>
-    <Navbar className="absolute top-0 left-0 w-full z-10"/>
+    <Navbar className="absolute top-0 left-0 w-full z-50"/>
       <div className="relative">
         {/* Ensure content starts below navbar */}
         <div className="relative overflow-hidden">

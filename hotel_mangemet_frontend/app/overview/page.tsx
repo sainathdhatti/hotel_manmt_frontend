@@ -49,7 +49,7 @@ const Overview = () => {
         {/* Carousel Section */}
         <div className="carousel-container relative">
           {/* Navbar placed here with absolute positioning */}
-          <Navbar className="absolute top-0 left-0 w-full z-10" />
+          <Navbar className="absolute top-0 left-0 w-full z-50" />
           <div
             className="carousel-wrapper"
             style={{ transform: `translateX(-${currentIndex * 100}%)` }}
