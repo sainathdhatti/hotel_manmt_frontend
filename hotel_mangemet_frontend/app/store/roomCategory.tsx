@@ -21,7 +21,7 @@ export interface RoomCategoryStoreState {
   getRoomCategory: (id: number) => Promise<void>;
 }
 
-interface RoomCategory {
+export interface RoomCategory {
   id: number;
   name: string;
   description?: string;

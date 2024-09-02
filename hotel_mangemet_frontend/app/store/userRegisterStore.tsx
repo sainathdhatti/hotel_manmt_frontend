@@ -30,6 +30,8 @@ interface UserStore {
   }) => Promise<void>;
   updateUser: (id: number, userData: Partial<User>) => Promise<void>;
   deleteUser: (userId: number) => Promise<void>;
+  forgetPassword: (email: string) => Promise<void>;
+  resetPassword: (token: string, newPassword: string) => Promise<void>;
 }
 
 const useUserStore = create<UserStore>((set) => ({
@@ -46,7 +48,7 @@ const useUserStore = create<UserStore>((set) => ({
 
       const response = await axios.get(`${API_URL}/users`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `${token}`,
         },
       });
       set({ users: response.data, loading: false });
@@ -137,6 +139,32 @@ const useUserStore = create<UserStore>((set) => ({
     } catch (error:any) {
       console.error('Error deleting user:', error);
       set({ error: `Error deleting user: ${error.message}`, registrationStatus: null });
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  forgetPassword: async (email: string) => {
+    set({ loading: true });
+    try {
+      await axios.post(`${API_URL}/users/forgetpassword`, { email });
+      set({ registrationStatus: 'Password reset email sent', error: null });
+    } catch (error:any) {
+      console.error('Error sending password reset email:', error);
+      set({ error: `Error sending password reset email: ${error.message}`, registrationStatus: null });
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  resetPassword: async (token: string, newPassword: string) => {
+    set({ loading: true });
+    try {
+      await axios.post(`${API_URL}/users/reset-password`, { token, newPassword });
+      set({ registrationStatus: 'Password reset successfully', error: null });
+    } catch (error:any) {
+      console.error('Error resetting password:', error);
+      set({ error: `Error resetting password: ${error.message}`, registrationStatus: null });
     } finally {
       set({ loading: false });
     }
