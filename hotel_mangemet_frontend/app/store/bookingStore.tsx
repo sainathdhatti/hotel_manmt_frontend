@@ -20,7 +20,7 @@ export interface Booking {
   noOfDays: number;
   TotalAmount: number;
   noOfAdults: number;
-  noOfChildren: number;
+  noOfChildrens: number;
   userId:number;
   user: {
     id: number;
@@ -55,7 +55,7 @@ interface BookingStore {
     checkInDate: Date;
     checkOutDate: Date;
     noOfAdults: number;
-    noOfChildren: number;
+    noOfChildrens: number;
     userId: number;
     categoryId: number;
   }) => Promise<void>;
@@ -63,7 +63,7 @@ interface BookingStore {
     checkInDate: Date;
     checkOutDate: Date;
     noOfAdults: number;
-    noOfChildren: number;
+    noOfChildrens: number;
     categoryId: number;
   }) => Promise<void>;
   deleteBooking: (bookingId: number) => Promise<void>;

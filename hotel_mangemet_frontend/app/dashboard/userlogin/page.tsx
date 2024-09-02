@@ -4,6 +4,10 @@ import { useRouter } from "next/navigation";
 import useAuthStore from "@/app/store/loginStore";
 import useFoodOrderStore from "@/app/store/FoodOrderStore";
 import useUserStore from "@/app/store/userRegisterStore";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
+import useBookingsStore from "@/app/store/bookingStore";
+import { Booking } from "@/app/store/bookingStore";
 
 interface User {
   id: number;
@@ -27,18 +31,21 @@ const UserDashboard = () => {
     updateOrder: state.updateOrder,
   }));
 
-  const { users, getAllUsers, updateUser, deleteUser, error } = useUserStore(
-    (state) => ({
-      users: state.users,
-      getAllUsers: state.getAllUsers,
-      updateUser: state.updateUser,
-      deleteUser: state.deleteUser,
-      error: state.error,
-    })
-  );
+  const { users, getAllUsers, updateUser, deleteUser, error } = useUserStore((state) => ({
+    users: state.users,
+    getAllUsers: state.getAllUsers,
+    updateUser: state.updateUser,
+    deleteUser: state.deleteUser,
+    error: state.error,
+  }));
 
   const [currentView, setCurrentView] = useState("food-orders");
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
+
+  const bookings = useBookingsStore((state) => state.bookings);
+  const fetchBookingsByUserId = useBookingsStore((state) => state.fetchBookingsByUserId);
+  const deleteBooking = useBookingsStore((state) => state.deleteBooking);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -59,6 +66,16 @@ const UserDashboard = () => {
     }
   }, [users, userId]);
 
+  useEffect(() => {
+    if (userId !== null) {
+      fetchBookingsByUserId(userId);
+    }
+  }, [userId, fetchBookingsByUserId]);
+
+  useEffect(() => {
+    setFilteredBookings(bookings);
+  }, [bookings]);
+
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to log out?")) {
       useAuthStore.getState().logout();
@@ -76,8 +93,7 @@ const UserDashboard = () => {
   const handleUpdateUser = async () => {
     if (editingUser && userId !== null) {
       try {
-        let userdata={...editingUser}
-        await updateUser(userId, userdata);
+        await updateUser(userId, { ...editingUser });
         alert("Profile updated successfully!");
       } catch (error) {
         alert("Failed to update profile.");
@@ -87,10 +103,7 @@ const UserDashboard = () => {
   };
 
   const handleDeleteUser = async () => {
-    if (
-      window.confirm("Are you sure you want to delete your account?") &&
-      editingUser
-    ) {
+    if (window.confirm("Are you sure you want to delete your account?") && editingUser) {
       try {
         await deleteUser(editingUser.id);
         alert("Account deleted successfully.");
@@ -109,17 +122,96 @@ const UserDashboard = () => {
     }
   };
 
-  const filteredOrders = orders.filter(
-    (order) =>
-      order.user && order.user.id === userId && order.status !== "cancelled"
-  );
+  const handleDelete = async (bookingId: number) => {
+    try {
+      await deleteBooking(bookingId);
+      alert("Booking deleted successfully");
+      if (userId !== null) {
+        await fetchBookingsByUserId(userId); // Refresh the list
+      }
+    } catch (error) {
+      console.error("Error deleting booking:", error);
+    }
+  };
+
+  const handleUpdateBooking = async (bookingId: number) => {
+    if (bookingId) {
+      try {
+        router.push(`/dashboard/userlogin/booking/${bookingId}`);
+        if (userId !== null) {
+          await fetchBookingsByUserId(userId);
+        }
+      } catch (error) {
+        console.error("Error updating booking:", error);
+        alert("Failed to update booking.");
+      }
+    }
+  };
 
   const renderContent = () => {
     switch (currentView) {
       case "bookings":
-        return <div>No bookings found</div>;
+        return (
+          <div className="flex flex-col items-center justify-center">
+            <div className="w-full bg-white shadow-md rounded-lg p-6 mt-10">
+              <h1 className="text-2xl font-bold mb-4 text-center">Your Bookings</h1>
+              <table className="min-w-full border border-gray-300">
+                <thead className="bg-gray-200">
+                  <tr>
+                    <th className="px-4 py-2 text-center">Customer Name</th>
+                    <th className="px-4 py-2 text-center">Check-in Date</th>
+                    <th className="px-4 py-2 text-center">Check-out Date</th>
+                    <th className="px-4 py-2 text-center">No. of Adults</th>
+                    <th className="px-4 py-2 text-center">No. of Children</th>
+                    <th className="px-4 py-2 text-center">No. of Days</th>
+                    <th className="px-4 py-2 text-center">Room Number</th>
+                    <th className="px-4 py-2 text-center">Total Amount</th>
+                    <th className="px-4 py-2 text-center">Status</th>
+                    <th className="px-4 py-2 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredBookings.length === 0 ? (
+                    <tr>
+                      <td colSpan={10} className="text-center py-4">No bookings available.</td>
+                    </tr>
+                  ) : (
+                    filteredBookings.map((booking) => (
+                      <tr key={booking.bookingId} className="border-b">
+                        <td className="px-4 py-2 text-center">{booking.user.firstName}</td>
+                        <td className="px-4 py-2 text-center">{new Date(booking.checkInDate).toLocaleDateString()}</td>
+                        <td className="px-4 py-2 text-center">{new Date(booking.checkOutDate).toLocaleDateString()}</td>
+                        <td className="px-4 py-2 text-center">{booking.noOfAdults}</td>
+                        <td className="px-4 py-2 text-center">{booking.noOfChildrens}</td>
+                        <td className="px-4 py-2 text-center">{booking.noOfDays}</td>
+                        <td className="px-4 py-2 text-center">{booking.room.roomNumber}</td>
+                        <td className="px-4 py-2 text-center">&#x20B9;{booking.TotalAmount}</td>
+                        <td className="px-4 py-2 text-center">{booking.status}</td>
+                        <td className="px-4 py-2 flex justify-center space-x-5">
+                          <button
+                            className="btn btn-warning btn-outline"
+                            onClick={() => handleUpdateBooking(booking.bookingId)}
+                          >
+                            <FontAwesomeIcon icon={faEdit} />
+                          </button>
+                          <button
+                            className="btn btn-warning btn-outline flex items-center justify-center"
+                            onClick={() => handleDelete(booking.bookingId)}
+                          >
+                            <FontAwesomeIcon icon={faTrash} className="text-red-500" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+
       case "food-orders":
-        if (filteredOrders.length === 0) {
+        if (orders.length === 0) {
           return <div>No orders found</div>;
         }
         return (
@@ -127,43 +219,37 @@ const UserDashboard = () => {
             <table className="min-w-full bg-white border border-gray-200">
               <thead className="bg-gray-100">
                 <tr>
-                  <th className="py-3 px-4 border-b text-left text-gray-600">
-                    User Name
-                  </th>
-                  <th className="py-3 px-4 border-b text-left text-gray-600">
-                    Order Time
-                  </th>
-                  <th className="py-3 px-4 border-b text-left text-gray-600">
-                    status
-                  </th>
-                  <th className="py-3 px-4 border-b text-left text-gray-600">
-                    Amount
-                  </th>
-                  <th className="py-3 px-4 border-b text-left text-gray-600">
-                    Action
-                  </th>
+                  <th className="py-3 px-4 border-b text-left text-gray-600">User Name</th>
+                  <th className="py-3 px-4 border-b text-left text-gray-600">Order Time</th>
+                  <th className="py-3 px-4 border-b text-left text-gray-600">Items</th>
+                  <th className="py-3 px-4 border-b text-left text-gray-600">Total Amount</th>
+                  <th className="py-3 px-4 border-b text-left text-gray-600">Status</th>
+                  <th className="py-3 px-4 border-b text-left text-gray-600">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredOrders.map((order) => (
+                {orders.map((order) => (
                   <tr key={order.id}>
-                    <td className="py-3 px-4 border-b text-gray-800">
-                      {order.user?.firstName}
+                    <td className="py-2 px-4 border-b text-gray-700">{order.userName}</td>
+                    <td className="py-2 px-4 border-b text-gray-700">{new Date(order.orderTime).toLocaleString()}</td>
+                    <td className="py-2 px-4 border-b text-gray-700">
+                      {order.items.map((item) => (
+                        <div key={item.id}>
+                          {item.name} - {item.quantity}
+                        </div>
+                      ))}
                     </td>
-                    <td className="py-3 px-4 border-b text-gray-800">
-                      {new Date(order.order_time).toLocaleString()}
-                    </td>
-                    <td>{order.status}</td>
-                    <td className="py-3 px-4 border-b text-gray-800">
-                      {order.totalAmount}
-                    </td>
-                    <td className="py-3 px-4 border-b text-gray-800">
-                      <button
-                        onClick={() => handleCancelOrder(order.id)}
-                        className="bg-red-500 text-white py-1 px-2 rounded"
-                      >
-                        Cancel
-                      </button>
+                    <td className="py-2 px-4 border-b text-gray-700">&#x20B9;{order.totalAmount}</td>
+                    <td className="py-2 px-4 border-b text-gray-700">{order.status}</td>
+                    <td className="py-2 px-4 border-b text-gray-700">
+                      {order.status !== "cancelled" && (
+                        <button
+                          className="bg-red-500 text-white px-4 py-2 rounded"
+                          onClick={() => handleCancelOrder(order.id)}
+                        >
+                          Cancel
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -171,157 +257,97 @@ const UserDashboard = () => {
             </table>
           </div>
         );
-      case "spa":
-        return <div>No spa bookings found</div>;
-      case "billing":
-        return <div>No billing found</div>;
+
       case "profile":
         return (
-          <div className="p-6 max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold mb-6">User Profile</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white shadow-md rounded-lg p-6 mt-10">
+            <h1 className="text-2xl font-bold mb-4">Profile Information</h1>
+            <div className="space-y-4">
               <div>
-                <label className="block mb-4">
-                  <span className="text-gray-700">First Name</span>
-                  <input
-                    type="text"
-                    name="firstName"
-                    value={editingUser?.firstName || ""}
-                    onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 p-3 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                  />
-                </label>
-                <label className="block mb-4">
-                  <span className="text-gray-700">Last Name</span>
-                  <input
-                    type="text"
-                    name="lastName"
-                    value={editingUser?.lastName || ""}
-                    onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 p-3 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                  />
-                </label>
-                <label className="block mb-4">
-                  <span className="text-gray-700">Email</span>
-                  <input
-                    type="email"
-                    name="email"
-                    value={editingUser?.email || ""}
-                    onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 p-3 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                  />
-                </label>
+                <label className="block text-sm font-medium text-gray-700">First Name</label>
+                <input
+                  type="text"
+                  name="firstName"
+                  value={editingUser?.firstName || ""}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                />
               </div>
               <div>
-                <label className="block mb-4">
-                  <span className="text-gray-700">Phone Number</span>
-                  <input
-                    type="text"
-                    name="phoneNumber"
-                    value={editingUser?.phoneNumber || ""}
-                    onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 p-3 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                  />
-                </label>
-                <label className="block mb-4">
-                  <span className="text-gray-700">Aadhar Card Number</span>
-                  <input
-                    type="text"
-                    name="aadharCardNumber"
-                    value={editingUser?.aadharCardNumber || ""}
-                    onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 p-3 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                  />
-                </label>
+                <label className="block text-sm font-medium text-gray-700">Last Name</label>
+                <input
+                  type="text"
+                  name="lastName"
+                  value={editingUser?.lastName || ""}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                />
               </div>
-            </div>
-            <div className="flex flex-col md:flex-row md:space-x-4 mt-6">
-              <button
-                onClick={handleUpdateUser}
-                className="bg-green-500 text-white py-2 px-4 rounded-md shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
-              >
-                Update Profile
-              </button>
-              <button
-                onClick={handleDeleteUser}
-                className="bg-red-500 text-white py-2 px-4 rounded-md shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 mt-4 md:mt-0"
-              >
-                Delete Account
-              </button>
-              <button
-                onClick={() =>
-                  router.push('/forgetpassword')
-                }
-                className="bg-blue-500 text-white py-2 px-4 rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 mt-4 md:mt-0"
-              >
-                Reset Password
-              </button>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={editingUser?.email || ""}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                  disabled
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                <input
+                  type="text"
+                  name="phoneNumber"
+                  value={editingUser?.phoneNumber || ""}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Aadhar Card Number</label>
+                <input
+                  type="text"
+                  name="aadharCardNumber"
+                  value={editingUser?.aadharCardNumber || ""}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                />
+              </div>
+              <div className="flex space-x-4">
+                <button
+                  onClick={handleUpdateUser}
+                  className="bg-blue-500 text-white px-4 py-2 rounded"
+                >
+                  Update
+                </button>
+                <button
+                  onClick={handleDeleteUser}
+                  className="bg-red-500 text-white px-4 py-2 rounded"
+                >
+                  Delete Account
+                </button>
+              </div>
             </div>
           </div>
         );
+
       default:
-        return <div>Select a view</div>;
+        return <div>Content not found</div>;
     }
   };
 
   return (
-    <div className="flex h-screen flex-col">
-      <div className="flex flex-1">
-        <aside className="w-64 bg-gray-200 p-4">
-          <h2 className="text-lg font-bold mb-4">Dashboard</h2>
-          <ul className="space-y-2">
-            <li>
-              <button
-                onClick={() => setCurrentView("bookings")}
-                className="block w-full text-left p-2 text-gray-700 hover:bg-gray-300"
-              >
-                Bookings
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => setCurrentView("food-orders")}
-                className="block w-full text-left p-2 text-gray-700 hover:bg-gray-300"
-              >
-                Food Orders
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => setCurrentView("spa")}
-                className="block w-full text-left p-2 text-gray-700 hover:bg-gray-300"
-              >
-                spa
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => setCurrentView("billing")}
-                className="block w-full text-left p-2 text-gray-700 hover:bg-gray-300"
-              >
-                Billing details
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => setCurrentView("profile")}
-                className="block w-full text-left p-2 text-gray-700 hover:bg-gray-300"
-              >
-                Profile
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={handleLogout}
-                className="block w-full text-left p-2 text-gray-700 hover:bg-gray-300"
-              >
-                Logout
-              </button>
-            </li>
-          </ul>
-        </aside>
-        <main className="flex-1 p-6">{renderContent()}</main>
-      </div>
+    <div className="p-6">
+      <nav className="mb-4">
+        <button onClick={() => setCurrentView("food-orders")} className="mr-4">Food Orders</button>
+        <button onClick={() => setCurrentView("bookings")} className="mr-4">Bookings</button>
+        <button onClick={() => setCurrentView("profile")}>Profile</button>
+        <button onClick={handleLogout} className="ml-4 bg-red-500 text-white px-4 py-2 rounded">
+          Logout
+        </button>
+      </nav>
+      {renderContent()}
     </div>
   );
 };
