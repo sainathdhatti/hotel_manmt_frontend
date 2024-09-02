@@ -70,7 +70,7 @@ const BookingForm = () => {
         checkInDate: checkInDate,
         checkOutDate: checkOutDate,
         noOfAdults: adults,
-        noOfChildren: children,
+        noOfChildrens: children,
         userId:userId,
         categoryId: roomCategory.id
       });
@@ -199,20 +199,4 @@ const BookingForm = () => {
 };
 
 export default BookingForm;
-
-
-
-
-import { create } from 'zustand';
-import axios from 'axios';
-
-enum BookingStatus {
-  AVAILABLE = 'AVAILABLE',
-  BOOKED = 'BOOKED',
-  CHECKED_OUT = 'CHECKED_OUT',
-  CANCELLED = 'CANCELLED',
-  CHECKED_IN = 'CHECKED_IN'
-}
-
-const API_URL = 'http://localhost:5000';
 

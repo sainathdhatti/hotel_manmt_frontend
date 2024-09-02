@@ -34,8 +34,8 @@ const Login = ({ params: { role } }: LoginProps) => {
   const onSubmit = async (data: FormValues) => {
     try {
       await login(data, role);
-      //  router.push(`/dashboard/${role}`);
-      router.push(`/rooms`)
+       router.push(`/dashboard/${role}`);
+      // router.push(`/rooms`)
     } catch (error: any) {
       console.error(error);
       alert(error.message || 'Login failed');

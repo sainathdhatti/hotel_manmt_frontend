@@ -6,6 +6,8 @@ import useAmenitiesStore from "@/app/store/amenitiesStore";
 import useRoomCategoryStore from "@/app/store/roomCategory";
 import useContactStore from "@/app/store/contactStore"; 
 import useFoodItemsStore from "@/app/store/foodItemsStore";
+import { Link } from "react-router-dom";
+import useBookingsStore from "@/app/store/bookingStore";
 
 const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState<string>("dashboard");
@@ -19,6 +21,8 @@ const AdminDashboard = () => {
     }
   };
 
+  const bookings = useBookingsStore((state) => state.bookings);
+  const getAllBookings = useBookingsStore((state) => state.fetchBookings);
   const { amenities, getAllAmenities, deleteAmenity } = useAmenitiesStore();
   const { roomCategories, getAllRoomCategories, deleteRoomCategory } =
     useRoomCategoryStore();
@@ -36,6 +40,11 @@ const AdminDashboard = () => {
       getAllFoodItems();
     }
   }, [activeSection, getAllAmenities, getAllRoomCategories, getAllContacts]);
+
+
+  useEffect(() => {
+    getAllBookings();
+}, [getAllBookings]);
 
   const handleDelete = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this amenity?")) {
@@ -61,7 +70,65 @@ const AdminDashboard = () => {
       case "dashboard":
         return <div>Dashboard Details</div>;
       case "bookings":
-        return <div>Bookings Details</div>;
+        return (
+          <div className="flex flex-col items-center justify-center">
+              <div className="w-full bg-white shadow-md rounded-lg p-6 mt-10">
+                  <h1 className="text-2xl font-bold mb-4 text-center">Bookings</h1>
+                  <table className="min-w-full border border-gray-300">
+                      <thead className="bg-gray-200">
+                          <tr>
+                              <th className="px-4 py-2 text-center">Customer Name</th>
+                              <th className="px-4 py-2 text-center">Check-in Date</th>
+                              <th className="px-4 py-2 text-center">Check-out Date</th>
+                              <th className="px-4 py-2 text-center">No. of Adults</th>
+                              <th className="px-4 py-2 text-center">No. of Children</th>
+                              <th className="px-4 py-2 text-center">No. of Days</th>
+                              <th className="px-4 py-2 text-center">Room Number</th>
+                              <th className="px-4 py-2 text-center">Total Amount</th>
+                              <th className="px-4 py-2 text-center">Status</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          {bookings.map((booking) => (
+                              <tr key={booking.bookingId} className="border-b">
+                                  <td className="px-4 py-2 text-center">
+                                      {booking.user.firstName ?? "N/A"}
+                                  </td>
+                                  <td className="px-4 py-2 text-center">
+                                      {new Date(booking.checkInDate).toLocaleDateString()}
+                                  </td>
+                                  <td className="px-4 py-2 text-center">
+                                      {new Date(booking.checkOutDate).toLocaleDateString()}
+                                  </td>
+                                  <td className="px-4 py-2 text-center">
+                                      {booking.noOfAdults ?? "N/A"}
+                                  </td>
+                                  <td className="px-4 py-2 text-center">
+                                      {booking.noOfChildrens ?? "N/A"}
+                                  </td>
+                                  <td className="px-4 py-2 text-center">
+                                      {booking.noOfDays ?? "N/A"}
+                                  </td>
+                                  <td className="px-4 py-2 text-center">
+                                      {booking.room?.roomNumber ?? "N/A"}
+                                  </td>
+                                  <td className="px-4 py-2 text-center">
+                                      &#x20B9;{booking.TotalAmount ?? "N/A"}
+                                  </td>
+                                  <td className="px-4 py-2 text-center">
+                                      {booking.status ?? "N/A"}
+                                  </td>
+                                  <td className="px-4 py-2 flex justify-center space-x-5">
+                                  </td>
+                              </tr>
+                          ))}
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+      );
+
+
       case "roomCategories":
         return (
           <div className="flex flex-col items-center justify-center p-4">
@@ -115,7 +182,7 @@ const AdminDashboard = () => {
                           {data.description || "N/A"}
                         </td>
                         <td className="px-4 py-2 text-gray-900">
-                          {data.price ? `${data.price}` : "N/A"}
+                        &#x20B9;{data.price ? `${data.price}` : "N/A"}
                         </td>
                         <td className="px-4 py-2 text-gray-900">
                           {data.imageUrl ? (
@@ -137,10 +204,10 @@ const AdminDashboard = () => {
                           )}
                         </td>
                         <td className="px-4 py-2 text-gray-900">
-                          {data.noOfAdults || "N/A"}
+                          {data.noOfAdults || 0}
                         </td>
                         <td className="px-4 py-2 text-gray-900">
-                          {data.noOfChildren || "N/A"}
+                          {data.noOfChildren || 0}
                         </td>
                         <td className="px-4 py-2 text-gray-900">
                           {data.amenities && data.amenities.length > 0 ? (
@@ -290,7 +357,7 @@ const AdminDashboard = () => {
                           {item.food_description}
                         </td>
                         <td className="px-6 py-1.5 text-gray-900">
-                          {item.food_price}
+                        &#x20B9;{item.food_price}
                         </td>
                         <td className="px-4 py-2 text-gray-900">
                           {item.food_image ? (
@@ -409,7 +476,7 @@ const AdminDashboard = () => {
         </button>
       </header>
       <div className="flex h-screen">
-        <nav className="w-1/4 bg-gray-200 p-4">
+        <nav className="w-48 bg-gray-200 p-4">
           <ul className="space-y-2">
             <li
               className={`cursor-pointer p-2 ${
