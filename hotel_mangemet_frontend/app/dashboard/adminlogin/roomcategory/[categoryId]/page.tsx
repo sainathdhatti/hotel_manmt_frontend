@@ -8,9 +8,9 @@ import useRoomCategoryStore from "@/app/store/roomCategory";
 import useAmenitiesStore from "@/app/store/amenitiesStore";
 
 interface FormData {
-  id?: number; // Made optional to handle both create and update cases
+  id?: number; 
   name: string;
-  description: string; // Made required
+  description: string;
   price: number;
   imageUrl?: string | null | undefined;
   amenities: (number | undefined)[] ;

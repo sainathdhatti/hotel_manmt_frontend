@@ -1,13 +1,13 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/app/store/loginStore";
 import useFoodOrderStore from "@/app/store/FoodOrderStore";
 import useUserStore from "@/app/store/userRegisterStore";
+import useBookingsStore, { Booking } from "@/app/store/bookingStore";
+import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
-import useBookingsStore from "@/app/store/bookingStore";
-import { Booking } from "@/app/store/bookingStore";
 
 interface User {
   id: number;
@@ -20,11 +20,12 @@ interface User {
 
 const UserDashboard = () => {
   const router = useRouter();
-  const { userId, isAuthenticated } = useAuthStore((state) => ({
+  const { userId, isAuthenticated, logout } = useAuthStore((state) => ({
     userId: state.userId,
     isAuthenticated: state.isAuthenticated,
+    logout: state.logout,
   }));
-
+  
   const { getAllOrders, orders, updateOrder } = useFoodOrderStore((state) => ({
     getAllOrders: state.getAllOrders,
     orders: state.orders,
@@ -39,32 +40,34 @@ const UserDashboard = () => {
     error: state.error,
   }));
 
+  const { bookings, fetchBookingsByUserId, deleteBooking } = useBookingsStore((state) => ({
+    bookings: state.bookings,
+    fetchBookingsByUserId: state.fetchBookingsByUserId,
+    deleteBooking: state.deleteBooking,
+  }));
+
   const [currentView, setCurrentView] = useState("food-orders");
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
-
-  const bookings = useBookingsStore((state) => state.bookings);
-  const fetchBookingsByUserId = useBookingsStore((state) => state.fetchBookingsByUserId);
-  const deleteBooking = useBookingsStore((state) => state.deleteBooking);
 
   useEffect(() => {
     if (isAuthenticated) {
       const fetchData = async () => {
         await getAllOrders();
         await getAllUsers();
+        if (userId) await fetchBookingsByUserId(userId);
       };
       fetchData();
     } else {
       router.push("/"); // Redirect if not authenticated
     }
-  }, [isAuthenticated, getAllOrders, getAllUsers, router]);
+  }, [isAuthenticated, getAllOrders, getAllUsers, fetchBookingsByUserId, userId, router]);
 
   useEffect(() => {
     if (userId) {
-      const user = users.find((u) => u.id === userId) || null;
-      setEditingUser(user);
+      setFilteredBookings(bookings.filter(booking => booking.user.id === userId));
     }
-  }, [users, userId]);
+  }, [userId, bookings]);
 
   useEffect(() => {
     if (userId !== null) {
@@ -78,7 +81,7 @@ const UserDashboard = () => {
 
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to log out?")) {
-      useAuthStore.getState().logout();
+      logout();
       router.push("/");
     }
   };
@@ -91,9 +94,9 @@ const UserDashboard = () => {
   };
 
   const handleUpdateUser = async () => {
-    if (editingUser && userId !== null) {
+    if (editingUser && userId) {
       try {
-        await updateUser(userId, { ...editingUser });
+        await updateUser(userId, editingUser);
         alert("Profile updated successfully!");
       } catch (error) {
         alert("Failed to update profile.");
@@ -103,7 +106,7 @@ const UserDashboard = () => {
   };
 
   const handleDeleteUser = async () => {
-    if (window.confirm("Are you sure you want to delete your account?") && editingUser) {
+    if (editingUser) {
       try {
         await deleteUser(editingUser.id);
         alert("Account deleted successfully.");
@@ -114,18 +117,10 @@ const UserDashboard = () => {
       }
     }
   };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    if (editingUser) {
-      setEditingUser({ ...editingUser, [name]: value });
-    }
-  };
-
+ 
   const handleDelete = async (bookingId: number) => {
     try {
       await deleteBooking(bookingId);
-      alert("Booking deleted successfully");
       if (userId !== null) {
         await fetchBookingsByUserId(userId); // Refresh the list
       }
@@ -133,18 +128,10 @@ const UserDashboard = () => {
       console.error("Error deleting booking:", error);
     }
   };
-
-  const handleUpdateBooking = async (bookingId: number) => {
-    if (bookingId) {
-      try {
-        router.push(`/dashboard/userlogin/booking/${bookingId}`);
-        if (userId !== null) {
-          await fetchBookingsByUserId(userId);
-        }
-      } catch (error) {
-        console.error("Error updating booking:", error);
-        alert("Failed to update booking.");
-      }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    if (editingUser) {
+      setEditingUser({ ...editingUser, [name]: value });
     }
   };
 
@@ -153,7 +140,7 @@ const UserDashboard = () => {
       case "bookings":
         return (
           <div className="flex flex-col items-center justify-center">
-            <div className="w-full bg-white shadow-md rounded-lg p-6 mt-10">
+            <div className="w-full bg-white shadow-md rounded-lg p-6">
               <h1 className="text-2xl font-bold mb-4 text-center">Your Bookings</h1>
               <table className="min-w-full border border-gray-300">
                 <thead className="bg-gray-200">
@@ -181,24 +168,18 @@ const UserDashboard = () => {
                         <td className="px-4 py-2 text-center">{booking.user.firstName}</td>
                         <td className="px-4 py-2 text-center">{new Date(booking.checkInDate).toLocaleDateString()}</td>
                         <td className="px-4 py-2 text-center">{new Date(booking.checkOutDate).toLocaleDateString()}</td>
-                        <td className="px-4 py-2 text-center">{booking.noOfAdults}</td>
-                        <td className="px-4 py-2 text-center">{booking.noOfChildrens}</td>
+                        <td className="px-4 py-2 text-center">{booking.noOfAdults || "N/A"}</td>
+                        <td className="px-4 py-2 text-center">{booking.noOfChildrens || "N/A"}</td>
                         <td className="px-4 py-2 text-center">{booking.noOfDays}</td>
                         <td className="px-4 py-2 text-center">{booking.room.roomNumber}</td>
-                        <td className="px-4 py-2 text-center">&#x20B9;{booking.TotalAmount}</td>
+                        <td className="px-4 py-2 text-center">₹{booking.TotalAmount}</td>
                         <td className="px-4 py-2 text-center">{booking.status}</td>
                         <td className="px-4 py-2 flex justify-center space-x-5">
                           <button
-                            className="btn btn-warning btn-outline"
-                            onClick={() => handleUpdateBooking(booking.bookingId)}
-                          >
-                            <FontAwesomeIcon icon={faEdit} />
-                          </button>
-                          <button
-                            className="btn btn-warning btn-outline flex items-center justify-center"
                             onClick={() => handleDelete(booking.bookingId)}
+                            className="btn btn-warning btn-outline flex items-center justify-center bg-red-500 p-1 text-white"
                           >
-                            <FontAwesomeIcon icon={faTrash} className="text-red-500" />
+                            cancel
                           </button>
                         </td>
                       </tr>
@@ -209,7 +190,6 @@ const UserDashboard = () => {
             </div>
           </div>
         );
-
       case "food-orders":
         if (orders.length === 0) {
           return <div>No orders found</div>;
@@ -221,35 +201,26 @@ const UserDashboard = () => {
                 <tr>
                   <th className="py-3 px-4 border-b text-left text-gray-600">User Name</th>
                   <th className="py-3 px-4 border-b text-left text-gray-600">Order Time</th>
-                  <th className="py-3 px-4 border-b text-left text-gray-600">Items</th>
-                  <th className="py-3 px-4 border-b text-left text-gray-600">Total Amount</th>
                   <th className="py-3 px-4 border-b text-left text-gray-600">Status</th>
-                  <th className="py-3 px-4 border-b text-left text-gray-600">Actions</th>
+                  <th className="py-3 px-4 border-b text-left text-gray-600">Amount</th>
+                  <th className="py-3 px-4 border-b text-left text-gray-600">Action</th>
                 </tr>
               </thead>
               <tbody>
-                {orders.map((order) => (
+                {orders.filter(order => order.user?.id === userId && order.status !== 'cancelled').map((order) => (
                   <tr key={order.id}>
-                    <td className="py-2 px-4 border-b text-gray-700">{order.userName}</td>
-                    <td className="py-2 px-4 border-b text-gray-700">{new Date(order.orderTime).toLocaleString()}</td>
-                    <td className="py-2 px-4 border-b text-gray-700">
-                      {order.items.map((item) => (
-                        <div key={item.id}>
-                          {item.name} - {item.quantity}
-                        </div>
-                      ))}
-                    </td>
-                    <td className="py-2 px-4 border-b text-gray-700">&#x20B9;{order.totalAmount}</td>
-                    <td className="py-2 px-4 border-b text-gray-700">{order.status}</td>
-                    <td className="py-2 px-4 border-b text-gray-700">
-                      {order.status !== "cancelled" && (
-                        <button
-                          className="bg-red-500 text-white px-4 py-2 rounded"
-                          onClick={() => handleCancelOrder(order.id)}
-                        >
-                          Cancel
-                        </button>
-                      )}
+                    <td className="py-3 px-4 border-b text-gray-800">{order.user?.firstName}</td>
+                    <td className="py-3 px-4 border-b text-gray-800">{new Date(order.order_time).toLocaleString()}</td>
+                    <td>{order.status}</td>
+                    <td className="py-3 px-4 border-b text-gray-800">{order.totalAmount}</td>
+                    <td className="py-3 px-4 border-b text-gray-800">
+                      <button
+                        onClick={() => handleCancelOrder(order.id)}
+                        disabled={order.status === 'delivered'}
+                        className={`py-1 px-2 rounded ${order.status === 'delivered' ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-500 text-white hover:bg-red-600'}`}
+                      >
+                        Cancel
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -329,6 +300,26 @@ const UserDashboard = () => {
                 </button>
               </div>
             </div>
+            <div className="flex flex-col md:flex-row md:space-x-4 mt-6">
+              <button
+                onClick={handleUpdateUser}
+                className="bg-green-500 text-white py-2 px-4 rounded-md shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+              >
+                Update Profile
+              </button>
+              <button
+                onClick={handleDeleteUser}
+                className="bg-red-500 text-white py-2 px-4 rounded-md shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 mt-4 md:mt-0"
+              >
+                Delete Account
+              </button>
+              <button
+                onClick={() => router.push('/forgetpassword')}
+                className="bg-blue-500 text-white py-2 px-4 rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 mt-4 md:mt-0"
+              >
+                Reset Password
+              </button>
+            </div>
           </div>
         );
 
@@ -338,16 +329,63 @@ const UserDashboard = () => {
   };
 
   return (
-    <div className="p-6">
-      <nav className="mb-4">
-        <button onClick={() => setCurrentView("food-orders")} className="mr-4">Food Orders</button>
-        <button onClick={() => setCurrentView("bookings")} className="mr-4">Bookings</button>
-        <button onClick={() => setCurrentView("profile")}>Profile</button>
-        <button onClick={handleLogout} className="ml-4 bg-red-500 text-white px-4 py-2 rounded">
-          Logout
-        </button>
-      </nav>
-      {renderContent()}
+    <div className="flex h-screen flex-col">
+      <div className="flex flex-1">
+        <aside className="w-64 bg-gray-200 p-2">
+          <h2 className="text-lg font-bold mb-4">Dashboard</h2>
+          <ul className="space-y-2">
+            <li>
+              <button
+                onClick={() => setCurrentView("bookings")}
+                className="block w-full text-left p-2 text-gray-700 hover:bg-gray-300"
+              >
+                Bookings
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setCurrentView("food-orders")}
+                className="block w-full text-left p-2 text-gray-700 hover:bg-gray-300"
+              >
+                Food Orders
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setCurrentView("spa")}
+                className="block w-full text-left p-2 text-gray-700 hover:bg-gray-300"
+              >
+                Spa
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setCurrentView("billing")}
+                className="block w-full text-left p-2 text-gray-700 hover:bg-gray-300"
+              >
+                Billing Details
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setCurrentView("profile")}
+                className="block w-full text-left p-2 text-gray-700 hover:bg-gray-300"
+              >
+                Profile
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={handleLogout}
+                className="block w-full text-left p-2 text-gray-700 hover:bg-gray-300"
+              >
+                Logout
+              </button>
+            </li>
+          </ul>
+        </aside>
+        <main className="flex-1 p-6">{renderContent()}</main>
+      </div>
     </div>
   );
 };
