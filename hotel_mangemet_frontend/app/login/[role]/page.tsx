@@ -35,6 +35,7 @@ const Login = ({ params: { role } }: LoginProps) => {
     try {
       await login(data, role);
       reset(); // Clear the form fields
+
       if (role === 'userlogin') {
         // If role is userlogin, redirect to the home page
         router.push('/');

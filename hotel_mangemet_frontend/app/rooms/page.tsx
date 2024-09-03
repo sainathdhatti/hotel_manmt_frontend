@@ -52,12 +52,14 @@ const Rooms = () => {
     if (isClient) {
       const sessionItem = sessionStorage.getItem('token');
       if (sessionItem) {
-        router.push(`bookingForm/${selectedCategoryId}`);
+        router.push(`/bookingForm/${selectedCategoryId}`);
       } else {
         alert("Please login first");
       }
     }
   };
+
+  const displayRoomCategory = roomCategory || (roomCategories.length > 0 ? roomCategories[0] : null);
 
   return (
     <>
@@ -101,12 +103,12 @@ const Rooms = () => {
             </ul>
           </nav>
           <main className="ml-4 w-3/4 p-6 flex flex-col relative rounded-lg">
-            {roomCategory ? (
+            {displayRoomCategory ? (
               <div className="flex flex-col">
-                {roomCategory.imageUrl ? (
+                {displayRoomCategory.imageUrl ? (
                   <img
-                    src={roomCategory.imageUrl}
-                    alt={roomCategory.name}
+                    src={displayRoomCategory.imageUrl}
+                    alt={displayRoomCategory.name}
                     className="w-full h-[70vh] object-cover mb-4 rounded-lg shadow-md"
                   />
                 ) : (
@@ -114,17 +116,17 @@ const Rooms = () => {
                 )}
                 <div className="flex items-center space-x-8 mb-6">
                   <div>
-                    <h1 className="text-3xl font-bold">{roomCategory.name}</h1>
+                    <h1 className="text-3xl font-bold">{displayRoomCategory.name}</h1>
                   </div>
                   <div>
                     <p className="text-2xl font-bold">
-                      Price: <span className="text-red-500">${roomCategory.price}</span>
+                      Price: <span className="text-red-500">${displayRoomCategory.price}</span>
                     </p>
                   </div>
                   <div>
                     <p className="text-xl flex items-center">
                       <FontAwesomeIcon icon={faBed} className="mr-2 text-xl" />
-                      {roomCategory.noOfAdults} Adults + {roomCategory.noOfChildren} Children
+                      {displayRoomCategory.noOfAdults} Adults + {displayRoomCategory.noOfChildren} Children
                     </p>
                   </div>
                   <div>
@@ -134,7 +136,7 @@ const Rooms = () => {
                     </p>
                   </div>
                 </div>
-                <p className="text-lg mb-4">{roomCategory.description}</p>
+                <p className="text-lg mb-4">{displayRoomCategory.description}</p>
                 <div className="mt-8 border-t pt-4 border-black flex flex-wrap justify-between">
                   <div className="flex items-center mb-2 space-x-2">
                     <input
@@ -170,8 +172,8 @@ const Rooms = () => {
                 <div className="mt-8 flex-1">
                   <h2 className="text-xl font-semibold mb-2">Amenities:</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {roomCategory.amenities?.length ? (
-                      roomCategory.amenities.map((amenity) => (
+                    {displayRoomCategory.amenities?.length ? (
+                      displayRoomCategory.amenities.map((amenity) => (
                         <div key={amenity.id} className="flex items-center space-x-2">
                           <input
                             type="checkbox"

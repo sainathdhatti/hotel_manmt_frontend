@@ -164,7 +164,7 @@ const AdminDashboard = () => {
                         {booking.noOfAdults ?? "N/A"}
                       </td>
                       <td className="px-4 py-2 text-center">
-                        {booking.noOfChildren ?? "N/A"}
+                        {booking.noOfChildrens ?? "N/A"}
                       </td>
                       <td className="px-4 py-2 text-center">
                         {booking.noOfDays ?? "N/A"}

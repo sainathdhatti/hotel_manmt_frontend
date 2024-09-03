@@ -65,17 +65,17 @@ const BookingForm = () => {
       })
       .then(() => {
         if (isAuthenticated && userId && roomCategory && checkInDate && checkOutDate) {
-    //   Add booking
-        addBooking({
-        checkInDate: checkInDate,
-        checkOutDate: checkOutDate,
-        noOfAdults: adults,
-        noOfChildren: children,
-        userId:userId,
-        categoryId: roomCategory.id
-      });
-      console.log(addBooking)
-         router.push(`/bookings/${userId}`)
+          // Add booking
+          addBooking({
+            checkInDate: checkInDate,
+            checkOutDate: checkOutDate,
+            noOfAdults: adults,
+            noOfChildren: children,
+            userId: userId,
+            categoryId: roomCategory.id
+          });
+          console.log(addBooking);
+          router.push(`/bookings/${userId}`);
         } else {
           alert('Please complete all required fields and ensure you are logged in.');
         }
@@ -200,9 +200,3 @@ const BookingForm = () => {
 };
 
 export default BookingForm;
-
-
-
-
-
-
