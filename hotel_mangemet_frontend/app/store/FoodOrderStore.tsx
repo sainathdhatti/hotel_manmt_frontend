@@ -18,7 +18,7 @@ interface FoodOrder {
   id: number; // Note the key here matches `order_id`
   totalAmount: string; // Note the type here is string
   order_time: string; // Date as ISO string
-  delivered_time: string | null; // Date as ISO string or null
+  delivered_time?: string | null; // Date as ISO string or null
   status: string;
   orderItems: OrderItem[]; // Adjust based on actual structure
   user: User; // User object

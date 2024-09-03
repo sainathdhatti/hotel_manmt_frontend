@@ -25,7 +25,12 @@ const Page = () => {
       fetchBookingsByUserId(userId);
     }
   }, [userId, fetchBookingsByUserId]);
-
+  useEffect(() => {
+    if (userId !== null) {
+      // Fetch bookings for the specific user ID
+      fetchBookingsByUserId(userId);
+    }
+  }, [userId, fetchBookingsByUserId]);
   useEffect(() => {
     // Update filtered bookings when bookings data changes
     setFilteredBookings(bookings);
