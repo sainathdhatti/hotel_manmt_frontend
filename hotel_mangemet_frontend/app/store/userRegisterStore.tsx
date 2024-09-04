@@ -5,6 +5,9 @@ import { toast } from "react-toastify";
 const API_URL = "http://localhost:5000"; // Adjust if necessary
 
 interface User {
+  role: ReactNode;
+  phone: ReactNode;
+  name: ReactNode;
   id: number;
   email: string;
   password: string;
@@ -20,6 +23,11 @@ interface UserStore {
   registrationStatus: string | null;
   error: string | null;
   getAllUsers: () => Promise<void>;
+interface UserService {
+  getUserById: (id: any) => Promise<void>;
+  checkEmailExists: (email: string) => Promise<boolean>;
+  // Add any additional methods or properties here
+}
 
   registerUser: (userData: {
     firstName: string;
@@ -68,9 +76,63 @@ const useUserStore = create<UserStore>((set) => ({
       set({ loading: false, error: "Failed to fetch users." });
     }
   },
+const userService = {
+  getUserById: async (id: number) => {
+    set({ loading: true });
+    try {
+      const token = sessionStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
+      const response = await axios.get(`${API_URL}/users/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      set({ users: response.data, loading: false });
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      set({ loading: false, error: 'Failed to fetch user.' });
+    }
+  },
+
+  checkEmailExists: async (email: string): Promise<boolean> => {
+    try {
+      const token = sessionStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
+      const response = await axios.get(`${API_URL}/users/check-email`, {
+        params: { email },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data.exists; // Assuming the API returns { exists: boolean }
+    } catch (error) {
+      console.error('Error checking email:', error);
+      return false; // Default to false if there's an error
+    }
+  },
+
   fetchUserById: async (id: number) => {
     console.log(id);
     set({ loading: true });
+    try {
+      const token = sessionStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
+      const response = await axios.get(`${API_URL}/users/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      set({ users: response.data, loading: false });
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      set({ loading: false, error: 'Failed to fetch user.' });
+    }
+  },
+};
+
     try {
       // const token = sessionStorage.getItem('token');
       // if (!token) throw new Error('No token found');

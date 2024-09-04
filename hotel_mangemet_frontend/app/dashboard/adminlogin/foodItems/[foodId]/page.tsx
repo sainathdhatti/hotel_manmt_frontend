@@ -36,7 +36,7 @@ const FoodItemsForm = ({ params: { foodId } }: Props) => {
   const updateFoodItem = useFoodItemsStore((state) => state.updateFoodItem);
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-
+  console.log(foodId)
   const {
     register,
     handleSubmit,
@@ -116,8 +116,13 @@ const FoodItemsForm = ({ params: { foodId } }: Props) => {
       } else {
         // Updating an existing food item requires food_id
         await updateFoodItem({
-          food_id: parseInt(foodId), // Include food_id here
-          ...foodItemData,
+          // food_id: parseInt(foodId), // Include food_id here
+          // ...foodItemData,
+          id: parseInt(foodId), // Ensure this matches the expected property name and type
+          name: foodItemData.food_name,
+          description: foodItemData.food_description,
+          price: foodItemData.food_price,
+          image: foodItemData.food_image,
         });
       }
   

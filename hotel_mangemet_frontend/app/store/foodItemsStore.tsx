@@ -18,6 +18,12 @@ export interface FoodItemsStoreState {
 }
 
 interface FoodItem {
+  description: ReactNode;
+  price: ReactNode;
+  image: string | undefined;
+  name: string | undefined;
+  id(id: any): void;
+  imageUrl: any;
   food_id: number;
   food_name: string;
   food_price: number;
