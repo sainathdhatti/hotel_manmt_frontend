@@ -5,6 +5,7 @@ interface OrderItem {
   foodItemId: number;
   quantity: number;
   price: number;
+  food_Name:string
 }
 
 interface User {
@@ -45,7 +46,7 @@ const useFoodOrderStore = create<FoodOrderStoreState>((set) => ({
     const response = await fetch(`${baseUrl}/orders`);
     const data = await response.json();
     console.log('Orders in Store:', data); // Debugging line
-    set({ orders: data });
+    set({ orders: Array.isArray(data) ? data : [] });
   },
   
 

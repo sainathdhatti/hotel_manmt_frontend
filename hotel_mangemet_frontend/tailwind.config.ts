@@ -17,6 +17,7 @@ const config: Config = {
         'custom-light-gray': '#f9f5f1', 
         'text-color':"#3C3C3C"
       },
+      
     },
   },
   plugins: [],

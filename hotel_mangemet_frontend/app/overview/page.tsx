@@ -8,6 +8,7 @@ import {
   faUtensils,
   faGlassCheers,
   faClock,
+  faPhone,
 } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import Navbar from "../navbar";
@@ -17,10 +18,10 @@ const Overview = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const images = [
-    "/images/OFrontview.jpg",
-    "/images/Oroom.jpg",
-    "/images/Orecepetint.jpg",
-    "/images/Oroom1.jpg",
+    "/images/OFrontview.png",
+    "/images/ORoom.png",
+    "/images/Orecepetint.png",
+    "/images/Oroom1.jpeg",
   ];
   const [selectedCategory, setSelectedCategory] = useState("rooms");
 
@@ -61,7 +62,7 @@ const Overview = () => {
                   alt={`Image ${index + 1}`}
                   layout="fill"
                   objectFit="cover"
-                  className="opacity-70 "
+                  className="opacity-50 "
                 />
               </div>
             ))}
@@ -89,23 +90,30 @@ const Overview = () => {
         </div>
 
         {/* Contact Information Section */}
-        <div className="bg-amber-950">
+        <div className="bg-amber-900">
+          {" "}
+          {/* Brighter background color */}
           <div className="text-center text-white bg-custom-blue shadow-lg rounded-lg mx-auto max-w-lg px-4 py-6">
             <h2 className="text-3xl font-bold mb-4">Hotel Enhance</h2>
-            <p className="text-lg mb-2">
-              135/136, Mumbai-Bangalore Bypass Highway, Wakad, Pune, Maharashtra
+            <p className="text-lg mb-1">
+              Mumbai-Bangalore Bypass Highway, Wakad, Pune, Maharashtra
               - 411057
             </p>
-            <p className="text-lg mb-2">Phone: 020 42121212</p>
-            <p className="text-lg mb-4 flex items-center justify-center">
+            <p className="text-lg mb-2 flex items-center justify-center">
+              <FontAwesomeIcon icon={faPhone} className="text-white mr-2" />{" "}
+              <span>Phone: 020 421212</span>
+            </p>
+            <p className="text-lg mb-2 flex items-center justify-center">
               <FontAwesomeIcon icon={faEnvelope} className="text-white mr-2" />
-              Email:{" "}
-              <a
-                href="mailto:reservations@Kanayarashi.com"
-                className="text-white hover:underline"
-              >
-                reservations@HotelEnhance.com
-              </a>
+              <span>
+                Email:{" "}
+                <a
+                  href="mailto:reservations@HotelEnhance.com"
+                  className="text-white hover:underline"
+                >
+                  reservations@HotelEnhance.com
+                </a>
+              </span>
             </p>
           </div>
         </div>
@@ -118,9 +126,9 @@ const Overview = () => {
             </h2>
             <p className="text-lg mb-4">
               As you enter Pune from the Mumbai-Bangalore Highway, you will
-              witness a beacon of luxury, towering over others. Hotel Enhance Pune
-              is a favourite 5-star destination of all the jet-setters who visit
-              Pune to experience the famed hospitality of the city of the
+              witness a beacon of luxury, towering over others. Hotel Enhance
+              Pune is a favourite 5-star destination of all the jet-setters who
+              visit Pune to experience the famed hospitality of the city of the
               Peshwas. The iconic facade of the hotel welcomes you to a superior
               stay experience.
             </p>
@@ -294,7 +302,7 @@ const Overview = () => {
           </div>
         </div>
       </div>
-      <Footer/>
+      <Footer />
     </div>
   );
 };

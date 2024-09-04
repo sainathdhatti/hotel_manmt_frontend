@@ -7,7 +7,7 @@ interface NavbarProps {
   className?: string;
 }
 
-const Navbar=({ className }: NavbarProps) =>{
+const Navbar = ({ className }: NavbarProps) => {
   const router = useRouter();
   const { isAuthenticated, userName, logout } = useAuthStore((state) => ({
     isAuthenticated: state.isAuthenticated,
@@ -39,8 +39,15 @@ const Navbar=({ className }: NavbarProps) =>{
       <nav className={`navbar ${className}`}>
         <div className="container mx-auto flex items-center justify-between p-4 relative">
           {/* Logo */}
-          <div className="text-center text-2xl font-bold text-black">
-            Hotel Enhance
+          <div className="flex items-center justify-center space-x-4">
+            <img
+              src="/images/logo1 (1).jpg"
+              alt="Hotel Logo"
+              className="w-15 h-12 object-cover"
+            />
+            <div className="text-center text-3xl font-bold text-black">
+              Hotel Enhance
+            </div>
           </div>
 
           <div className="flex items-center space-x-4 ml-auto">
@@ -62,7 +69,7 @@ const Navbar=({ className }: NavbarProps) =>{
                       onClick={handleDropdownToggle}
                       className="text-black text-xl hover:text-red-900 font-bold"
                     >
-                      {userName} 
+                      {userName}
                     </button>
                     {isDropdownOpen && (
                       <ul className="absolute bg-red-100 shadow-lg border border-gray-200 mt-2 w-20 rounded-lg">
