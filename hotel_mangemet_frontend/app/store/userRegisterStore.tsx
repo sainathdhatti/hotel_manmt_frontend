@@ -1,7 +1,8 @@
-import { create } from 'zustand';
-import axios from 'axios';
+import { create } from "zustand";
+import axios from "axios";
+import { toast } from "react-toastify";
 
-const API_URL = 'http://localhost:5000'; // Adjust if necessary
+const API_URL = "http://localhost:5000"; // Adjust if necessary
 
 interface User {
   role: ReactNode;
@@ -22,8 +23,12 @@ interface UserStore {
   registrationStatus: string | null;
   error: string | null;
   getAllUsers: () => Promise<void>;
+interface UserService {
   getUserById: (id: any) => Promise<void>;
   checkEmailExists: (email: string) => Promise<boolean>;
+  // Add any additional methods or properties here
+}
+
   registerUser: (userData: {
     firstName: string;
     lastName: string;
@@ -32,10 +37,20 @@ interface UserStore {
     password: string;
     aadharCardNumber: string;
   }) => Promise<void>;
-  updateUser: (id: number, userData: Partial<User>) => Promise<void>;
+  updateUser: (
+    id: number,
+    userData: {
+      firstName?: string;
+      lastName?: string;
+      email?: string;
+      phoneNumber?: string;
+      aadharCardNumber?: string;
+    }
+  ) => Promise<void>;
   deleteUser: (userId: number) => Promise<void>;
   forgetPassword: (email: string) => Promise<void>;
   resetPassword: (token: string, newPassword: string) => Promise<void>;
+  fetchUserById: (id: number) => Promise<User | undefined>;
 }
 
 const useUserStore = create<UserStore>((set) => ({
@@ -47,8 +62,8 @@ const useUserStore = create<UserStore>((set) => ({
   getAllUsers: async () => {
     set({ loading: true });
     try {
-      const token = sessionStorage.getItem('token');
-      if (!token) throw new Error('No token found');
+      const token = sessionStorage.getItem("token");
+      if (!token) throw new Error("No token found");
 
       const response = await axios.get(`${API_URL}/users`, {
         headers: {
@@ -57,12 +72,12 @@ const useUserStore = create<UserStore>((set) => ({
       });
       set({ users: response.data, loading: false });
     } catch (error) {
-      console.error('Error fetching users:', error);
-      set({ loading: false, error: 'Failed to fetch users.' });
+      console.error("Error fetching users:", error);
+      set({ loading: false, error: "Failed to fetch users." });
     }
   },
-
-  getUserById:async (id:number)=>{
+const userService = {
+  getUserById: async (id: number) => {
     set({ loading: true });
     try {
       const token = sessionStorage.getItem('token');
@@ -70,77 +85,131 @@ const useUserStore = create<UserStore>((set) => ({
 
       const response = await axios.get(`${API_URL}/users/${id}`, {
         headers: {
-          Authorization: `${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       set({ users: response.data, loading: false });
     } catch (error) {
-      console.error('Error fetching users:', error);
-      set({ loading: false, error: 'Failed to fetch users.' });
+      console.error('Error fetching user:', error);
+      set({ loading: false, error: 'Failed to fetch user.' });
     }
   },
 
   checkEmailExists: async (email: string): Promise<boolean> => {
     try {
-      const response = await axios.get(`${API_URL}/users`, {
+      const token = sessionStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
+      const response = await axios.get(`${API_URL}/users/check-email`, {
         params: { email },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
-      return response.data.exists;
+      return response.data.exists; // Assuming the API returns { exists: boolean }
     } catch (error) {
-      console.error('Error checking email existence:', error);
-      set({ error: 'Error checking email existence.' });
-      return false;
+      console.error('Error checking email:', error);
+      return false; // Default to false if there's an error
+    }
+  },
+
+  fetchUserById: async (id: number) => {
+    console.log(id);
+    set({ loading: true });
+    try {
+      const token = sessionStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
+      const response = await axios.get(`${API_URL}/users/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      set({ users: response.data, loading: false });
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      set({ loading: false, error: 'Failed to fetch user.' });
+    }
+  },
+};
+
+    try {
+      // const token = sessionStorage.getItem('token');
+      // if (!token) throw new Error('No token found');
+
+      const response = await axios.get(`${API_URL}/users/${id}`, {
+        // headers: {
+        //   Authorization: `Bearer ${token}`,
+        // },
+      });
+      return response.data; // Return the user data
+    } catch (error: any) {
+      console.error("Error fetching user by ID:", error);
+      set({ error: `Error fetching user by ID: ${error.message}` });
+      throw error; // Re-throw the error to be handled by the caller
+    } finally {
+      set({ loading: false });
     }
   },
 
   registerUser: async (userData) => {
     set({ loading: true, registrationStatus: null });
     try {
-      const token = sessionStorage.getItem('token');
-      if (!token) throw new Error('No token found');
-
-      // Check if email already exists
-      const emailExists = await useUserStore.getState().checkEmailExists(userData.email);
-      if (emailExists) {
-        throw new Error('Email already exists.');
-      }
-
       await axios.post(`${API_URL}/users`, userData, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
+        // headers: {
+        //   'Content-Type': 'application/json',
+        //   Authorization: `Bearer ${token}`,
+        // },
       });
-      set({ registrationStatus: 'User registered successfully', error: null });
-    } catch (error:any) {
-      console.error('Error registering user:', error);
-      set({ registrationStatus: `Error registering user: ${error.message}`, error: null });
+      set({ registrationStatus: "User registered successfully", error: null });
+      toast.success("User registered successfully");
+    } catch (error: any) {
+      if (error.response) {
+        console.error("Failed to delete booking:", error.response.data.message);
+        toast.error(error.response.data.message);
+      }
+      console.error("Error registering user:", error);
+      set({
+        registrationStatus: `Error registering user: ${error.message}`,
+        error: error.message,
+      });
     } finally {
       set({ loading: false });
     }
   },
-
-  updateUser: async (id, userData) => {
+  updateUser: async (
+    id,
+    userData: {
+      firstName?: string;
+      lastName?: string;
+      email?: string;
+      phoneNumber?: string;
+      aadharCardNumber?: string;
+    }
+  ) => {
     set({ loading: true });
     try {
       if (!id || !userData) {
-        throw new Error('User ID and data are required');
+        throw new Error("User ID and data are required");
       }
 
-      const token = sessionStorage.getItem('token');
-      if (!token) throw new Error('No token found');
+      const token = sessionStorage.getItem("token");
+      if (!token) throw new Error("No token found");
 
       await axios.put(`${API_URL}/users/${id}`, userData, {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `${token}`,
         },
       });
 
-      set({ registrationStatus: 'User updated successfully', error: null });
-    } catch (error:any) {
-      console.error('Error updating user:', error);
-      set({ error: `Error updating user: ${error.message}`, registrationStatus: null });
+      set({ registrationStatus: "User updated successfully", error: null });
+    } catch (error: any) {
+      console.error("Error updating user:", error);
+      set({
+        error: `Error updating user: ${error.message}`,
+        registrationStatus: null,
+      });
     } finally {
       set({ loading: false });
     }
@@ -149,18 +218,21 @@ const useUserStore = create<UserStore>((set) => ({
   deleteUser: async (userId) => {
     set({ loading: true });
     try {
-      const token = sessionStorage.getItem('token');
-      if (!token) throw new Error('No token found');
+      const token = sessionStorage.getItem("token");
+      if (!token) throw new Error("No token found");
 
       await axios.delete(`${API_URL}/users/${userId}`, {
         headers: {
           Authorization: `${token}`,
         },
       });
-      set({ registrationStatus: 'User deleted successfully', error: null });
-    } catch (error:any) {
-      console.error('Error deleting user:', error);
-      set({ error: `Error deleting user: ${error.message}`, registrationStatus: null });
+      set({ registrationStatus: "User deleted successfully", error: null });
+    } catch (error: any) {
+      console.error("Error deleting user:", error);
+      set({
+        error: `Error deleting user: ${error.message}`,
+        registrationStatus: null,
+      });
     } finally {
       set({ loading: false });
     }
@@ -170,10 +242,13 @@ const useUserStore = create<UserStore>((set) => ({
     set({ loading: true });
     try {
       await axios.post(`${API_URL}/users/forgetpassword`, { email });
-      set({ registrationStatus: 'Password reset email sent', error: null });
-    } catch (error:any) {
-      console.error('Error sending password reset email:', error);
-      set({ error: `Error sending password reset email: ${error.message}`, registrationStatus: null });
+      set({ registrationStatus: "Password reset email sent", error: null });
+    } catch (error: any) {
+      console.error("Error sending password reset email:", error);
+      set({
+        error: `Error sending password reset email: ${error.message}`,
+        registrationStatus: null,
+      });
     } finally {
       set({ loading: false });
     }
@@ -182,11 +257,17 @@ const useUserStore = create<UserStore>((set) => ({
   resetPassword: async (token: string, newPassword: string) => {
     set({ loading: true });
     try {
-      await axios.post(`${API_URL}/users/reset-password`, { token, newPassword });
-      set({ registrationStatus: 'Password reset successfully', error: null });
-    } catch (error:any) {
-      console.error('Error resetting password:', error);
-      set({ error: `Error resetting password: ${error.message}`, registrationStatus: null });
+      await axios.post(`${API_URL}/users/reset-password`, {
+        token,
+        newPassword,
+      });
+      set({ registrationStatus: "Password reset successfully", error: null });
+    } catch (error: any) {
+      console.error("Error resetting password:", error);
+      set({
+        error: `Error resetting password: ${error.message}`,
+        registrationStatus: null,
+      });
     } finally {
       set({ loading: false });
     }

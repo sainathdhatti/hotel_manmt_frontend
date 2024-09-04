@@ -5,6 +5,7 @@ interface OrderItem {
   foodItemId: number;
   quantity: number;
   price: number;
+  food_Name:string
 }
 
 interface User {
@@ -18,7 +19,7 @@ interface FoodOrder {
   id: number; // Note the key here matches `order_id`
   totalAmount: string; // Note the type here is string
   order_time: string; // Date as ISO string
-  delivered_time: string | null; // Date as ISO string or null
+  delivered_time?: string | null; // Date as ISO string or null
   status: string;
   orderItems: OrderItem[]; // Adjust based on actual structure
   user: User; // User object
@@ -45,7 +46,7 @@ const useFoodOrderStore = create<FoodOrderStoreState>((set) => ({
     const response = await fetch(`${baseUrl}/orders`);
     const data = await response.json();
     console.log('Orders in Store:', data); // Debugging line
-    set({ orders: data });
+    set({ orders: Array.isArray(data) ? data : [] });
   },
   
 

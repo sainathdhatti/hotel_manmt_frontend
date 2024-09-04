@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 enum BookingStatus {
   AVAILABLE = 'AVAILABLE',
@@ -174,10 +175,24 @@ const useBookingsStore = create<BookingStore>((set) => ({
         bookings: state.bookings.filter((b) => b.bookingId !== bookingId),
         booking: state.booking?.bookingId === bookingId ? null : state.booking,
       }));
-    } catch (error) {
-      console.error('Failed to delete booking:', error);
+    } catch (error:any) {
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error('Failed to delete booking:', error.response.data.message);
+        toast.error(error.response.data.message); // Display error message to the user
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error('Failed to delete booking:', error.request);
+        alert('No response received from server.');
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error('Failed to delete booking:', error.message);
+        alert('Error in setting up request.');
+      }
     }
   },
+  
 }));
 
 export default useBookingsStore;
