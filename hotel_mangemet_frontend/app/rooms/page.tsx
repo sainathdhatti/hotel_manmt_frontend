@@ -55,6 +55,7 @@ const Rooms = () => {
         router.push(`/bookingForm/${selectedCategoryId}`);
       } else {
         alert("Please login first");
+        router.push(`login/userlogin`);
       }
     }
   };
@@ -116,11 +117,11 @@ const Rooms = () => {
                 )}
                 <div className="flex items-center space-x-8 mb-6">
                   <div>
-                    <h1 className="text-3xl font-bold">{displayRoomCategory.name}</h1>
+                    <h1 className="text-2xl font-bold">{displayRoomCategory.name}</h1>
                   </div>
                   <div>
-                    <p className="text-2xl font-bold">
-                      Price: <span className="text-red-500">${displayRoomCategory.price}</span>
+                    <p className="text-xl font-bold">
+                      Price: <span className="text-red-500">&#8377;{displayRoomCategory.price}</span>
                     </p>
                   </div>
                   <div>

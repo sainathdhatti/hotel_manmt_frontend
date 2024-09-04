@@ -4,6 +4,9 @@ import axios from 'axios';
 const API_URL = 'http://localhost:5000'; // Adjust if necessary
 
 interface User {
+  role: ReactNode;
+  phone: ReactNode;
+  name: ReactNode;
   id: number;
   email: string;
   password: string;
@@ -19,6 +22,7 @@ interface UserStore {
   registrationStatus: string | null;
   error: string | null;
   getAllUsers: () => Promise<void>;
+  getUserById: (id: any) => Promise<void>;
   checkEmailExists: (email: string) => Promise<boolean>;
   registerUser: (userData: {
     firstName: string;
@@ -47,6 +51,24 @@ const useUserStore = create<UserStore>((set) => ({
       if (!token) throw new Error('No token found');
 
       const response = await axios.get(`${API_URL}/users`, {
+        headers: {
+          Authorization: `${token}`,
+        },
+      });
+      set({ users: response.data, loading: false });
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      set({ loading: false, error: 'Failed to fetch users.' });
+    }
+  },
+
+  getUserById:async (id:number)=>{
+    set({ loading: true });
+    try {
+      const token = sessionStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
+      const response = await axios.get(`${API_URL}/users/${id}`, {
         headers: {
           Authorization: `${token}`,
         },

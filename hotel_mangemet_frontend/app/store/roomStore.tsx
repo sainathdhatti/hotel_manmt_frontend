@@ -14,6 +14,8 @@ interface RoomCategory {
 }
 
 interface Rooms {
+    price: ReactNode;
+    image: string | undefined;
     id: number;
     roomNumber: number;
     roomCategory: RoomCategory;
