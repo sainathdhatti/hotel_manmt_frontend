@@ -1,13 +1,4 @@
 import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faFacebookF,
-  faTwitter,
-  faInstagram,
-  faLinkedinIn,
-  faXTwitter,
-} from "@fortawesome/free-brands-svg-icons";
-import Navbar from "../navbar";
 
 const Footer = () => {
   return (
@@ -40,7 +31,7 @@ const Footer = () => {
           <div className="flex flex-col gap-4">
             <h2 className="text-xl font-semibold mb-2">Quick Links</h2>
             <ul className="space-y-2">
-              {["Home", "About Us", "Rooms & Suites", "Amenities", "Contact Us", "Privacy Policy", "Terms & Conditions"].map((link, index) => (
+              {["Overview", "About Us", "Rooms", "Amenities", "Contact", "Privacy Policy", "Terms & Conditions"].map((link, index) => (
                 <li key={index}>
                   <a
                     href={`/${link.replace(/\s+/g, '-').toLowerCase()}`}
