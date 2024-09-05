@@ -8,6 +8,7 @@ import DatePicker from "react-datepicker";
 import * as yup from "yup";
 import "react-datepicker/dist/react-datepicker.css";
 import { useRouter } from 'next/navigation';
+import Navbar from '@/app/navbar';
 
 // Schema for validation
 const schema = yup.object().shape({
@@ -38,7 +39,7 @@ const BookingForm = () => {
   const [checkInDate, setCheckInDate] = useState<Date | null>(null);
   const [checkOutDate, setCheckOutDate] = useState<Date | null>(null);
   const [adults, setAdults] = useState<number>(1);
-  const [children, setChildren] = useState<number>(1);
+  const [children, setChildren] = useState<number>(0);
   const [totalPrice, setTotalPrice] = useState<number>(0);
 
   useEffect(() => {
@@ -70,7 +71,7 @@ const BookingForm = () => {
             checkInDate: checkInDate,
             checkOutDate: checkOutDate,
             noOfAdults: adults,
-            noOfChildren: children,
+            noOfChildrens: children,
             userId: userId,
             categoryId: roomCategory.id
           });
@@ -87,6 +88,7 @@ const BookingForm = () => {
 
   return (
     <div className="p-6 flex">
+            <Navbar className="absolute top-0 left-0 w-full z-10" />
       <div className="w-1/3 mt-32">
         {roomCategory ? (
           <>
