@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Footer from "../footer/page";
 import useContactStore from "@/app/store/contactStore";
 import Navbar from "../navbar";
+import { toast } from "react-toastify";
 
 // Define the Yup schema for validation
 const schema = yup.object().shape({
@@ -38,6 +39,7 @@ const Contact = () => {
     try {
       await addContact(data);
       reset();
+      toast.success("Thank you for contacting us. We will get back to you soon.");
       router.push("/contact");
     } catch (error) {
       console.error("Submission error:", error);

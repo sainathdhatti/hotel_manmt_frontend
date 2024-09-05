@@ -14,6 +14,7 @@ import Link from "next/link";
 import Navbar from "../navbar";
 import Footer from "../footer/page";
 
+
 const Overview = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -62,7 +63,7 @@ const Overview = () => {
                   alt={`Image ${index + 1}`}
                   layout="fill"
                   objectFit="cover"
-                  className="opacity-50 "
+                  className="opacity-70 "
                 />
               </div>
             ))}

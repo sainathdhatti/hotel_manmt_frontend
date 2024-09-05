@@ -52,7 +52,6 @@ const Footer = () => {
                 { href: "https://facebook.com", label: "Facebook" },
                 { href: "https://twitter.com", label: "Twitter" },
                 { href: "https://instagram.com", label: "Instagram" },
-                { href: "https://x.com", label: "X" },
                 { href: "https://linkedin.com", label: "LinkedIn" }
               ].map(({ href, label }, index) => (
                 <li key={index}>
