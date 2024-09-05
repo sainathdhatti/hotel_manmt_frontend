@@ -123,7 +123,7 @@ const AdminDashboard = () => {
       console.error("Error deleting booking:", error);
     }
   };
-  const isCancelled = (status: string) => status === 'CANCELLED';
+  const isCancelled = (status: string) => status === "CANCELLED";
   const renderContent = () => {
     const tableColorClass =
       activeSection === "dashboard" ? "bg-blue-50" : "bg-white";
@@ -771,29 +771,30 @@ const AdminDashboard = () => {
       case "UserQueries":
         return (
           <div className="flex flex-col items-center justify-center">
-            <div className="w-full max-w-2xl p-6 ">
+            <div className="w-full max-w-6xl p-6">
               <div className="flex justify-center">
                 <table className="w-full border border-gray-300 bg-blue-50 rounded-lg overflow-hidden">
                   <thead className="bg-gray-200 text-gray-700">
                     <tr>
-                      <th className="px-4 py-2 text-left font-semibold">
+                      <th className="px-2 py-2 text-left font-semibold">
                         First Name
                       </th>
-                      <th className="px-4 py-2 text-left font-semibold">
+                      <th className="px-2 py-2 text-left font-semibold">
                         Last Name
                       </th>
-                      <th className="px-4 py-2 text-left font-semibold">
+                      <th className="px-2 py-2 text-left font-semibold">
                         PhoneNumber
                       </th>
-                      <th className="px-4 py-2 text-left font-semibold">
+                      <th className="px-2 py-2 text-left font-semibold">
                         Email
                       </th>
-                      <th className="px-4 py-2 text-left font-semibold">
+                      <th className="px-2 py-2 text-left font-semibold">
                         Subject
                       </th>
-                      <th className="px-4 py-2 text-left font-semibold">
+                      <th className="px-6 py-2 text-left font-semibold w-2/5">
                         Message
-                      </th>
+                      </th>{" "}
+                      {/* Adjusted padding and width */}
                     </tr>
                   </thead>
                   <tbody>
@@ -802,24 +803,24 @@ const AdminDashboard = () => {
                         key={contact.id}
                         className="border-b hover:bg-gray-100"
                       >
-                        <td className="px-4 py-2 text-gray-900">
+                        <td className="px-2 py-2 text-gray-900">
                           {contact.firstName}
                         </td>
-                        <td className="px-4 py-2 text-gray-900">
+                        <td className="px-2 py-2 text-gray-900">
                           {contact.lastName}
                         </td>
-                        <td className="px-4 py-2 text-gray-900">
+                        <td className="px-2 py-2 text-gray-900">
                           {contact.phone}
                         </td>
-                        <td className="px-4 py-2 text-gray-900">
+                        <td className="px-2 py-2 text-gray-900">
                           {contact.Email}
                         </td>
-                        <td className="px-4 py-2 text-gray-900">
+                        <td className="px-2 py-2 text-gray-900">
                           {contact.Subject}
                         </td>
-                        <td className="px-4 py-2 text-gray-900">
+                        <td className="px-6 py-2 text-gray-900 w-2/5">
                           {contact.Message}
-                        </td>
+                        </td>{" "}
                       </tr>
                     ))}
                   </tbody>

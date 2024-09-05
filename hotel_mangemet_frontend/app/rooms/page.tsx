@@ -3,9 +3,10 @@ import useRoomCategoryStore from "../store/roomCategory";
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBed, faVectorSquare } from "@fortawesome/free-solid-svg-icons";
-import Footer from "../footer/page";
+
 import Navbar from "../navbar";
 import { useRouter } from "next/navigation";
+import Footer from "../footer/page";
 
 const Rooms = () => {
   const router = useRouter();
