@@ -77,7 +77,7 @@ const SpaBookingForm = () => {
           return;
         }
           
-        console.log(firstName,lastName,gender,bookingDate,selectedService.id,selectedSlot.id,userId);
+        console.log(firstName, lastName, gender, bookingDate, selectedService.id, selectedSlot.id, userId);
         await addBooking({
           firstName,
           lastName,
@@ -106,17 +106,17 @@ const SpaBookingForm = () => {
   const spaService = spaServices.find(service => service.id === Number(serviceId)) || null;
 
   return (
-    <div className="p-6 flex">
+    <div className="p-6 flex flex-col lg:flex-row">
       <Navbar className="absolute top-0 left-0 w-full z-10" />
-      <div className="w-1/3 mt-32">
+      <div className="lg:w-1/3 mt-16 lg:mt-32 flex flex-col items-center">
         {spaService ? (
           <>
             <img
               src={spaService.service_image || "/abc.jpg"}
               alt={spaService.name || "Spa Service"}
-              className="w-full h-auto object-cover"
+              className="w-full h-auto object-cover rounded-lg shadow-md"
             />
-            <h1 className="ml-24 text-2xl mt-3">
+            <h1 className="text-2xl mt-3 text-center">
               {spaService.name || 'Spa Service'}
             </h1>
           </>
@@ -124,9 +124,9 @@ const SpaBookingForm = () => {
           <p>No image available</p>
         )}
       </div>
-      <div className="w-2/3 ml-6 bg-yellow-400">
-        <div className="flex mb-4 mt-28 ml-10">
-          <div className="flex-1 mr-2">
+      <div className="lg:w-2/3 lg:ml-6 bg-yellow-400 p-4 rounded-lg shadow-lg">
+        <div className="flex flex-col space-y-4">
+          <div>
             <label className="block text-lg mb-2">First Name</label>
             <input
               type="text"
@@ -136,7 +136,7 @@ const SpaBookingForm = () => {
             />
           </div>
 
-          <div className="flex-1 ml-2">
+          <div>
             <label className="block text-lg mb-2">Last Name</label>
             <input
               type="text"
@@ -145,10 +145,8 @@ const SpaBookingForm = () => {
               className="w-full border border-gray-300 rounded-md p-2"
             />
           </div>
-        </div>
 
-        <div className="flex mb-4 mt-10 ml-10">
-          <div className="flex-1 mr-2">
+          <div>
             <label className="block text-lg mb-2">Booking Date</label>
             <DatePicker
               selected={bookingDate}
@@ -159,10 +157,8 @@ const SpaBookingForm = () => {
               className="w-full border border-gray-300 rounded-md pl-5"
             />
           </div>
-        </div>
 
-        <div className="flex mb-4 mt-10 ml-10">
-          <div className="flex-1 mr-2">
+          <div>
             <label className="block text-lg mb-2">Gender</label>
             <select
               value={gender}
@@ -173,10 +169,8 @@ const SpaBookingForm = () => {
               <option value={Gender.FEMALE}>Female</option>
             </select>
           </div>
-        </div>
 
-        <div className="flex mb-4 mt-10 ml-10">
-          <div className="flex-1 mr-2">
+          <div>
             <label className="block text-lg mb-2">Select Time Slot</label>
             <select
               value={selectedTimeSlot || ''}
@@ -191,15 +185,15 @@ const SpaBookingForm = () => {
               ))}
             </select>
           </div>
-        </div>
-        
-        <div className="mt-6 ml-10">
-          <button
-            onClick={handleSubmit}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md"
-          >
-            Confirm Booking
-          </button>
+
+          <div>
+            <button
+              onClick={handleSubmit}
+              className="bg-blue-500 text-white px-4 py-2 rounded-md w-full"
+            >
+              Confirm Booking
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -12,7 +12,7 @@ export enum BookingStatus {
 
 const API_URL = 'http://localhost:5000'; // Update to your actual backend URL
 
-interface SpaBooking{
+export interface SpaBooking{
     id:number;
     firstName:string;
     lastName:string;

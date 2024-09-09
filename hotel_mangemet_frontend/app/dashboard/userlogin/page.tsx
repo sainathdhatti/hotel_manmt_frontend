@@ -38,13 +38,13 @@ const UserDashboard = () => {
     updateOrder: state.updateOrder,
   }));
 
-  const { users, getAllUsers, updateUser, deleteUser, fetchUserById } =
+  const { users, getAllUsers, updateUser, deleteUser, getUserById } =
     useUserStore((state) => ({
       users: state.users,
       getAllUsers: state.getAllUsers,
       updateUser: state.updateUser,
       deleteUser: state.deleteUser,
-      fetchUserById: state.fetchUserById,
+      getUserById: state.getUserById,
     }));
 
   const { bookings, fetchBookingsByUserId, deleteBooking } = useBookingsStore(
@@ -62,17 +62,22 @@ const UserDashboard = () => {
   useEffect(() => {
     if (isAuthenticated) {
       const fetchData = async () => {
-        await getAllOrders();
-        await getAllUsers();
-        if (userId) {
-          await fetchBookingsByUserId(userId);
-          const userDetails = await fetchUserById(userId);
-          setEditingUser(userDetails ?? null);
+        try {
+          await getAllOrders();
+          await getAllUsers();
+          if (userId) {
+            await fetchBookingsByUserId(userId);
+            const userDetails = await getUserById(userId); // Ensure this returns data
+            console.log("userDetails", userDetails);
+            setEditingUser(userDetails ?? null);
+          }
+        } catch (error) {
+          console.error("Error fetching data:", error);
         }
       };
       fetchData();
     } else {
-      router.push("/"); // Redirect if not authenticated
+      router.push("/");
     }
   }, [
     isAuthenticated,
@@ -80,7 +85,7 @@ const UserDashboard = () => {
     getAllUsers,
     fetchBookingsByUserId,
     userId,
-    fetchUserById,
+    getUserById,
   ]);
 
   useEffect(() => {
@@ -248,74 +253,120 @@ const UserDashboard = () => {
             </div>
           </div>
         );
-
-      case "food-orders":
-        return (
-          <div className="overflow-x-auto w-full border-2 border-gray-200   p-6">
-            <h1 className="text-2xl font-bold mb-4  text-teal-500">
-              Food Orders
-            </h1>
-            <table className="min-w-full bg-white border border-gray-300 shadow-md">
-              <thead className="bg-gray-100 text-teal-600">
+        case "food-orders":
+          return(
+            <div className="overflow-x-auto">
+            <table className="w-full bg-white border border-gray-300 rounded-lg shadow-md">
+              <thead className="bg-gray-200 text-gray-700">
                 <tr>
-                  <th className="py-3 px-4 border-b text-center">User Name</th>
-                  <th className="py-3 px-4 border-b text-center">Order Time</th>
-                  <th className="py-3 px-4 border-b text-center">Status</th>
-                  <th className="py-3 px-4 border-b text-center">Amount</th>
-                  <th className="py-3 px-4 border-b text-center">Action</th>
+                  <th className="px-2 py-2 text-center font-semibold">Customer Name</th>
+                  <th className="px-2 py-2 text-center font-semibold">Customer Number</th>
+                  <th className="px-2 py-2 text-center font-semibold">Food Name</th>
+                  <th className="px-2 py-2 text-center font-semibold">Quantity</th>
+                  <th className="px-2 py-2 text-center font-semibold">Price</th>
+                  <th className="px-2 py-2 text-center font-semibold">Order Time</th>
+                  <th className="px-2 py-2 text-center font-semibold">Delivered Time</th>
+                  <th className="px-2 py-2 text-center font-semibold">Status</th>
+                  <th className="px-2 py-2 text-center font-semibold">Total Amount</th>
+                  <th className="px-2 py-2 text-center font-semibold">Action</th>
                 </tr>
               </thead>
-              <tbody className="text-gray-800">
-                {orders.filter(
-                  (order) =>
-                    order.user?.id === userId && order.status !== "cancelled"
-                ).length === 0 ? (
+              <tbody>
+                {orders.length > 0 ? (
+                  orders.flatMap((order) => {
+                    const orderItems = Array.isArray(order.orderItems)
+                      ? order.orderItems
+                      : [];
+          
+                    return orderItems.map((item: any, index: number) => (
+                      <tr
+                        key={`${order.id}-${item.foodItemId}-${index}`}
+                        className="border-b hover:bg-gray-50 even:bg-gray-100"
+                      >
+                        {index === 0 && (
+                          <>
+                            <td
+                              rowSpan={order.orderItems.length}
+                              className="px-2 py-2 text-gray-800"
+                            >
+                              {order.user?.firstName || "Unknown"}
+                            </td>
+                            <td
+                              rowSpan={order.orderItems.length}
+                              className="px-2 py-2 text-gray-800"
+                            >
+                              {order.user?.phoneNumber || "Unknown"}
+                            </td>
+                          </>
+                        )}
+                        <td className="px-2 py-2 text-gray-800">{item.food_name}</td>
+                        <td className="px-2 py-2 text-gray-800">{item.quantity}</td>
+                        <td className="px-2 py-2 text-gray-800">${item.price}</td>
+                        {index === 0 && (
+                          <>
+                            <td
+                              rowSpan={order.orderItems.length}
+                              className="px-2 py-2 text-gray-800"
+                            >
+                              {new Date(order.order_time).toLocaleString()}
+                            </td>
+                            <td
+                              rowSpan={order.orderItems.length}
+                              className="px-2 py-2 text-gray-800"
+                            >
+                              {order.delivered_time
+                                ? new Date(order.delivered_time).toLocaleString()
+                                : "N/A"}
+                            </td>
+                            <td
+                              rowSpan={order.orderItems.length}
+                              className="px-6 py-4 text-gray-800"
+                            >
+                              {order.status}
+                            </td>
+                            <td
+                              rowSpan={order.orderItems.length}
+                              className="px-6 py-4 text-gray-800"
+                            >
+                              ${order.totalAmount}
+                            </td>
+                          </>
+                        )}
+                        {index === 0 && (
+                          <td
+                            rowSpan={order.orderItems.length}
+                            className="px-6 py-4 text-center"
+                          >
+                            <button
+                              onClick={() => handleCancelOrder(order.id)}
+                              disabled={order.status === "delivered"}
+                              className={`bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition duration-300 ${
+                                order.status === "delivered"
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
+                            >
+                              Cancel
+                            </button>
+                          </td>
+                        )}
+                      </tr>
+                    ));
+                  })
+                ) : (
                   <tr>
-                    <td colSpan={5} className="text-center py-4 text-gray-500">
+                    <td colSpan={10} className="text-center py-4 text-gray-500">
                       No food orders found.
                     </td>
                   </tr>
-                ) : (
-                  orders
-                    .filter(
-                      (order) =>
-                        order.user?.id === userId &&
-                        order.status !== "cancelled"
-                    )
-                    .map((order) => (
-                      <tr key={order.id} className="border-b hover:bg-gray-100">
-                        <td className="py-3 px-4 border-b text-blue-500 text-center">
-                          {order.user?.firstName}
-                        </td>
-                        <td className="py-3 px-4 border-b text-green-500 text-center">
-                          {new Date(order.order_time).toLocaleString()}
-                        </td>
-                        <td className="py-3 px-4 border-b text-red-500 text-center">
-                          {order.status}
-                        </td>
-                        <td className="py-3 px-4 border-b text-yellow-500 text-center">
-                          {order.totalAmount}
-                        </td>
-                        <td className="py-3 px-4 border-b text-gray-800 text-center">
-                          <button
-                            onClick={() => handleCancelOrder(order.id)}
-                            disabled={order.status === "delivered"}
-                            className={`py-1 px-2 rounded-md ${
-                              order.status === "delivered"
-                                ? "bg-gray-400 cursor-not-allowed"
-                                : "bg-red-500 text-white hover:bg-red-600"
-                            }`}
-                          >
-                            Cancel
-                          </button>
-                        </td>
-                      </tr>
-                    ))
                 )}
               </tbody>
             </table>
           </div>
-        );
+          
+        
+            );
+        
 
       case "profile":
         return (
@@ -333,7 +384,7 @@ const UserDashboard = () => {
                   name="firstName"
                   value={editingUser?.firstName || ""}
                   onChange={handleChange}
-                  className="mt-1 block w-full p-2 border  text-blue-500 border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500"
+                  className="mt-1 block w-full p-2 border text-blue-500 border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500"
                 />
               </div>
               <div>
@@ -345,7 +396,7 @@ const UserDashboard = () => {
                   name="lastName"
                   value={editingUser?.lastName || ""}
                   onChange={handleChange}
-                  className="mt-1 block w-full border p-2  text-blue-500 border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500"
+                  className="mt-1 block w-full border p-2 text-blue-500 border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500"
                 />
               </div>
               <div>
@@ -370,11 +421,11 @@ const UserDashboard = () => {
                   name="phoneNumber"
                   value={editingUser?.phoneNumber || ""}
                   onChange={handleChange}
-                  className="mt-1 block w-full p-2 border  text-blue-500 border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500"
+                  className="mt-1 block w-full p-2 border text-blue-500 border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500"
                 />
               </div>
               <div>
-                <label className="block text-sm  text-gray-700 font-bold">
+                <label className="block text-sm text-gray-700 font-bold">
                   Aadhar Card Number
                 </label>
                 <input

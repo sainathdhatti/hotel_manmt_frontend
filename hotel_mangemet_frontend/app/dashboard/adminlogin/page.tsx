@@ -2,23 +2,64 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/app/store/loginStore";
-import useAmenitiesStore from "@/app/store/amenitiesStore";
+import useAmenitiesStore, { Amenity } from "@/app/store/amenitiesStore";
 import useRoomCategoryStore, { RoomCategory } from "@/app/store/roomCategory";
-import useContactStore from "@/app/store/contactStore";
-import useFoodItemsStore from "@/app/store/foodItemsStore";
-import useRoomStore from "@/app/store/roomStore";
-import useUserStore from "@/app/store/userRegisterStore";
-import useSpaServiceStore from "@/app/store/spaServiceStore";
-import useStaffCategoryStore from "@/app/store/staffCategoryStore";
-import useStaffMemberStore from "@/app/store/staffMembersStore";
+import useContactStore, { Contact } from "@/app/store/contactStore";
+import useFoodItemsStore, { FoodItem } from "@/app/store/foodItemsStore";
+import useRoomStore, { Rooms } from "@/app/store/roomStore";
+import useUserStore, { User } from "@/app/store/userRegisterStore";
+import useSpaServiceStore, { SpaService } from "@/app/store/spaServiceStore";
+import useStaffCategoryStore, {
+  StaffCategory,
+} from "@/app/store/staffCategoryStore";
+import useStaffMemberStore, {
+  StaffMember,
+} from "@/app/store/staffMembersStore";
 import useBookingsStore, { Booking } from "@/app/store/bookingStore";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
+import Pagination from "./pagination/page";
 
+// interface room {
+//   id: number;
+//   roomNumber: number;
+//   roomCategory: RoomCategory;
+//   status: string;
+// }
+// interface booking {
+//   bookingId: number;
+//   user: {
+//     firstName: string;
+//   };
+//   checkInDate: string;
+//   checkOutDate: string;
+//   noOfAdults: number;
+//   noOfChildrens: number;
+//   noOfDays: number;
+//   room?: {
+//     roomNumber: string;
+//   };
+//   TotalAmount: number;
+//   status: string;
+// }
+// interface roomCategory {
+//   id: number;
+//   name: string;
+//   description?: string;
+//   price?: number;
+//   imageUrl?: string ;
+//   amenities?: { id: number; name: string }[];
+//   noOfChildren?: number;
+//   noOfAdults?: number;
+// }
 
 const AdminDashboard = () => {
-  const [activeSection, setActiveSection] = useState<string>("dashboard");
+  const [activeSection, setActiveSection] = useState<string>("bookings");
+  const [roomFilter, setRoomFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [nameFilter, setNameFilter] = useState<string>("");
+
   const { logout } = useAuthStore();
   const router = useRouter();
 
@@ -30,19 +71,18 @@ const AdminDashboard = () => {
   };
 
   const { amenities, getAllAmenities, deleteAmenity } = useAmenitiesStore();
-const { roomCategories, getAllRoomCategories, deleteRoomCategory } =
-  useRoomCategoryStore();
-
+  const { roomCategories, getAllRoomCategories, deleteRoomCategory } =
+    useRoomCategoryStore();
   const { contacts, getAllContacts } = useContactStore();
   const { foodItems, getAllFoodItems, deleteFoodItem } = useFoodItemsStore();
   const { rooms, getAllRooms, deleteRoom } = useRoomStore();
   const { users, getAllUsers } = useUserStore();
-const { spaServices, getAllSpaServices, deleteSpaService } = useSpaServiceStore();
-const { staffCategories, fetchStaffCategories, deleteStaffCategory } =
-  useStaffCategoryStore();
-const { staffMembers, getAllStaffMembers, deleteStaffMember } =
-  useStaffMemberStore();
-
+  const { spaServices, getAllSpaServices, deleteSpaService } =
+    useSpaServiceStore();
+  const { staffCategories, fetchStaffCategories, deleteStaffCategory } =
+    useStaffCategoryStore();
+  const { staffMembers, getAllStaffMembers, deleteStaffMember } =
+    useStaffMemberStore();
 
   const bookings = useBookingsStore((state) => state.bookings);
   const getAllBookings = useBookingsStore((state) => state.fetchBookings);
@@ -52,6 +92,7 @@ const { staffMembers, getAllStaffMembers, deleteStaffMember } =
     isAuthenticated: state.isAuthenticated,
     userId: state.userId,
   }));
+
   useEffect(() => {
     if (activeSection === "amenities") {
       getAllAmenities();
@@ -65,15 +106,14 @@ const { staffMembers, getAllStaffMembers, deleteStaffMember } =
       getAllRooms();
     } else if (activeSection === "users") {
       getAllUsers();
-} else if (activeSection === "spaServices") {
-  getAllSpaServices();
-} else if (activeSection === "staffCategories") {
-  fetchStaffCategories();
-} else if (activeSection === "staffMembers") {
-  getAllStaffMembers();
-} else if (activeSection === "bookings") {
-  getAllBookings();
-
+    } else if (activeSection === "spaServices") {
+      getAllSpaServices();
+    } else if (activeSection === "staffCategories") {
+      fetchStaffCategories();
+    } else if (activeSection === "staffMembers") {
+      getAllStaffMembers();
+    } else if (activeSection === "bookings") {
+      getAllBookings();
     }
   }, [
     activeSection,
@@ -83,12 +123,12 @@ const { staffMembers, getAllStaffMembers, deleteStaffMember } =
     getAllFoodItems,
     getAllRooms,
     getAllUsers,
-[
-  getAllSpaServices,
-  fetchStaffCategories,
-  getAllStaffMembers,
-  getAllBookings,
-]);
+    getAllBookings,
+    getAllSpaServices,
+    fetchStaffCategories,
+    getAllStaffMembers,
+    getAllBookings,
+  ]);
 
   const handleDelete = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this amenity?")) {
@@ -108,152 +148,246 @@ const { staffMembers, getAllStaffMembers, deleteStaffMember } =
     }
   };
 
-
   const handleDeleteRoom = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this room?")) {
       await deleteRoom(id);
     }
   };
 
-<const handleDeleteSpaService = async (id: number) => {
-  if (window.confirm("Are you sure you want to delete this service?")) {
-    try {
-      await deleteSpaService(id);
-      alert("Service deleted successfully");
-    } catch (error) {
-      console.error("Error deleting service:", error);
+  const handleDeleteSpaService = async (id: number) => {
+    if (window.confirm("Are you sure you want to delete this service?")) {
+      try {
+        await deleteSpaService(id);
+        alert("Service deleted successfully");
+      } catch (error) {
+        console.error("Error deleting service:", error);
+      }
     }
-  }
-};
+  };
 
-const handleDeleteCategory = async (id: number) => {
-  if (window.confirm("Are you sure you want to delete this category?")) {
-    try {
-      await deleteStaffCategory(id);
-      alert("Category deleted successfully");
-    } catch (error) {
-      console.error("Error deleting category:", error);
+  const handleDeleteCategory = async (id: number) => {
+    if (window.confirm("Are you sure you want to delete this category?")) {
+      try {
+        await deleteStaffCategory(id);
+        alert("Category deleted successfully");
+      } catch (error) {
+        console.error("Error deleting category:", error);
+      }
     }
-  }
-};
+  };
 
-const handleDeleteStaffMember = async (id: number) => {
-  if (window.confirm("Are you sure you want to delete this member?")) {
-    try {
-      await deleteStaffMember(id);
-      alert("Member deleted successfully");
-    } catch (error) {
-      console.error("Error deleting member:", error);
+  const handleDeleteStaffMember = async (id: number) => {
+    if (window.confirm("Are you sure you want to delete this member?")) {
+      try {
+        await deleteStaffMember(id);
+        alert("Member deleted successfully");
+      } catch (error) {
+        console.error("Error deleting member:", error);
+      }
     }
-  }
-};
+  };
 
-const handleDeleteBooking = async (bookingId: number) => {
-  if (window.confirm("Are you sure you want to delete this booking?")) {
-    try {
-      await deleteBooking(bookingId);
-      alert("Booking deleted successfully");
-      await getAllBookings(); // Refresh the list
-    } catch (error) {
-      console.error("Error deleting booking:", error);
+  const handleDeleteBooking = async (bookingId: number) => {
+    if (window.confirm("Are you sure you want to delete this booking?")) {
+      try {
+        await deleteBooking(bookingId);
+        alert("Booking deleted successfully");
+        await getAllBookings(); // Refresh the list
+      } catch (error) {
+        console.error("Error deleting booking:", error);
+      }
     }
-  }
-};
+  };
 
-const isCancelled = (status: string) => status === 'CANCELLED';
+  const isCancelled = (status: string) => status === "CANCELLED";
 
-const renderContent = () => {
-  // Your rendering logic here
-};
+  const filteredBookings = bookings.filter((booking) => {
+    // Convert filters to lowercase for case-insensitive comparison
+    const roomFilterLower = roomFilter.toLowerCase();
+    const nameFilterLower = nameFilter.toLowerCase();
 
+    // Get values to filter
+    const roomNumber = booking.room?.roomNumber ?? "";
+    const customerName = booking.user?.firstName ?? "";
+
+    // Check if the room number starts with the room filter value
+    const roomMatches =
+      roomFilterLower === "" ||
+      roomNumber.toString().toLowerCase().startsWith(roomFilterLower);
+
+    // Check if the customer name starts with the name filter value
+    const nameMatches =
+      nameFilterLower === "" ||
+      customerName.toLowerCase().startsWith(nameFilterLower);
+
+    // Check if the booking status matches the selected status filter
+    const statusMatches =
+      statusFilter === "" ||
+      booking.status.toLowerCase() === statusFilter.toLowerCase();
+
+    return roomMatches && nameMatches && statusMatches;
+  });
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 10;
+  const getCurrentItems = (data: any) => {
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    return data.slice(indexOfFirstItem, indexOfLastItem);
+  };
+
+  const renderContent = () => {
     const tableColorClass =
       activeSection === "dashboard" ? "bg-blue-50" : "bg-white";
+    const data: { [key: string]: any } = {
+      bookings: filteredBookings,
+      roomCategories: roomCategories,
+      rooms: rooms,
+      contacts: contacts,
+      foodItems: foodItems,
+      amenities: amenities,
+      spaServices: spaServices,
+      staffCategories: staffCategories,
+      staffMembers: staffMembers,
+      users: users,
+      UserQueries: contacts,
+    };
+
+    const currentItems = getCurrentItems(data[activeSection]);
+    const totalPages = Math.ceil(data[activeSection].length / itemsPerPage);
     switch (activeSection) {
       case "bookings":
-return (
-  <div className="flex flex-col items-center justify-center">
-    <div className="w-full bg-white shadow-md rounded-lg p-6 mt-10">
-      <h1 className="text-2xl font-bold mb-4 text-center">Bookings</h1>
-      <table className="min-w-full border border-gray-300">
-        <thead className="bg-gray-200">
-          <tr>
-            <th className="px-4 py-2 text-center">Customer Name</th>
-            <th className="px-4 py-2 text-center">Check-in Date</th>
-            <th className="px-4 py-2 text-center">Check-out Date</th>
-            <th className="px-4 py-2 text-center">No. of Adults</th>
-            <th className="px-4 py-2 text-center">No. of Children</th>
-            <th className="px-4 py-2 text-center">No. of Days</th>
-            <th className="px-4 py-2 text-center">Room Number</th>
-            <th className="px-4 py-2 text-center">Total Amount</th>
-            <th className="px-4 py-2 text-center">Status</th>
-            <th className="px-4 py-2 text-center">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {bookings.map((booking) => (
-            <tr key={booking.bookingId} className="border-b">
-              <td className="px-4 py-2 text-center">
-                {booking.user.firstName ?? "N/A"}
-              </td>
-              <td className="px-4 py-2 text-center">
-                {new Date(booking.checkInDate).toLocaleDateString()}
-              </td>
-              <td className="px-4 py-2 text-center">
-                {new Date(booking.checkOutDate).toLocaleDateString()}
-              </td>
-              <td className="px-4 py-2 text-center">
-                {booking.noOfAdults ?? "N/A"}
-              </td>
-              <td className="px-4 py-2 text-center">
-                {booking.noOfChildrens ?? "N/A"}
-              </td>
-              <td className="px-4 py-2 text-center">
-                {booking.noOfDays ?? "N/A"}
-              </td>
-              <td className="px-4 py-2 text-center">
-                {booking.room?.roomNumber ?? "N/A"}
-              </td>
-              <td className="px-4 py-2 text-center">
-                &#x20B9;{booking.TotalAmount ?? "N/A"}
-              </td>
-              <td className="px-4 py-2 text-center">
-                {booking.status ?? "N/A"}
-              </td>
-              <td className="px-4 py-2 flex justify-center space-x-5">
-                <Link href={`/bookings/${userId}`}>
-                  <button
-                    className={`btn ${
-                      isCancelled(booking.status)
-                        ? "btn-disabled"
-                        : "btn-warning"
-                    } btn-outlin`}
-                    disabled={isCancelled(booking.status)}
-                  >
-                    <FontAwesomeIcon icon={faEdit} />
-                  </button>
-                </Link>
-                <button
-                  className={`btn ${
-                    isCancelled(booking.status)
-                      ? "btn-disabled"
-                      : "btn-error"
-                  } btn-outlin`}
-                  onClick={() => handleDeletebooking(booking.bookingId)}
-                  disabled={isCancelled(booking.status)}
+        return (
+          <div className="flex flex-col items-center justify-center">
+            <div className="w-full bg-white shadow-md rounded-lg p-2">
+              <h1 className="text-2xl font-bold mb-4">Bookings List</h1>
+
+              {/* Filter Inputs */}
+              <div className="mb-4 flex gap-2">
+                <input
+                  type="text"
+                  placeholder="RoomNumber"
+                  value={roomFilter}
+                  onChange={(e) => setRoomFilter(e.target.value)}
+                  className="px-1 py-1 border border-gray-300 rounded w-[135px]"
+                />
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="px-2 py-2 border border-gray-300 rounded w-[135px]"
                 >
-                  <FontAwesomeIcon
-                    icon={faTrash}
-                    className="text-red-500"
-                  />
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </div>
-);
+                  <option value="">All</option>
+                  <option value="booked">booked</option>
+                  <option value="Confirmed">Confirmed</option>
+                  <option value="checked_in">checked_in</option>
+                  <option value="checked_out">checked_out</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+                <input
+                  type="text"
+                  placeholder="Name"
+                  value={nameFilter}
+                  onChange={(e) => setNameFilter(e.target.value)}
+                  className="px-2 py-2 border border-gray-300 rounded w-[135px]"
+                />
+              </div>
+
+              <table className="min-w-full border border-gray-300">
+                <thead className="bg-gray-200">
+                  <tr>
+                    <th className="px-4 py-2 text-center">Customer</th>
+                    <th className="px-4 py-2 text-center">Room</th>
+                    <th className="px-4 py-2 text-center">Adults</th>
+                    <th className="px-4 py-2 text-center">Children</th>
+                    <th className="px-4 py-2 text-center">Arrival</th>
+                    <th className="px-4 py-2 text-center">Departure</th>
+                    <th className="px-4 py-2 text-center">Total Days</th>
+                    <th className="px-4 py-2 text-center">Total Amount</th>
+                    <th className="px-4 py-2 text-center">Status</th>
+                    <th className="px-4 py-2 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentItems.length > 0 ? (
+                    currentItems.map((booking: Booking) => (
+                      <tr key={booking.bookingId} className="border-b">
+                        <td className="px-4 py-2 text-center">
+                          {booking.user.firstName ?? "N/A"}
+                        </td>
+                        <td className="px-4 py-2 text-center">
+                          {booking.room?.roomNumber ?? "N/A"}
+                        </td>
+                        <td className="px-4 py-2 text-center">
+                          {booking.noOfAdults ?? "N/A"}
+                        </td>
+                        <td className="px-4 py-2 text-center">
+                          {booking.noOfChildrens ?? "N/A"}
+                        </td>
+                        <td className="px-4 py-2 text-center">
+                          {new Date(booking.checkInDate).toLocaleDateString()}
+                        </td>
+                        <td className="px-4 py-2 text-center">
+                          {new Date(booking.checkOutDate).toLocaleDateString()}
+                        </td>
+
+                        <td className="px-4 py-2 text-center">
+                          {booking.noOfDays ?? "N/A"}
+                        </td>
+
+                        <td className="px-4 py-2 text-center">
+                          &#x20B9;{booking.TotalAmount ?? "N/A"}
+                        </td>
+                        <td className="px-4 py-2 text-center">
+                          {booking.status ?? "N/A"}
+                        </td>
+                        <td className="px-4 py-2 flex justify-center space-x-5">
+                          <Link href={`/bookings/${booking.bookingId}`}>
+                            <button
+                              className={`btn ${
+                                isCancelled(booking.status)
+                                  ? "btn-disabled"
+                                  : "btn-warning"
+                              } btn-outlin`}
+                              disabled={isCancelled(booking.status)}
+                            >
+                              <FontAwesomeIcon icon={faEdit} />
+                            </button>
+                          </Link>
+                          <button
+                            className={`btn ${
+                              isCancelled(booking.status)
+                                ? "btn-disabled"
+                                : "btn-error"
+                            } btn-outlin`}
+                            onClick={() =>
+                              handleDeleteBooking(booking.bookingId)
+                            }
+                            disabled={isCancelled(booking.status)}
+                          >
+                            <FontAwesomeIcon
+                              icon={faTrash}
+                              className="text-red-500"
+                            />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={10} className="px-4 py-2 text-center">
+                        No bookings available
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            <Pagination 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        );
 
       case "roomCategories":
         return (
@@ -269,10 +403,9 @@ return (
                   Add Room Category
                 </button>
               </div>
-
               <div className="flex justify-center">
-                <table className="w-full border border-gray-300 bg-blue-50 rounded-lg overflow-hidden">
-                  <thead className="bg-gray-200 text-gray-700">
+                <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
+                  <thead className=" text-gray-700">
                     <tr>
                       <th className="px-4 py-2 text-left font-semibold">
                         Name
@@ -301,8 +434,8 @@ return (
                     </tr>
                   </thead>
                   <tbody>
-                    {roomCategories.map((data) => (
-                      <tr key={data.id} className="border-b hover:bg-gray-100">
+                    {currentItems.map((data: RoomCategory) => (
+                      <tr key={data.id} className="border-b">
                         <td className="px-4 py-2 text-gray-900">{data.name}</td>
                         <td className="px-4 py-2 text-gray-900">
                           {data.description || "N/A"}
@@ -312,19 +445,11 @@ return (
                         </td>
                         <td className="px-4 py-2 text-gray-900">
                           {data.imageUrl ? (
-                            typeof data.imageUrl === "string" ? (
-                              <img
-                                src={data.imageUrl}
-                                alt="Room"
-                                className="w-10 h-10 object-cover "
-                              />
-                            ) : (
-                              <img
-                                src={URL.createObjectURL(data.imageUrl)}
-                                alt="Room"
-                                className="w-20 h-10 object-cover rounded"
-                              />
-                            )
+                            <img
+                              src={data.imageUrl}
+                              alt="Room"
+                              className="w-10 h-10 object-cover"
+                            />
                           ) : (
                             "No Image"
                           )}
@@ -338,7 +463,7 @@ return (
                         <td className="px-4 py-2 text-gray-900">
                           {data.amenities && data.amenities.length > 0 ? (
                             <ul className="list-disc pl-5">
-                              {data.amenities.map((amenity) => (
+                              {data.amenities.map((amenity: Amenity) => (
                                 <li key={amenity.id}>{amenity.name}</li>
                               ))}
                             </ul>
@@ -370,13 +495,18 @@ return (
                 </table>
               </div>
             </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         );
 
       case "rooms":
         return (
           <div className="flex flex-col items-center justify-center">
-            <div className="w-full max-w-2xl ">
+            <div className="w-full max-w-2xl">
               <div className="mb-6 flex justify-center">
                 <button
                   onClick={() => router.push("/dashboard/adminlogin/rooms/new")}
@@ -385,7 +515,6 @@ return (
                   Add Rooms
                 </button>
               </div>
-
               <div className="flex justify-center">
                 <table
                   className={`w-3/4 border border-gray-300 ${tableColorClass} rounded-lg overflow-hidden`}
@@ -407,32 +536,36 @@ return (
                     </tr>
                   </thead>
                   <tbody>
-                    {rooms.map((r) => (
+                    {currentItems.map((r: Rooms) => (
                       <tr key={r.id} className="border-b hover:bg-gray-100">
                         <td className="px-6 py-1.5 text-gray-900">
-                          {r.roomNumber}
+                          {r.roomNumber || "N/A"}
                         </td>
                         <td className="px-6 py-1.5 text-gray-900">
-                          {r.status}
+                          {r.status || "N/A"}
                         </td>
                         <td className="px-6 py-1.5 text-gray-900">
-                          {r.roomCategory.name}
+                          {r.roomCategory?.name || "N/A"}
                         </td>
-                        <td className="px-6 py-1.5 text-center flex">
-                          <button
-                            onClick={() =>
-                              router.push(`/dashboard/adminlogin/rooms/${r.id}`)
-                            }
-                            className="bg-yellow-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-yellow-600 transition duration-300 mr-2"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteRoom(r.id)}
-                            className="bg-red-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-red-600 transition duration-300"
-                          >
-                            Delete
-                          </button>
+                        <td className="px-6 py-1.5 text-center">
+                          <div className="flex justify-center gap-2">
+                            <button
+                              onClick={() =>
+                                router.push(
+                                  `/dashboard/adminlogin/rooms/${r.id}`
+                                )
+                              }
+                              className="bg-yellow-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-yellow-600 transition duration-300"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteRoom(r.id)}
+                              className="bg-red-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-red-600 transition duration-300"
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -440,23 +573,28 @@ return (
                 </table>
               </div>
             </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         );
+
       case "amenities":
         return (
           <div className="flex flex-col items-center justify-center">
-            <div className="w-full max-w-2xl ">
+            <div className="w-full max-w-2xl">
               <div className="mb-6 flex justify-center">
                 <button
                   onClick={() =>
-                    router.push("/dashboard/adminlogin/amenities/add")
+                    router.push("/dashboard/adminlogin/amenities/new")
                   }
                   className="bg-blue-500 text-white px-6 py-1.5 rounded-md shadow-md hover:bg-blue-600 transition duration-300"
                 >
-                  Add Amenity
+                  Add Amenities
                 </button>
               </div>
-
               <div className="flex justify-center">
                 <table
                   className={`w-3/4 border border-gray-300 ${tableColorClass} rounded-lg overflow-hidden`}
@@ -472,9 +610,11 @@ return (
                     </tr>
                   </thead>
                   <tbody>
-                    {amenities.map((a) => (
+                    {currentItems.map((a: Amenity) => (
                       <tr key={a.id} className="border-b hover:bg-gray-100">
-                        <td className="px-6 py-1.5 text-gray-900">{a.name}</td>
+                        <td className="px-6 py-1.5 text-gray-900">
+                          {a.name || "N/A"}
+                        </td>
                         <td className="px-6 py-1.5 text-center">
                           <button
                             onClick={() =>
@@ -499,9 +639,13 @@ return (
                 </table>
               </div>
             </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         );
-
       case "foodItems":
         return (
           <div className="flex flex-col items-center justify-center">
@@ -539,7 +683,7 @@ return (
                     </tr>
                   </thead>
                   <tbody>
-                    {foodItems.map((item) => (
+                    {currentItems.map((item: FoodItem) => (
                       <tr
                         key={item.food_id}
                         className="border-b hover:bg-gray-100"
@@ -588,430 +732,80 @@ return (
                 </table>
               </div>
             </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         );
 
-      case "staff_Category":
-
+      case "spaServices":
         return (
           <div className="flex flex-col items-center justify-center">
             <div className="w-full max-w-2xl">
               <div className="mb-6 flex justify-center">
                 <button
                   onClick={() =>
-const renderContent = () => {
-  switch (activeSection) {
-    case "spaServices":
-      return (
-        <div className="flex flex-col items-center justify-center">
-          <div className="w-full max-w-2xl">
-            <div className="mb-6 flex justify-center">
-              <button
-                onClick={() => router.push("/dashboard/adminlogin/spaServices/new")}
-                className="bg-blue-500 text-white px-6 py-1.5 rounded-md shadow-md hover:bg-blue-600 transition duration-300"
-              >
-                Add Spa Services
-              </button>
-            </div>
-            {/* Render Spa Services Table */}
-          </div>
-        </div>
-      );
-
-    case "staffCategories":
-      return (
-        <div className="flex flex-col items-center justify-center">
-          <div className="w-full max-w-2xl">
-            <div className="mb-6 flex justify-center">
-              <button
-                onClick={() => router.push("/dashboard/adminlogin/staffcategories/new")}
-                className="bg-blue-500 text-white px-6 py-1.5 rounded-md shadow-md hover:bg-blue-600 transition duration-300"
-              >
-                Add Staff Category
-              </button>
-            </div>
-            <div className="flex justify-center">
-              <table className="w-3/4 border border-gray-300 rounded-lg overflow-hidden">
-                <thead className="bg-gray-200 text-gray-700">
-                  <tr>
-                    <th className="px-6 py-1.5 text-left font-semibold">Category Name</th>
-                    <th className="px-6 py-1.5 text-center font-semibold">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {staffCategories.length === 0 ? (
-                    <tr>
-                      <td colSpan={2} className="text-center py-4">No staff categories found</td>
-                    </tr>
-                  ) : (
-                    staffCategories.map((category) => (
-                      <tr key={category.id} className="border-b hover:bg-gray-100">
-                        <td className="px-6 py-1.5 text-gray-900">{category.category}</td>
-                        <td className="px-6 py-1.5 text-center flex">
-                          <button
-                            onClick={() => router.push(`/dashboard/adminlogin/staffcategories/${category.id}`)}
-                            className="bg-yellow-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-yellow-600 transition duration-300 mr-2"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteCategory(category.id)}
-                            className="bg-red-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-red-600 transition duration-300"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      );
-
-    case "staffMembers":
-      return (
-        <div className="flex flex-col items-center justify-center">
-          <div className="w-full max-w-2xl">
-            <div className="mb-6 flex justify-center">
-              <button
-                onClick={() => router.push("/dashboard/adminlogin/staffmembers/new")}
-                className="bg-blue-500 text-white px-6 py-1.5 rounded-md shadow-md hover:bg-blue-600 transition duration-300"
-              >
-                Add Staff Member
-              </button>
-            </div>
-            <div className="flex justify-center">
-              <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
-                <thead className="bg-gray-200 text-gray-700">
-                  <tr>
-                    <th className="px-6 py-1.5 text-left font-semibold">First Name</th>
-                    <th className="px-6 py-1.5 text-left font-semibold">Last Name</th>
-                    <th className="px-6 py-1.5 text-left font-semibold">Email</th>
-                    <th className="px-6 py-1.5 text-left font-semibold">Phone</th>
-                    <th className="px-6 py-1.5 text-left font-semibold">Gender</th>
-                    <th className="px-6 py-1.5 text-left font-semibold">Category</th>
-                    <th className="px-6 py-1.5 text-center font-semibold">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {staffMembers.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} className="text-center py-4">No staff members found</td>
-                    </tr>
-                  ) : (
-                    staffMembers.map((member) => (
-                      <tr key={member.id} className="border-b hover:bg-gray-100">
-                        <td className="px-6 py-1.5 text-gray-900">{member.firstName}</td>
-                        <td className="px-6 py-1.5 text-gray-900">{member.lastName}</td>
-                        <td className="px-6 py-1.5 text-gray-900">{member.email}</td>
-                        <td className="px-6 py-1.5 text-gray-900">{member.phone}</td>
-                        <td className="px-6 py-1.5 text-gray-900">{member.gender}</td>
-                        <td className="px-6 py-1.5 text-gray-900">{member.staffcategory?.category ?? "N/A"}</td>
-                        <td className="px-6 py-1.5 text-center flex">
-                          <button
-                            onClick={() => router.push(`/dashboard/adminlogin/staffmembers/${member.id}`)}
-                            className="bg-yellow-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-yellow-600 transition duration-300 mr-2"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeletestaffMembers(member.id)}
-                            className="bg-red-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-red-600 transition duration-300"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      );
-
-    case "bookings":
-      return (
-        <div className="flex flex-col items-center justify-center">
-          <div className="w-full max-w-2xl">
-            <div className="mb-6 flex justify-center">
-              <button
-                onClick={() => router.push("/dashboard/adminlogin/bookings/new")}
-                className="bg-blue-500 text-white px-6 py-1.5 rounded-md shadow-md hover:bg-blue-600 transition duration-300"
-              >
-                Add Booking
-              </button>
-            </div>
-            <div className="flex justify-center">
-              <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
-                <thead className="bg-gray-200 text-gray-700">
-                  <tr>
-                    <th className="px-6 py-1.5 text-left font-semibold">Customer Name</th>
-                    <th className="px-6 py-1.5 text-left font-semibold">Check-in Date</th>
-                    <th className="px-6 py-1.5 text-left font-semibold">Check-out Date</th>
-                    <th className="px-6 py-1.5 text-left font-semibold">No. of Adults</th>
-                    <th className="px-6 py-1.5 text-left font-semibold">No. of Children</th>
-                    <th className="px-6 py-1.5 text-left font-semibold">No. of Days</th>
-                    <th className="px-6 py-1.5 text-left font-semibold">Room Number</th>
-                    <th className="px-6 py-1.5 text-left font-semibold">Total Amount</th>
-                    <th className="px-6 py-1.5 text-left font-semibold">Status</th>
-                    <th className="px-6 py-1.5 text-center font-semibold">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {bookings.length === 0 ? (
-                    <tr>
-                      <td colSpan={10} className="text-center py-4">No bookings found</td>
-                    </tr>
-                  ) : (
-                    bookings.map((booking) => (
-                      <tr key={booking.bookingId} className="border-b hover:bg-gray-100">
-                        <td className="px-6 py-1.5 text-gray-900">{booking.user.firstName ?? "N/A"}</td>
-                        <td className="px-6 py-1.5 text-gray-900">{new Date(booking.checkInDate).toLocaleDateString()}</td>
-                        <td className="px-6 py-1.5 text-gray-900">{new Date(booking.checkOutDate).toLocaleDateString()}</td>
-                        <td className="px-6 py-1.5 text-gray-900">{booking.noOfAdults ?? "N/A"}</td>
-                        <td className="px-6 py-1.5 text-gray-900">{booking.noOfChildrens ?? "N/A"}</td>
-                        <td className="px-6 py-1.5 text-gray-900">{booking.noOfDays ?? "N/A"}</td>
-                        <td className="px-6 py-1.5 text-gray-900">{booking.room?.roomNumber ?? "N/A"}</td>
-                        <td className="px-6 py-1.5 text-gray-900">&#x20B9;{booking.TotalAmount ?? "N/A"}</td>
-                        <td className="px-6 py-1.5 text-gray-900">{booking.status ?? "N/A"}</td>
-                        <td className="px-6 py-1.5 text-center flex">
-                          <button
-                            onClick={() => router.push(`/dashboard/adminlogin/bookings/${booking.bookingId}`)}
-                            className="bg-yellow-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-yellow-600 transition duration-300 mr-2"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeletebooking(booking.bookingId)}
-                            className="bg-red-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-red-600 transition duration-300"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      );
-
-    default:
-      return <div>Select a section to manage.</div>;
-  }
-};
-
+                    router.push("/dashboard/adminlogin/spaServices/new")
+                  }
+                  className="bg-blue-500 text-white px-6 py-1.5 rounded-md shadow-md hover:bg-blue-600 transition duration-300"
+                >
+                  Add Spa Service
+                </button>
+              </div>
               <div className="flex justify-center">
-                <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
+                <table
+                  className={`w-3/4 border border-gray-300 ${tableColorClass} rounded-lg overflow-hidden`}
+                >
                   <thead className="bg-gray-200 text-gray-700">
                     <tr>
-                      <th className="px-4 py-2 text-left font-semibold">
-const renderContent = () => {
-  switch (activeSection) {
-    case "spaServices":
-      return (
-        <div className="flex flex-col items-center justify-center">
-          <div className="w-full max-w-2xl">
-            <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
-              <thead className="bg-gray-200 text-gray-700">
-                <tr>
-                  <th className="px-4 py-2 text-left font-semibold">Name</th>
-                  <th className="px-4 py-2 text-left font-semibold">Description</th>
-                  <th className="px-4 py-2 text-left font-semibold">Price</th>
-                  <th className="px-6 py-1.5 text-center font-semibold">Image</th>
-                  <th className="px-6 py-1.5 text-center font-semibold">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {/* Map over spaServices and render rows here */}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      );
-
-    case "staffMembers":
-      return (
-        <div className="flex flex-col items-center justify-center">
-          <div className="w-full max-w-2xl">
-            <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
-              <thead className="bg-gray-200 text-gray-700">
-                <tr>
-                  <th className="px-4 py-2 text-left font-semibold">First Name</th>
-                  <th className="px-4 py-2 text-left font-semibold">Last Name</th>
-                  <th className="px-4 py-2 text-left font-semibold">Phone Number</th>
-                  <th className="px-4 py-2 text-left font-semibold">Email</th>
-                  <th className="px-4 py-2 text-left font-semibold">Aadhar Card Number</th>
-                  <th className="px-6 py-1.5 text-center font-semibold">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {/* Map over staffMembers and render rows here */}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      );
-
-    default:
-      return <div>Select a section to manage.</div>;
-  }
-};
-
+                      <th className="px-6 py-1.5 text-left font-semibold">
+                        Name
+                      </th>
+                      <th className="px-6 py-1.5 text-left font-semibold">
+                        Description
+                      </th>
+                      <th className="px-6 py-1.5 text-left font-semibold">
+                        Price
+                      </th>
+                      <th className="px-6 py-1.5 text-center font-semibold">
+                        Actions
                       </th>
                     </tr>
                   </thead>
                   <tbody>
-const renderContent = () => {
-  switch (activeSection) {
-    case "spaServices":
-      return (
-        <div className="flex flex-col items-center justify-center">
-          <div className="w-full max-w-2xl">
-            <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
-              <thead className="bg-gray-200 text-gray-700">
-                <tr>
-                  <th className="px-4 py-2 text-left font-semibold">Name</th>
-                  <th className="px-4 py-2 text-left font-semibold">Description</th>
-                  <th className="px-4 py-2 text-left font-semibold">Price</th>
-                  <th className="px-6 py-1.5 text-center font-semibold">Image</th>
-                  <th className="px-6 py-1.5 text-center font-semibold">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {spaServices.map((spaservice) => (
-                  <tr key={spaservice.id} className="border-b hover:bg-gray-100">
-                    <td className="px-6 py-1.5 text-gray-900">{spaservice.name}</td>
-                    <td className="px-6 py-1.5 text-gray-900">{spaservice.description}</td>
-                    <td className="px-6 py-1.5 text-gray-900">{spaservice.price}</td>
-                    <td className="px-4 py-2 text-gray-900">
-                      {spaservice.service_image ? (
-                        <img
-                          src={spaservice.service_image}
-                          alt={spaservice.name}
-                          className="w-10 h-10 object-cover"
-                        />
-                      ) : (
-                        "No Image"
-                      )}
-                    </td>
-                    <td className="px-6 py-1.5 text-center flex space-x-2">
-                      <button
-                        onClick={() =>
-                          router.push(`/dashboard/adminlogin/spaServices/${spaservice.id}`)
-                        }
-                        className="bg-yellow-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-yellow-600 transition duration-300"
+                    {currentItems.map((service: SpaService) => (
+                      <tr
+                        key={service.id}
+                        className="border-b hover:bg-gray-100"
                       >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteSpaService(spaservice.id)}
-                        className="bg-red-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-red-600 transition duration-300"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      );
-
-    case "staffMembers":
-      return (
-        <div className="flex flex-col items-center justify-center">
-          <div className="w-full max-w-2xl">
-            <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
-              <thead className="bg-gray-200 text-gray-700">
-                <tr>
-                  <th className="px-4 py-2 text-left font-semibold">First Name</th>
-                  <th className="px-4 py-2 text-left font-semibold">Last Name</th>
-                  <th className="px-4 py-2 text-left font-semibold">Phone Number</th>
-                  <th className="px-4 py-2 text-left font-semibold">Email</th>
-                  <th className="px-4 py-2 text-left font-semibold">Aadhar Card Number</th>
-                  <th className="px-6 py-1.5 text-center font-semibold">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {staffMembers.map((member) => (
-                  <tr key={member.id} className="border-b hover:bg-gray-100">
-                    <td className="px-4 py-2 text-gray-900">{member.firstName}</td>
-                    <td className="px-4 py-2 text-gray-900">{member.lastName}</td>
-                    <td className="px-4 py-2 text-gray-900">{member.phone}</td>
-                    <td className="px-4 py-2 text-gray-900">{member.email}</td>
-                    <td className="px-4 py-2 text-gray-900">{member.aadharCardNumber}</td>
-                    <td className="px-6 py-1.5 text-center flex">
-                      <button
-                        onClick={() =>
-                          router.push(`/dashboard/adminlogin/staffmembers/${member.id}`)
-                        }
-                        className="bg-yellow-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-yellow-600 transition duration-300 mr-2"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeletestaffMembers(member.id)}
-                        className="bg-red-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-red-600 transition duration-300"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      );
-
-    case "UserQueries":
-      return (
-        <div className="flex flex-col items-center justify-center">
-          <div className="w-full max-w-2xl p-6 ">
-            <div className="flex justify-center">
-              <table className="w-full border border-gray-300 bg-blue-50 rounded-lg overflow-hidden">
-                <thead className="bg-gray-200 text-gray-700">
-                  <tr>
-                    <th className="px-4 py-2 text-left font-semibold">First Name</th>
-                    <th className="px-4 py-2 text-left font-semibold">Last Name</th>
-                    <th className="px-4 py-2 text-left font-semibold">Phone Number</th>
-                    <th className="px-4 py-2 text-left font-semibold">Email</th>
-                    <th className="px-4 py-2 text-left font-semibold">Subject</th>
-                    <th className="px-4 py-2 text-left font-semibold">Message</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {contacts.map((contact) => (
-                    <tr key={contact.id} className="border-b hover:bg-gray-100">
-                      <td className="px-4 py-2 text-gray-900">{contact.firstName}</td>
-                      <td className="px-4 py-2 text-gray-900">{contact.lastName}</td>
-                      <td className="px-4 py-2 text-gray-900">{contact.phone}</td>
-                      <td className="px-4 py-2 text-gray-900">{contact.email}</td>
-                      <td className="px-4 py-2 text-gray-900">{contact.subject}</td>
-                      <td className="px-4 py-2 text-gray-900">{contact.message}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      );
-
-    default:
-      return <div>Select a section to manage.</div>;
-  }
-};
-
+                        <td className="px-6 py-1.5 text-gray-900">
+                          {service.name || "N/A"}
+                        </td>
+                        <td className="px-6 py-1.5 text-gray-900">
+                          {service.description || "N/A"}
+                        </td>
+                        <td className="px-6 py-1.5 text-gray-900">
+                          {service.price ? `₹${service.price}` : "N/A"}
+                        </td>
+                        <td className="px-6 py-1.5 text-center">
+                          <button
+                            onClick={() =>
+                              router.push(
+                                `/dashboard/adminlogin/spaServices/${service.id}`
+                              )
+                            }
+                            className="bg-yellow-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-yellow-600 transition duration-300 mr-2"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteSpaService(service.id)}
+                            className="bg-red-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-red-600 transition duration-300"
+                          >
+                            Delete
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -1019,9 +813,184 @@ const renderContent = () => {
                 </table>
               </div>
             </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         );
 
+      case "staffCategories":
+        return (
+          <div className="flex flex-col items-center justify-center">
+            <div className="w-full max-w-2xl">
+              <div className="mb-6 flex justify-center">
+                <button
+                  onClick={() =>
+                    router.push("/dashboard/adminlogin/staffcategories/new")
+                  }
+                  className="bg-blue-500 text-white px-6 py-1.5 rounded-md shadow-md hover:bg-blue-600 transition duration-300"
+                >
+                  Add Staff Category
+                </button>
+              </div>
+              <div className="flex justify-center">
+                <table
+                  className={`w-3/4 border border-gray-300 ${tableColorClass} rounded-lg overflow-hidden`}
+                >
+                  <thead className="bg-gray-200 text-gray-700">
+                    <tr>
+                      <th className="px-6 py-1.5 text-left font-semibold">
+                        Name
+                      </th>
+                      <th className="px-6 py-1.5 text-center font-semibold">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentItems.map((sc: StaffCategory) => (
+                      <tr key={sc.id} className="border-b hover:bg-gray-100">
+                        <td className="px-6 py-1.5 text-gray-900">
+                          {sc.category || "N/A"}
+                        </td>
+                        <td className="px-6 py-1.5 text-center">
+                          <button
+                            onClick={() =>
+                              router.push(
+                                `/dashboard/adminlogin/staffcategories/${sc.id}`
+                              )
+                            }
+                            className="bg-yellow-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-yellow-600 transition duration-300 mr-2"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteCategory(sc.id)}
+                            className="bg-red-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-red-600 transition duration-300"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        );
+
+      case "staffMembers":
+        return (
+          <div className="flex flex-col items-center justify-center">
+            <div className="w-full max-w-2xl">
+              <div className="mb-6 flex justify-center">
+                <button
+                  onClick={() =>
+                    router.push("/dashboard/adminlogin/staffmembers/new")
+                  }
+                  className="bg-blue-500 text-white px-6 py-1.5 rounded-md shadow-md hover:bg-blue-600 transition duration-300"
+                >
+                  Add Staff Member
+                </button>
+              </div>
+              <div className="flex justify-center">
+                <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
+                  <thead className="bg-gray-200 text-gray-700">
+                    <tr>
+                      <th className="px-6 py-1.5 text-left font-semibold">
+                        First Name
+                      </th>
+                      <th className="px-6 py-1.5 text-left font-semibold">
+                        Last Name
+                      </th>
+                      <th className="px-6 py-1.5 text-left font-semibold">
+                        Email
+                      </th>
+                      <th className="px-6 py-1.5 text-left font-semibold">
+                        Phone
+                      </th>
+                      <th className="px-6 py-1.5 text-left font-semibold">
+                        Gender
+                      </th>
+                      <th className="px-6 py-1.5 text-left font-semibold">
+                        Category
+                      </th>
+                      <th className="px-6 py-1.5 text-center font-semibold">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentItems.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="text-center py-4">
+                          No staff members found
+                        </td>
+                      </tr>
+                    ) : (
+                      currentItems.map((member: StaffMember) => (
+                        <tr
+                          key={member.id}
+                          className="border-b hover:bg-gray-100"
+                        >
+                          <td className="px-6 py-1.5 text-gray-900">
+                            {member.firstName}
+                          </td>
+                          <td className="px-6 py-1.5 text-gray-900">
+                            {member.lastName}
+                          </td>
+                          <td className="px-6 py-1.5 text-gray-900">
+                            {member.email}
+                          </td>
+                          <td className="px-6 py-1.5 text-gray-900">
+                            {member.phone}
+                          </td>
+                          <td className="px-6 py-1.5 text-gray-900">
+                            {member.gender}
+                          </td>
+                          <td className="px-6 py-1.5 text-gray-900">
+                            {member.staffcategory?.category ?? "N/A"}
+                          </td>
+                          <td className="px-6 py-1.5 text-center flex">
+                            <button
+                              onClick={() =>
+                                router.push(
+                                  `/dashboard/adminlogin/staffmembers/${member.id}`
+                                )
+                              }
+                              className="bg-yellow-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-yellow-600 transition duration-300 mr-2"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteStaffMember(member.id)}
+                              className="bg-red-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-red-600 transition duration-300"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        );
 
       case "users":
         return (
@@ -1049,7 +1018,7 @@ const renderContent = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {users.map((u) => (
+                    {currentItems.map((u: User) => (
                       <tr key={u.id} className="border-b hover:bg-gray-100">
                         <td className="px-4 py-2 text-gray-900">
                           {u.firstName}
@@ -1070,6 +1039,11 @@ const renderContent = () => {
                 </table>
               </div>
             </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         );
       case "UserQueries":
@@ -1102,7 +1076,7 @@ const renderContent = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {contacts.map((contact) => (
+                    {currentItems.map((contact: Contact) => (
                       <tr
                         key={contact.id}
                         className="border-b hover:bg-gray-100"
@@ -1131,209 +1105,59 @@ const renderContent = () => {
                 </table>
               </div>
             </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         );
+
       default:
-        return <div>Select a section</div>;
+        return null;
     }
   };
-
   return (
     <>
-
-      <header className="flex items-center justify-between p-2 bg-blue-600 text-white">
+      <header className="fixed top-0 left-0 w-full bg-slate-900 text-white p-2 z-10 flex justify-between items-center">
         <div className="text-xl font-bold">Hotel Enhance</div>
+        <div className="text-xl font-bold">Admin Dashboard</div>
         <button className="bg-red-500 px-4 py-2 rounded" onClick={handleLogout}>
           Logout
         </button>
       </header>
-      <div className="flex h-screen">
-        
-        <nav className="w-500px bg-gray-200 p-2">
-          <ul className="space-y-2">
-            <li
-              className={`cursor-pointer p-2 ${
-                activeSection === "dashboard" ? "bg-blue-100" : ""
-              }`}
-              onClick={() => setActiveSection("dashboard")}
-            >
-              Dashboard
-            </li>
-            <li
-              className={`cursor-pointer p-2 ${
-                activeSection === "bookings" ? "bg-blue-100" : ""
-              }`}
-              onClick={() => setActiveSection("bookings")}
-            >
-              Bookings
-            </li>
-            <li
-              className={`cursor-pointer p-2 ${
-                activeSection === "roomCategories" ? "bg-blue-100" : ""
-              }`}
-              onClick={() => setActiveSection("roomCategories")}
-            >
-              Room Categories
-            </li>
-            <li
-              className={`cursor-pointer p-2 ${
-                activeSection === "amenities" ? "bg-blue-100" : ""
-              }`}
-              onClick={() => setActiveSection("amenities")}
-            >
-              Amenities
-            </li>
-            <li
-              className={`cursor-pointer p-2 ${
-                activeSection === "rooms" ? "bg-blue-100" : ""
-              }`}
-              onClick={() => setActiveSection("rooms")}
-            >
-              Rooms
-            </li>
-            <li
-              className={`cursor-pointer p-2 ${
-                activeSection === "foodItems" ? "bg-blue-100" : ""
-              }`}
-              onClick={() => setActiveSection("foodItems")}
-            >
-              FoodItems
-            </li>
-            <li
-              className={`cursor-pointer p-2 ${
-<ul className="flex space-x-4">
-  <li
-    className={`cursor-pointer p-2 ${
-      activeSection === "spaServices" ? "bg-blue-100" : ""
-    }`}
-    onClick={() => setActiveSection("spaServices")}
-  >
-    Spa Services
-  </li>
-  <li
-    className={`cursor-pointer p-2 ${
-      activeSection === "staffCategories" ? "bg-blue-100" : ""
-    }`}
-    onClick={() => setActiveSection("staffCategories")}
-  >
-    Staff Categories
-  </li>
-  <li
-    className={`cursor-pointer p-2 ${
-      activeSection === "staffMembers" ? "bg-blue-100" : ""
-    }`}
-    onClick={() => setActiveSection("staffMembers")}
-  >
-    Staff Members
-  </li>
-  <li
-    className={`cursor-pointer p-2 ${
-      activeSection === "bookings" ? "bg-blue-100" : ""
-    }`}
-    onClick={() => setActiveSection("bookings")}
-  >
-    Bookings
-  </li>
-  <li
-    className={`cursor-pointer p-2 ${
-      activeSection === "users" ? "bg-blue-100" : ""
-    }`}
-    onClick={() => setActiveSection("users")}
-  >
-    Users
-  </li>
-  <li
-    className={`cursor-pointer p-2 ${
-      activeSection === "UserQueries" ? "bg-blue-100" : ""
-    }`}
-    onClick={() => setActiveSection("UserQueries")}
-  >
-    User Queries
-  </li>
-</ul>
 
-                activeSection === "staff_Category" ? "bg-blue-100" : ""
-              }`}
-              onClick={() => setActiveSection("staff_Category")}
-            >
-              staff_Category
-            </li>
-
-            <li
-              className={`cursor-pointer p-2 ${
-<ul className="flex space-x-4">
-  <li
-    className={`cursor-pointer p-2 ${
-      activeSection === "spaServices" ? "bg-blue-100" : ""
-    }`}
-    onClick={() => setActiveSection("spaServices")}
-  >
-    Spa Services
-  </li>
-  <li
-    className={`cursor-pointer p-2 ${
-      activeSection === "staffCategories" ? "bg-blue-100" : ""
-    }`}
-    onClick={() => setActiveSection("staffCategories")}
-  >
-    Staff Categories
-  </li>
-  <li
-    className={`cursor-pointer p-2 ${
-      activeSection === "staffMembers" ? "bg-blue-100" : ""
-    }`}
-    onClick={() => setActiveSection("staffMembers")}
-  >
-    Staff Members
-  </li>
-  <li
-    className={`cursor-pointer p-2 ${
-      activeSection === "bookings" ? "bg-blue-100" : ""
-    }`}
-    onClick={() => setActiveSection("bookings")}
-  >
-    Bookings
-  </li>
-  <li
-    className={`cursor-pointer p-2 ${
-      activeSection === "users" ? "bg-blue-100" : ""
-    }`}
-    onClick={() => setActiveSection("users")}
-  >
-    Users
-  </li>
-  <li
-    className={`cursor-pointer p-2 ${
-      activeSection === "UserQueries" ? "bg-blue-100" : ""
-    }`}
-    onClick={() => setActiveSection("UserQueries")}
-  >
-    User Queries
-  </li>
-</ul>
-
-            >
-              staff_Members
-            </li>
-            <li
-              className={`cursor-pointer p-2 ${
-                activeSection === "users" ? "bg-blue-100" : ""
-              }`}
-              onClick={() => setActiveSection("users")}
-            >
-              UserDetails
-            </li>
-            <li
-              className={`cursor-pointer p-2 ${
-                activeSection === "UserQueries" ? "bg-blue-100" : ""
-              }`}
-              onClick={() => setActiveSection("UserQueries")}
-            >
-              User Queries
-            </li>
+      <div className="flex h-screen pt-14">
+        <nav className="fixed w-60 bg-slate-900  p-2 ">
+          <ul className="space-y-2 text-teal-400">
+            {[
+              { name: "Dashboard", key: "dashboard" },
+              { name: "Bookings", key: "bookings" },
+              { name: "Room Categories", key: "roomCategories" },
+              { name: "Amenities", key: "amenities" },
+              { name: "Rooms", key: "rooms" },
+              { name: "Food Items", key: "foodItems" },
+              { name: "Spa Services", key: "spaServices" },
+              { name: "Staff Categories", key: "staffCategories" },
+              { name: "Staff Members", key: "staffMembers" },
+              { name: "Users", key: "users" },
+              { name: "User Queries", key: "UserQueries" },
+            ].map(({ name, key }) => (
+              <li
+                key={key}
+                className={`cursor-pointer p-2 ${
+                  activeSection === key ? "bg-gray-700" : ""
+                }`}
+                onClick={() => setActiveSection(key)}
+              >
+                {name}
+              </li>
+            ))}
           </ul>
         </nav>
-        <main className="flex-1 p-4 overflow-auto">{renderContent()}</main>
+        <main className="flex-1 p-4 overflow-auto ml-60">
+          {renderContent()}
+        </main>
       </div>
     </>
   );
