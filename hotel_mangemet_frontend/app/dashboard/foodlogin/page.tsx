@@ -102,8 +102,10 @@ const Food = () => {
           </thead>
           <tbody>
             {filteredOrders.length > 0 ? (
-              filteredOrders.flatMap((order) =>
-                order.orderItems.map((item: any, index: number) => (
+              filteredOrders.flatMap((order) =>{
+                const orderItems = Array.isArray(order.orderItems) ? order.orderItems : [];
+
+               return orderItems.map((item: any, index: number) => (
                   <tr
                     key={`${order.id}-${item.foodItemId}-${index}`}
                     className="border-b hover:bg-gray-50 even:bg-gray-100"
@@ -213,7 +215,7 @@ const Food = () => {
                     )}
                   </tr>
                 ))
-              )
+})
             ) : (
               <tr>
                 <td

@@ -17,12 +17,8 @@ export interface FoodItemsStoreState {
   deleteFoodItem: (id: number) => Promise<void>;
 }
 
-interface FoodItem {
-  description: ReactNode;
-  price: ReactNode;
-  image: string | undefined;
-  name: string | undefined;
-  id(id: any): void;
+export interface FoodItem {
+  id: number;
   imageUrl: any;
   food_id: number;
   food_name: string;

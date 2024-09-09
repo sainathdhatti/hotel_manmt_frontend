@@ -10,7 +10,7 @@ export interface AmenitiesStoreState {
   getAmenity: (id: any) => Promise<void>;
 }
 
-interface Amenity {
+export interface Amenity {
   id: number;
   name: string;
 }
