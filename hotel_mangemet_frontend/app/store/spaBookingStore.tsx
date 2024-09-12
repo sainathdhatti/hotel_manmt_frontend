@@ -1,18 +1,20 @@
 import { create } from 'zustand';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 export enum Gender {
   MALE = 'male',
   FEMALE = 'female',
 } 
 export enum BookingStatus {
-  PENDING = 'pending',
-  DONE = 'done',
+  PENDING = 'PENDING',
+  DONE = 'DONE',
+  CANCELLED='CANCELLED'
 }
 
 const API_URL = 'http://localhost:5000'; // Update to your actual backend URL
 
-export interface SpaBooking{
+interface SpaBooking{
     id:number;
     firstName:string;
     lastName:string;
@@ -28,12 +30,13 @@ export interface SpaBooking{
       phoneNumber: string;
       aadharCardNumber: string;
     };
-    spaService:{
+    spaservice:{
         id:number;
         name:string;
         description:string;
+        price:number;
     }
-    timeSlot:{
+    timeslot:{
         id:number;
         startTime:Date;
         endTime:Date;
@@ -124,6 +127,7 @@ const useSpaBookingStore = create<SpaBookingStore>((set) => ({
       set((state) => ({
         spabookings: [...state.spabookings, response.data],
       }));
+      toast.success('Booking created successfully!');
     } catch (error) {
       console.error('Failed to create booking:', error);
       if (axios.isAxiosError(error) && error.response) {
@@ -166,10 +170,24 @@ const useSpaBookingStore = create<SpaBookingStore>((set) => ({
         spabookings: state.spabookings.filter((b) => b.id !== id),
         spabooking: state.spabooking?.id === id ? null : state.spabooking,
       }));
-    } catch (error) {
-      console.error('Failed to delete booking:', error);
+      toast.success('Booking cancelled successfully!');
+    } catch (error:any) {
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error('Failed to delete booking:', error.response.data.message);
+        toast.error(error.response.data.message); // Display error message to the user
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error('Failed to delete booking:', error.request);
+        alert('No response received from server.');
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error('Failed to delete booking:', error.message);
+        alert('Error in setting up request.');
+      }   
     }
-  },
+  }
 }));
 
 export default useSpaBookingStore;

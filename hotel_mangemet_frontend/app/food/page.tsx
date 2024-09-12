@@ -116,12 +116,12 @@ const FoodOrderPage = () => {
 
   return (
     <div className="relative container mx-auto ">
-      <Navbar className="absolute top-0 left-0 w-full z-10" />
-      <div className="relative w-full h-[60vh] overflow-hidden">
+      <Navbar />
+      <div className="relative w-full h-[60vh] ">
         <img
           src="/images/orderFood.jpg"
           alt="Order Food"
-          className="absolute inset-0 object-cover w-full h-full brightness-60 opacity-80"
+          className="absolute inset-0 object-cover w-full h-full"
         />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-black text-center">
           <h1 className="text-4xl font-bold mb-4">Delicious Food Awaits!</h1>
@@ -130,7 +130,7 @@ const FoodOrderPage = () => {
           </p>
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 py-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 py-5">
         {foodItems.map((foodItem) => (
           <FoodItemCard
             key={foodItem.food_id}

@@ -5,7 +5,7 @@ const Footer = () => {
     <footer className="bg-gradient-to-r from-gray-800 to-gray-900 text-white py-8">
       
       <div className="container mx-auto px-6 md:px-12 max-w-7xl">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
 
           {/* Hotel Logo and Image */}
           <div className="flex flex-col items-center">

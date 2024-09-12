@@ -130,7 +130,7 @@ const Amenities = () => {
                     alt={`Image ${index + 1}`}
                     layout="fill"
                     objectFit="cover"
-                    className="h-auto w-full object-cover opacity-70"
+                    className="h-auto w-full object-cover "
                   />
                 </div>
               ))}

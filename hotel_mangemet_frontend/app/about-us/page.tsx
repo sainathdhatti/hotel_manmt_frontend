@@ -5,11 +5,11 @@ import Navbar from "../navbar";
 const AboutUs = () => {
   return (
     <div className="mx-auto ">
-      <Navbar className="absolute top-0 left-0 w-full z-50" />
+      <Navbar  />
       {/* Hero Image */}
       <div className="mb-8">
         <img
-          src="/images/aboutus.jpeg" // Add your hotel's hero image URL
+          src="/images/cnt2.jpg" // Add your hotel's hero image URL
           alt="About Us"
           className="w-full h-96 object-cover rounded-lg shadow-lg"
         />
@@ -29,7 +29,7 @@ const AboutUs = () => {
       </div>
 
       {/* Image and Story Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12 m-8">
         <div className="h-64 md:h-96">
           <img
             src="/images/hotelstory.jpg"
@@ -53,10 +53,10 @@ const AboutUs = () => {
 
       {/* Our Services Section */}
       <div className="mb-12">
-        <h2 className="text-3xl font-semibold mb-4 text-gray-800">
+        <h2 className="text-3xl font-semibold mb-4 text-gray-800 m-8">
           Our Premium Services
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 m-8">
           {/* Service 1 */}
           <div className="text-center">
             <img
@@ -109,10 +109,10 @@ const AboutUs = () => {
 
       {/* Team Section */}
       <div className="mb-12">
-        <h2 className="text-3xl font-semibold mb-4 text-gray-800">
+        <h2 className="text-3xl font-semibold mb-4 text-gray-800 m-8">
           Meet Our Team
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 ml-8">
           <div>
             <img
               src="/images/ourteam.jpg" // Replace with a team image
@@ -170,7 +170,7 @@ const AboutUs = () => {
           Book now and experience the perfect blend of luxury and comfort at our
           hotel.
         </p>
-        <button className="bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-blue-500 transition duration-300">
+        <button className="bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-blue-500 transition duration-300 mb-4">
           <a href="/rooms">Book Now</a>
         </button>
       </div>

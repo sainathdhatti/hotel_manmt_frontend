@@ -48,14 +48,14 @@ const Contact = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Navbar className="absolute top-0 left-0 w-full z-10" />
+      <Navbar/>
       
       {/* Hero Image Section */}
       <div className="relative w-full h-[40vh] md:h-[60vh] overflow-hidden">
         <img
-          src="/images/contact3.jpg"
+          src="/images/contttt.jpg"
           alt="Contact Us"
-          className="absolute inset-0 object-cover w-full h-full brightness-60"
+          className="absolute inset-0 object-cover w-full h-full "
         />
       </div>
 
@@ -246,13 +246,10 @@ const Contact = () => {
             <h3 className="text-2xl md:text-4xl font-semibold mb-4 text-center md:text-left">
               Our Location
             </h3>
-            <p className="text-gray-700 text-base md:text-lg">
-              1234 Street Name, City, Country, 12345
-            </p>
           </div>
 
           {/* Map */}
-          <div className="md:w-2/3 h-60 md:h-80 rounded-lg overflow-hidden border shadow-md">
+          <div className="md:w-2/3 h-60 md:h-80 rounded-lg overflow-hidden border shadow-md mb-10">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d12690.755757143983!2d-0.1297921101715347!3d51.50853019543915!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x48761b3170a26a2f%3A0x0!2zNDPCsDE5JzA4LjEiTiA0MMKwMTEnNTUuMiJX!5e0!3m2!1sen!2sus!4v1615280731320!5m2!1sen!2sus"
               allowFullScreen

@@ -45,7 +45,7 @@ const FoodItemCard = ({
   };
 
   return (
-    <div className="w-56 max-w-xs h-70 mx-auto rounded-lg overflow-hidden shadow-lg transition-transform transform hover:scale-105 bg-white border border-gray-200">
+    <div className="w-60 max-w-xs h-70 m-8 mx-auto rounded-lg overflow-hidden shadow-lg transition-transform transform hover:scale-105 bg-white border border-gray-200">
       <img
         className="w-full h-32 object-cover rounded-t-lg"
         src={foodItem.food_image}
