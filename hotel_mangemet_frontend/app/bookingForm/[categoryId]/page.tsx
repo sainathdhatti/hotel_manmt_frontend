@@ -76,7 +76,7 @@ const BookingForm = () => {
             categoryId: roomCategory.id
           });
           console.log(addBooking);
-          router.push(`/bookings/${userId}`);
+          router.push(`/dashboard/userlogin`);
         } else {
           alert('Please complete all required fields and ensure you are logged in.');
         }
@@ -87,9 +87,11 @@ const BookingForm = () => {
   };
 
   return (
+    <>
+    <Navbar/>
     <div className="p-6 flex">
-            <Navbar className="absolute top-0 left-0 w-full z-10" />
-      <div className="w-1/3 mt-32">
+           
+      <div className="w-1/3 mt-10">
         {roomCategory ? (
           <>
             <img
@@ -104,9 +106,7 @@ const BookingForm = () => {
         )}
       </div>
       <div className="w-2/3 ml-6">
-        <h1 className="text-2xl font-bold mb-4">Booking Page</h1>
-
-        <div className="flex mb-4 mt-28 ml-10">
+        <div className="flex mb-4 mt-10 ml-10">
           <div className="flex-1 mr-2">
             <label className="block text-lg mb-2">Check-In Date</label>
             <DatePicker
@@ -191,13 +191,14 @@ const BookingForm = () => {
         <div className="mt-6 ml-10">
           <button
             onClick={handleSubmit}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md"
+            className="bg-red-500 text-white px-4 py-2 rounded-md"
           >
             Confirm Booking
           </button>
         </div>
       </div>
     </div>
+    </>
   );
 };
 

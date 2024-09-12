@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import useAuthStore from "@/app/store/loginStore";
 import useFoodOrderStore from "@/app/store/FoodOrderStore";
 import useUserStore from "@/app/store/userRegisterStore";
-import useBookingsStore, { Booking } from "@/app/store/bookingStore";
+import useBookingsStore, {
+  Booking,
+  BookingStatuss,
+} from "@/app/store/bookingStore";
 import {
   CalendarIcon,
   ShoppingBagIcon,
@@ -14,6 +17,10 @@ import {
   UserIcon,
   LogoutIcon,
 } from "@heroicons/react/outline";
+import useSpaBookingStore, { BookingStatus } from "@/app/store/spaBookingStore";
+import useSpaServiceStore from "@/app/store/spaServiceStore";
+import useTimeSlotStore from "@/app/store/timeSlotStore";
+import useReviewStore from "@/app/store/reviewStore";
 
 interface User {
   id: number;
@@ -38,13 +45,39 @@ const UserDashboard = () => {
     updateOrder: state.updateOrder,
   }));
 
-  const { users, getAllUsers, updateUser, deleteUser, getUserById } =
+  // const { spabookings, fetchBookings } = useSpaBookingStore(state => ({
+  //   spabookings: state.spabookings,
+  //   fetchBookings: state.fetchBookings,
+  // }));
+
+  // useEffect(() => {
+  //   fetchBookings();
+  // }, [fetchBookings]);
+
+  const { getAllSpaBooking, spabookings, updateSpaBooking } =
+    useSpaBookingStore((state) => ({
+      getAllSpaBooking: state.fetchBookings,
+      spabookings: state.spabookings,
+      updateSpaBooking: state.updateBooking,
+    }));
+
+  const { getAllSpaServices, spaServices } = useSpaServiceStore((state) => ({
+    getAllSpaServices: state.getAllSpaServices,
+    spaServices: state.spaServices,
+  }));
+
+  const { getAllTimeSlot, timeSlots } = useTimeSlotStore((state) => ({
+    getAllTimeSlot: state.getAllTimeSlots,
+    timeSlots: state.timeslots,
+  }));
+
+  const { users, getAllUsers, updateUser, deleteUser, fetchUserById } =
     useUserStore((state) => ({
       users: state.users,
       getAllUsers: state.getAllUsers,
       updateUser: state.updateUser,
       deleteUser: state.deleteUser,
-      getUserById: state.getUserById,
+      fetchUserById: state.getUserById,
     }));
 
   const { bookings, fetchBookingsByUserId, deleteBooking } = useBookingsStore(
@@ -54,6 +87,9 @@ const UserDashboard = () => {
       deleteBooking: state.deleteBooking,
     })
   );
+  const { sendReviewLink } = useReviewStore((state) => ({
+    sendReviewLink: state.sendReviewLink,
+  }));
 
   const [currentView, setCurrentView] = useState("bookings");
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -62,17 +98,16 @@ const UserDashboard = () => {
   useEffect(() => {
     if (isAuthenticated) {
       const fetchData = async () => {
-        try {
-          await getAllOrders();
-          await getAllUsers();
-          if (userId) {
-            await fetchBookingsByUserId(userId);
-            const userDetails = await getUserById(userId); // Ensure this returns data
-            console.log("userDetails", userDetails);
-            setEditingUser(userDetails ?? null);
-          }
-        } catch (error) {
-          console.error("Error fetching data:", error);
+        await getAllOrders();
+        await getAllSpaBooking();
+        await getAllSpaServices();
+        await getAllTimeSlot();
+        await getAllSpaServices();
+        await getAllUsers();
+        if (userId) {
+          await fetchBookingsByUserId(userId);
+          const userDetails = await fetchUserById(userId);
+          setEditingUser(userDetails ?? null);
         }
       };
       fetchData();
@@ -83,18 +118,58 @@ const UserDashboard = () => {
     isAuthenticated,
     getAllOrders,
     getAllUsers,
+    getAllSpaBooking,
+    getAllSpaServices,
+    getAllTimeSlot,
     fetchBookingsByUserId,
     userId,
-    getUserById,
+    fetchUserById,
   ]);
 
+  // useEffect(() => {
+  // if (userId && bookings.length > 0) {
+  //   // Filter bookings that belong to the user
+  //   setFilteredBookings(bookings.filter((booking) => booking.user.id === userId));
+
+    // Function to handle sending revie
   useEffect(() => {
-    if (userId) {
-      setFilteredBookings(
-        bookings.filter((booking) => booking.user.id === userId)
-      );
+    if (userId && bookings.length > 0) {
+      // Filter bookings that belong to the user
+      setFilteredBookings(bookings.filter((booking) => booking.user.id === userId));
+
+      // Ensure review links are only sent once
+      const sendPendingReviewLinks = async () => {
+        const promises = bookings.map(async (booking) => {
+          // Check if booking is "CHECKED_OUT" and review link hasn't been sent
+          if (booking.status === BookingStatuss.CHECKED_OUT && !booking.reviewLinkSent) {
+            try {
+              console.log("Sending review link for booking:", booking.bookingId);
+              await sendReviewLink(booking.bookingId); // Send the review link
+              alert("Review link sent successfully for booking " + booking.bookingId);
+            } catch (err: any) {
+              if (
+                err.response?.data?.message ===
+                "Review link has already been sent for this booking."
+              ) {
+                console.log("Review link already sent for booking:", booking.bookingId);
+              } else {
+                console.error("Error sending review link for booking:", booking.bookingId, err);
+              }
+            }
+          }
+        });
+        await Promise.all(promises); // Ensure all promises are resolved before proceeding
+      };
+
+      // Use a debounce technique to prevent the effect from running too frequently
+      const timeoutId = setTimeout(() => {
+        sendPendingReviewLinks();
+      }, 100); // Debounce by 100ms to ensure the effect doesn't trigger multiple times
+
+      // Cleanup the timeout when component unmounts or dependencies change
+      return () => clearTimeout(timeoutId);
     }
-  }, [userId, bookings]);
+  }, [userId, bookings, sendReviewLink]);
 
   const [showConfirm, setShowConfirm] = useState(false);
   const handleLogout = () => {
@@ -114,6 +189,13 @@ const UserDashboard = () => {
     if (window.confirm("Are you sure you want to cancel this order?")) {
       await updateOrder(orderId, { status: "cancelled" });
       await getAllOrders();
+    }
+  };
+
+  const handleCancelSpaBooking = async (bookingId: number) => {
+    if (window.confirm("Are you sure you want to cancel this spa booking?")) {
+      await updateSpaBooking(bookingId, { status: BookingStatus.CANCELLED });
+      await getAllSpaBooking();
     }
   };
 
@@ -253,120 +335,174 @@ const UserDashboard = () => {
             </div>
           </div>
         );
-        case "food-orders":
-          return(
-            <div className="overflow-x-auto">
-            <table className="w-full bg-white border border-gray-300 rounded-lg shadow-md">
-              <thead className="bg-gray-200 text-gray-700">
+
+      case "food-orders":
+        return (
+          <div className="overflow-x-auto w-full border-2 border-gray-200   p-6">
+            <h1 className="text-2xl font-bold mb-4  text-teal-500">
+              Food Orders
+            </h1>
+            <table className="min-w-full bg-white border border-gray-300 shadow-md">
+              <thead className="bg-gray-100 text-teal-600">
                 <tr>
-                  <th className="px-2 py-2 text-center font-semibold">Customer Name</th>
-                  <th className="px-2 py-2 text-center font-semibold">Customer Number</th>
-                  <th className="px-2 py-2 text-center font-semibold">Food Name</th>
-                  <th className="px-2 py-2 text-center font-semibold">Quantity</th>
-                  <th className="px-2 py-2 text-center font-semibold">Price</th>
-                  <th className="px-2 py-2 text-center font-semibold">Order Time</th>
-                  <th className="px-2 py-2 text-center font-semibold">Delivered Time</th>
-                  <th className="px-2 py-2 text-center font-semibold">Status</th>
-                  <th className="px-2 py-2 text-center font-semibold">Total Amount</th>
-                  <th className="px-2 py-2 text-center font-semibold">Action</th>
+                  <th className="py-3 px-4 border-b text-center">User Name</th>
+                  <th className="py-3 px-4 border-b text-center">Order Time</th>
+                  <th className="py-3 px-4 border-b text-center">Status</th>
+                  <th className="py-3 px-4 border-b text-center">Amount</th>
+                  <th className="py-3 px-4 border-b text-center">Action</th>
                 </tr>
               </thead>
-              <tbody>
-                {orders.length > 0 ? (
-                  orders.flatMap((order) => {
-                    const orderItems = Array.isArray(order.orderItems)
-                      ? order.orderItems
-                      : [];
-          
-                    return orderItems.map((item: any, index: number) => (
-                      <tr
-                        key={`${order.id}-${item.foodItemId}-${index}`}
-                        className="border-b hover:bg-gray-50 even:bg-gray-100"
-                      >
-                        {index === 0 && (
-                          <>
-                            <td
-                              rowSpan={order.orderItems.length}
-                              className="px-2 py-2 text-gray-800"
-                            >
-                              {order.user?.firstName || "Unknown"}
-                            </td>
-                            <td
-                              rowSpan={order.orderItems.length}
-                              className="px-2 py-2 text-gray-800"
-                            >
-                              {order.user?.phoneNumber || "Unknown"}
-                            </td>
-                          </>
-                        )}
-                        <td className="px-2 py-2 text-gray-800">{item.food_name}</td>
-                        <td className="px-2 py-2 text-gray-800">{item.quantity}</td>
-                        <td className="px-2 py-2 text-gray-800">${item.price}</td>
-                        {index === 0 && (
-                          <>
-                            <td
-                              rowSpan={order.orderItems.length}
-                              className="px-2 py-2 text-gray-800"
-                            >
-                              {new Date(order.order_time).toLocaleString()}
-                            </td>
-                            <td
-                              rowSpan={order.orderItems.length}
-                              className="px-2 py-2 text-gray-800"
-                            >
-                              {order.delivered_time
-                                ? new Date(order.delivered_time).toLocaleString()
-                                : "N/A"}
-                            </td>
-                            <td
-                              rowSpan={order.orderItems.length}
-                              className="px-6 py-4 text-gray-800"
-                            >
-                              {order.status}
-                            </td>
-                            <td
-                              rowSpan={order.orderItems.length}
-                              className="px-6 py-4 text-gray-800"
-                            >
-                              ${order.totalAmount}
-                            </td>
-                          </>
-                        )}
-                        {index === 0 && (
-                          <td
-                            rowSpan={order.orderItems.length}
-                            className="px-6 py-4 text-center"
-                          >
-                            <button
-                              onClick={() => handleCancelOrder(order.id)}
-                              disabled={order.status === "delivered"}
-                              className={`bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition duration-300 ${
-                                order.status === "delivered"
-                                  ? "opacity-50 cursor-not-allowed"
-                                  : ""
-                              }`}
-                            >
-                              Cancel
-                            </button>
-                          </td>
-                        )}
-                      </tr>
-                    ));
-                  })
-                ) : (
+              <tbody className="text-gray-800">
+                {orders.filter(
+                  (order) =>
+                    order.user?.id === userId && order.status !== "cancelled"
+                ).length === 0 ? (
                   <tr>
-                    <td colSpan={10} className="text-center py-4 text-gray-500">
+                    <td colSpan={5} className="text-center py-4 text-gray-500">
                       No food orders found.
                     </td>
                   </tr>
+                ) : (
+                  orders
+                    .filter(
+                      (order) =>
+                        order.user?.id === userId &&
+                        order.status !== "cancelled"
+                    )
+                    .map((order) => (
+                      <tr key={order.id} className="border-b hover:bg-gray-100">
+                        <td className="py-3 px-4 border-b text-blue-500 text-center">
+                          {order.user?.firstName}
+                        </td>
+                        <td className="py-3 px-4 border-b text-green-500 text-center">
+                          {new Date(order.order_time).toLocaleString()}
+                        </td>
+                        <td className="py-3 px-4 border-b text-red-500 text-center">
+                          {order.status}
+                        </td>
+                        <td className="py-3 px-4 border-b text-yellow-500 text-center">
+                          {order.totalAmount}
+                        </td>
+                        <td className="py-3 px-4 border-b text-gray-800 text-center">
+                          <button
+                            onClick={() => handleCancelOrder(order.id)}
+                            disabled={order.status === "delivered"}
+                            className={`py-1 px-2 rounded-md ${
+                              order.status === "delivered"
+                                ? "bg-gray-400 cursor-not-allowed"
+                                : "bg-red-500 text-white hover:bg-red-600"
+                            }`}
+                          >
+                            Cancel
+                          </button>
+                        </td>
+                      </tr>
+                    ))
                 )}
               </tbody>
             </table>
           </div>
-          
-        
-            );
-        
+        );
+
+      case "spa":
+        return (
+          <div className="flex flex-col items-center justify-center">
+            <div className="w-full border-2 border-gray-200 p-6">
+              <h1 className="text-2xl font-bold mb-4 text-teal-500">
+                Spa Bookings List
+              </h1>
+              <table className="min-w-full bg-white border border-gray-300">
+                <thead className="bg-gray-100 text-teal-600">
+                  <tr>
+                    <th className="px-4 py-2 text-center">First Name</th>
+                    <th className="px-4 py-2 text-center">Last Name</th>
+                    <th className="px-4 py-2 text-center">Service</th>
+                    <th className="px-4 py-2 text-center">Amount</th>
+                    <th className="px-4 py-2 text-center">Booking Date</th>
+                    <th className="px-4 py-2 text-center">Time Slot</th>
+                    <th className="px-4 py-2 text-center">Status</th>
+                    <th className="px-4 py-2 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="text-gray-800">
+                  {spabookings.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={8}
+                        className="text-center py-4 text-gray-500"
+                      >
+                        No spa bookings available.
+                      </td>
+                    </tr>
+                  ) : (
+                    spabookings
+                      .filter((spa) => spa.user.id === userId)
+                      .map((spa) => (
+                        <tr key={spa.id} className="border-b hover:bg-gray-100">
+                          <td className="px-4 py-2 text-center text-blue-500">
+                            {spa.firstName}
+                          </td>
+                          <td className="px-4 py-2 text-center text-blue-500">
+                            {spa.lastName}
+                          </td>
+                          <td className="px-4 py-2 text-center text-red-500">
+                            {spa.spaservice
+                              ? spa.spaservice.name
+                              : "Unknown Service"}
+                          </td>
+                          <td className="px-4 py-2 text-center text-red-500">
+                            {spa.spaservice && spa.spaservice.price
+                              ? spa.spaservice.price
+                              : "Unknown Price"}
+                          </td>
+                          <td className="px-4 py-2 text-center text-purple-500">
+                            {spa.booking_date
+                              ? new Date(spa.booking_date).toLocaleDateString()
+                              : "N/A"}
+                          </td>
+                          <td className="px-4 py-2 text-center text-purple-500">
+                            {spa.timeslot.startTime.toLocaleString()}
+                          </td>
+                          <td className="px-4 py-2 text-center">
+                            <span
+                              className={`px-2 py-1 rounded-full ${
+                                spa.status === BookingStatus.DONE
+                                  ? "text-teal-700"
+                                  : spa.status === BookingStatus.PENDING
+                                  ? "text-yellow-500"
+                                  : spa.status === BookingStatus.CANCELLED
+                                  ? "text-red-500"
+                                  : "text-red-500"
+                              }`}
+                            >
+                              {spa.status}
+                            </span>
+                          </td>
+                          <td className="px-4 py-2 text-center">
+                            <button
+                              onClick={() => handleCancelSpaBooking(spa.id)}
+                              className={`bg-red-500 hover:bg-red-700 text-white px-4 py-2 rounded ${
+                                spa.status === BookingStatus.DONE ||
+                                spa.status === BookingStatus.CANCELLED
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
+                              disabled={
+                                spa.status === BookingStatus.DONE ||
+                                spa.status === BookingStatus.CANCELLED
+                              }
+                            >
+                              Cance
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
 
       case "profile":
         return (
@@ -384,7 +520,7 @@ const UserDashboard = () => {
                   name="firstName"
                   value={editingUser?.firstName || ""}
                   onChange={handleChange}
-                  className="mt-1 block w-full p-2 border text-blue-500 border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500"
+                  className="mt-1 block w-full p-2 border  text-blue-500 border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500"
                 />
               </div>
               <div>
@@ -396,7 +532,7 @@ const UserDashboard = () => {
                   name="lastName"
                   value={editingUser?.lastName || ""}
                   onChange={handleChange}
-                  className="mt-1 block w-full border p-2 text-blue-500 border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500"
+                  className="mt-1 block w-full border p-2  text-blue-500 border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500"
                 />
               </div>
               <div>
@@ -421,11 +557,11 @@ const UserDashboard = () => {
                   name="phoneNumber"
                   value={editingUser?.phoneNumber || ""}
                   onChange={handleChange}
-                  className="mt-1 block w-full p-2 border text-blue-500 border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500"
+                  className="mt-1 block w-full p-2 border  text-blue-500 border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500"
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-700 font-bold">
+                <label className="block text-sm  text-gray-700 font-bold">
                   Aadhar Card Number
                 </label>
                 <input
