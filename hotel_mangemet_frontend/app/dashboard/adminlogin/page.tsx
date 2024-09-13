@@ -46,7 +46,7 @@ const AdminDashboard = () => {
   const bookings = useBookingsStore((state) => state.bookings);
   const getAllBookings = useBookingsStore((state) => state.fetchBookings);
   const deleteBooking = useBookingsStore((state) => state.deleteBooking);
-  const updateBooking = useBookingsStore((state) => state.updateBooking);
+  const updateBooking = useBookingsStore((state) => state.updateBookingStatus);
   const { isAuthenticated, userId } = useAuthStore((state) => ({
     isAuthenticated: state.isAuthenticated,
     userId: state.userId,
@@ -199,7 +199,7 @@ const AdminDashboard = () => {
                         {booking.noOfAdults ?? "N/A"}
                       </td>
                       <td className="px-4 py-2 text-center">
-                        {booking.noOfChildren ?? "N/A"}
+                        {booking.noOfChildrens ?? "N/A"}
                       </td>
                       <td className="px-4 py-2 text-center">
                         {booking.noOfDays ?? "N/A"}

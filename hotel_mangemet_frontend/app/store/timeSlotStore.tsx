@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:5000';
 
-interface TimeSlot {
+export interface TimeSlot {
   id: number;
   startTime: string;
   endTime: string;

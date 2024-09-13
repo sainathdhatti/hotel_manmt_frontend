@@ -1,10 +1,14 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/app/store/loginStore";
 import useFoodOrderStore from "@/app/store/FoodOrderStore";
 import useUserStore from "@/app/store/userRegisterStore";
-import useBookingsStore, { Booking } from "@/app/store/bookingStore";
+import useBookingsStore, {
+  Booking,
+  BookingStatuss,
+} from "@/app/store/bookingStore";
 import {
   CalendarIcon,
   ShoppingBagIcon,
@@ -16,6 +20,7 @@ import {
 import useSpaBookingStore, { BookingStatus } from "@/app/store/spaBookingStore";
 import useSpaServiceStore from "@/app/store/spaServiceStore";
 import useTimeSlotStore from "@/app/store/timeSlotStore";
+import useReviewStore from "@/app/store/reviewStore";
 
 interface User {
   id: number;
@@ -40,15 +45,21 @@ const UserDashboard = () => {
     updateOrder: state.updateOrder,
   }));
 
-  const {
-    getAllSpaBooking,
-    spabookings,
-    updateSpaBooking,
-  } = useSpaBookingStore((state) => ({
-    getAllSpaBooking: state.fetchBookings,
-    spabookings: state.spabookings,
-    updateSpaBooking: state.updateBooking,
-  }));
+  // const { spabookings, fetchBookings } = useSpaBookingStore(state => ({
+  //   spabookings: state.spabookings,
+  //   fetchBookings: state.fetchBookings,
+  // }));
+
+  // useEffect(() => {
+  //   fetchBookings();
+  // }, [fetchBookings]);
+
+  const { getAllSpaBooking, spabookings, updateSpaBooking } =
+    useSpaBookingStore((state) => ({
+      getAllSpaBooking: state.fetchBookings,
+      spabookings: state.spabookings,
+      updateSpaBooking: state.updateBooking,
+    }));
 
   const { getAllSpaServices, spaServices } = useSpaServiceStore((state) => ({
     getAllSpaServices: state.getAllSpaServices,
@@ -60,19 +71,14 @@ const UserDashboard = () => {
     timeSlots: state.timeslots,
   }));
 
-  const {
-    users,
-    getAllUsers,
-    updateUser,
-    deleteUser,
-    fetchUserById,
-  } = useUserStore((state) => ({
-    users: state.users,
-    getAllUsers: state.getAllUsers,
-    updateUser: state.updateUser,
-    deleteUser: state.deleteUser,
-    fetchUserById: state.getUserById,
-  }));
+  const { users, getAllUsers, updateUser, deleteUser, fetchUserById } =
+    useUserStore((state) => ({
+      users: state.users,
+      getAllUsers: state.getAllUsers,
+      updateUser: state.updateUser,
+      deleteUser: state.deleteUser,
+      fetchUserById: state.getUserById,
+    }));
 
   const { bookings, fetchBookingsByUserId, deleteBooking } = useBookingsStore(
     (state) => ({
@@ -81,6 +87,9 @@ const UserDashboard = () => {
       deleteBooking: state.deleteBooking,
     })
   );
+  const { sendReviewLink } = useReviewStore((state) => ({
+    sendReviewLink: state.sendReviewLink,
+  }));
 
   const [currentView, setCurrentView] = useState("bookings");
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -103,7 +112,7 @@ const UserDashboard = () => {
       };
       fetchData();
     } else {
-      router.push("/"); // Redirect if not authenticated
+      router.push("/");
     }
   }, [
     isAuthenticated,
@@ -117,13 +126,50 @@ const UserDashboard = () => {
     fetchUserById,
   ]);
 
+  // useEffect(() => {
+  // if (userId && bookings.length > 0) {
+  //   // Filter bookings that belong to the user
+  //   setFilteredBookings(bookings.filter((booking) => booking.user.id === userId));
+
+    // Function to handle sending revie
   useEffect(() => {
-    if (userId) {
-      setFilteredBookings(
-        bookings.filter((booking) => booking.user.id === userId)
-      );
+    if (userId && bookings.length > 0) {
+      // Filter bookings that belong to the user
+      setFilteredBookings(bookings.filter((booking) => booking.user.id === userId));
+
+      // Ensure review links are only sent once
+      const sendPendingReviewLinks = async () => {
+        const promises = bookings.map(async (booking) => {
+          // Check if booking is "CHECKED_OUT" and review link hasn't been sent
+          if (booking.status === BookingStatuss.CHECKED_OUT && !booking.reviewLinkSent) {
+            try {
+              console.log("Sending review link for booking:", booking.bookingId);
+              await sendReviewLink(booking.bookingId); // Send the review link
+              alert("Review link sent successfully for booking " + booking.bookingId);
+            } catch (err: any) {
+              if (
+                err.response?.data?.message ===
+                "Review link has already been sent for this booking."
+              ) {
+                console.log("Review link already sent for booking:", booking.bookingId);
+              } else {
+                console.error("Error sending review link for booking:", booking.bookingId, err);
+              }
+            }
+          }
+        });
+        await Promise.all(promises); // Ensure all promises are resolved before proceeding
+      };
+
+      // Use a debounce technique to prevent the effect from running too frequently
+      const timeoutId = setTimeout(() => {
+        sendPendingReviewLinks();
+      }, 100); // Debounce by 100ms to ensure the effect doesn't trigger multiple times
+
+      // Cleanup the timeout when component unmounts or dependencies change
+      return () => clearTimeout(timeoutId);
     }
-  }, [userId, bookings]);
+  }, [userId, bookings, sendReviewLink]);
 
   const [showConfirm, setShowConfirm] = useState(false);
   const handleLogout = () => {
@@ -155,12 +201,8 @@ const UserDashboard = () => {
 
   const handleUpdateUser = async () => {
     if (editingUser && userId) {
-      const {
-        aadharCardNumber,
-        phoneNumber,
-        firstName,
-        lastName,
-      } = editingUser;
+      const { aadharCardNumber, phoneNumber, firstName, lastName } =
+        editingUser;
 
       const updatedUserData = {
         aadharCardNumber,
@@ -450,7 +492,7 @@ const UserDashboard = () => {
                                 spa.status === BookingStatus.CANCELLED
                               }
                             >
-                              Cancel
+                              Cance
                             </button>
                           </td>
                         </tr>

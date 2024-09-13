@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Footer from "../footer/page";
 import useContactStore from "@/app/store/contactStore";
 import Navbar from "../navbar";
+import { toast } from "react-toastify";
 
 // Define the Yup schema for validation
 const schema = yup.object().shape({
@@ -38,6 +39,7 @@ const Contact = () => {
     try {
       await addContact(data);
       reset();
+      toast.success("Thank you for contacting us. We will get back to you soon.");
       router.push("/contact");
     } catch (error) {
       console.error("Submission error:", error);
@@ -46,19 +48,20 @@ const Contact = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Navbar className="absolute top-0 left-0 w-full z-10" />
+      <Navbar/>
+      
       {/* Hero Image Section */}
-      <div className="relative w-full h-[60vh] overflow-hidden">
+      <div className="relative w-full h-[40vh] md:h-[60vh] overflow-hidden">
         <img
-          src="/images/contact3.jpg"
+          src="/images/contttt.jpg"
           alt="Contact Us"
-          className="absolute inset-0 object-cover w-full h-full brightness-60"
+          className="absolute inset-0 object-cover w-full h-full "
         />
       </div>
 
       {/* Contact Form Section */}
-      <div className="flex-grow max-w-4xl mx-auto p-8 bg-white rounded-lg shadow-xl mt-[-60px] relative z-10">
-        <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
+      <div className="flex-grow max-w-4xl mx-auto p-6 md:p-8 bg-white rounded-lg shadow-xl mt-[-60px] relative z-10">
+        <h2 className="text-2xl md:text-3xl font-bold mb-4 text-center text-gray-800">
           We'd Love to Hear From You
         </h2>
         <p className="text-red-500 mb-4 text-center">
@@ -234,17 +237,19 @@ const Contact = () => {
 
       {/* Map and Location Section */}
       <div className="relative w-full mt-12 px-4 md:px-0">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
+        <h2 className="text-2xl md:text-3xl font-semibold text-gray-800 mb-6 text-center">
           Find Us
         </h2>
         <div className="flex flex-col md:flex-row">
           {/* Location Info */}
           <div className="md:w-1/3 p-6 rounded-lg shadow-md mb-4 md:mb-0 md:mr-4">
-            <h3 className="text-4xl font-semibold mb-4 pl-24 pt-10">Our Location</h3>
+            <h3 className="text-2xl md:text-4xl font-semibold mb-4 text-center md:text-left">
+              Our Location
+            </h3>
           </div>
 
           {/* Map */}
-          <div className="md:w-2/3 h-80 md:h-96  rounded-lg overflow-hidden border  shadow-md pb-9">
+          <div className="md:w-2/3 h-60 md:h-80 rounded-lg overflow-hidden border shadow-md mb-10">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d12690.755757143983!2d-0.1297921101715347!3d51.50853019543915!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x48761b3170a26a2f%3A0x0!2zNDPCsDE5JzA4LjEiTiA0MMKwMTEnNTUuMiJX!5e0!3m2!1sen!2sus!4v1615280731320!5m2!1sen!2sus"
               allowFullScreen

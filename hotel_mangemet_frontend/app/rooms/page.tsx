@@ -64,15 +64,16 @@ const Rooms = () => {
 
   return (
     <>
-      <Navbar className="absolute top-0 left-0 w-full z-10" />
-      <div className="relative flex overflow-hidden justify-center min-h-screen pt-16">
-        <div className="absolute inset-0">
+      <Navbar />
+      <div className="relative flex overflow-hidden justify-center min-h-screen ">
+        {/* Remove or comment out the following block to eliminate the background image */}
+        {/* <div className="absolute inset-0">
           <img
             src='images/Oroom1.jpeg'
             className="opacity-80 w-full h-full object-cover"
           />
-        </div>
-        <div className="flex w-full max-w-screen-xl mx-auto pt-12 ">
+        </div> */}
+        <div className="flex w-full max-w-screen-xl mx-auto  ">
           <nav className="w-1/4 min-h-screen p-6 py-8">
             <h1 className="text-3xl font-bold mb-6 ml-4 text-black">Enhance Your Stay</h1>
             <ul className="space-y-2 font-bold">
@@ -103,7 +104,7 @@ const Rooms = () => {
               )}
             </ul>
           </nav>
-          <main className="ml-4 w-3/4 p-6 flex flex-col relative rounded-lg">
+          <main className="ml-4 w-3/4 p-6 flex flex-col relative rounded-lg bg-white shadow-lg">
             {displayRoomCategory ? (
               <div className="flex flex-col">
                 {displayRoomCategory.imageUrl ? (

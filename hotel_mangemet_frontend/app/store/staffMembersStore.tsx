@@ -4,7 +4,7 @@ import { StaffCategory } from "./staffCategoryStore"; // Ensure correct path
 
 const baseUrl = "http://localhost:5000/staff_members";
 
-interface StaffMember {
+export interface StaffMember {
     id: number;
     firstName: string;
     lastName: string;

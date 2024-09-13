@@ -1,3 +1,4 @@
+
 import { create } from "zustand";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -7,9 +8,11 @@ export enum Gender {
   FEMALE = "female",
 }
 export enum BookingStatus {
+
   PENDING = "PENDING",
   DONE = "DONE",
   CANCELLED = "CANCELLED",
+
 }
 
 const API_URL = "http://localhost:5000"; // Update to your actual backend URL
@@ -57,8 +60,7 @@ interface SpaBooking {
       id: number;
       name: string;
     };
-  };
-  
+
 }
 
 interface SpaBookingStore {
@@ -146,6 +148,7 @@ const useSpaBookingStore = create<SpaBookingStore>((set) => ({
         spabookings: [...state.spabookings, response.data],
       }));
       toast.success("Booking created successfully!");
+
     } catch (error) {
       console.error("Failed to create booking:", error);
       if (axios.isAxiosError(error) && error.response) {
@@ -194,18 +197,25 @@ const useSpaBookingStore = create<SpaBookingStore>((set) => ({
         spabookings: state.spabookings.filter((b) => b.id !== id),
         spabooking: state.spabooking?.id === id ? null : state.spabooking,
       }));
-      toast.success("Booking deleted successfully!");
-    } catch (error) {
-      console.error("Failed to create booking:", error);
-      if (axios.isAxiosError(error) && error.response) {
-        const errorMessage =
-          error.response.data.message || "An unknown error occurred";
-        toast.error(errorMessage);
+
+      toast.success('Booking cancelled successfully!');
+    } catch (error:any) {
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error('Failed to delete booking:', error.response.data.message);
+        toast.error(error.response.data.message); // Display error message to the user
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error('Failed to delete booking:', error.request);
+        alert('No response received from server.');
       } else {
-        alert("An unexpected error occurred");
-      }
+        // Something happened in setting up the request that triggered an Error
+        console.error('Failed to delete booking:', error.message);
+        alert('Error in setting up request.');
+      }   
     }
-  },
+  }
 }));
 
 export default useSpaBookingStore;

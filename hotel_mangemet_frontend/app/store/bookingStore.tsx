@@ -2,10 +2,11 @@ import { create } from 'zustand';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-export enum BookingStatus {
+
+export enum BookingStatuss {
   AVAILABLE = 'AVAILABLE',
   BOOKED = 'BOOKED',
-  CHECKED_OUT = 'CHECKED_OUT',
+  CHECKED_OUT = 'checked_out',
   CANCELLED = 'CANCELLED',
   CHECKED_IN = 'CHECKED_IN'
 }
@@ -16,12 +17,13 @@ export interface Booking {
   bookingId: number;
   checkInDate: Date;
   checkOutDate: Date;
-  status: BookingStatus;
+  status: BookingStatuss;
   billPicUrl?: string;
   noOfDays: number;
   TotalAmount: number;
   noOfAdults: number;
   noOfChildrens: number;
+  reviewLinkSent: boolean;
   userId:number;
   user: {
     id: number;

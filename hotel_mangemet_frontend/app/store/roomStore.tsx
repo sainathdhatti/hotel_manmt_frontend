@@ -14,9 +14,7 @@ interface RoomCategory {
     noOfAdults?: number;
 }
 
-interface Rooms {
-    price: ReactNode;
-    image: string | undefined;
+export interface Rooms {
     id: number;
     roomNumber: number;
     roomCategory: RoomCategory;

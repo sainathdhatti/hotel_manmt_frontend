@@ -11,6 +11,7 @@ import * as yup from "yup";
 import "react-datepicker/dist/react-datepicker.css";
 import Navbar from "@/app/navbar";
 import Footer from "@/app/footer/page";
+
 import axios from "axios";
 
 // Schema for validation
@@ -123,8 +124,10 @@ const SpaBookingForm = () => {
           bookingDate,
           selectedService.id,
           selectedSlot.id,
+
           userId,
           bookingId
+
         );
         await addBooking({
           firstName,
