@@ -1,6 +1,6 @@
 "use client";
 import React, { Dispatch, SetStateAction, useState } from "react";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import useAuthStore from "@/app/store/loginStore"; // Import your Zustand store
 
 interface NavbarProps {
@@ -8,7 +8,7 @@ interface NavbarProps {
 }
 
 const Navbar = ({ className }: NavbarProps) => {
-  const router = useRouter();
+  // const router = useRouter();
   const { isAuthenticated, userName, logout } = useAuthStore((state) => ({
     isAuthenticated: state.isAuthenticated,
     userName: state.userName,
@@ -122,6 +122,12 @@ const Navbar = ({ className }: NavbarProps) => {
                         className="p-2 cursor-pointer hover:bg-gray-100"
                       >
                         User
+                      </li>
+                      <li
+                        onClick={() => handleSelectOption("receptionistlogin")}
+                        className="p-2 cursor-pointer hover:bg-gray-100"
+                      >
+                        Receptionist
                       </li>
                     </ul>
                   )}

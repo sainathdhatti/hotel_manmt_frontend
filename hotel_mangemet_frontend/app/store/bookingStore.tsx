@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-enum BookingStatus {
+export enum BookingStatus {
   AVAILABLE = 'AVAILABLE',
   BOOKED = 'BOOKED',
   CHECKED_OUT = 'CHECKED_OUT',
@@ -60,12 +60,8 @@ interface BookingStore {
     userId: number;
     categoryId: number;
   }) => Promise<void>;
-  updateBooking: (bookingId: number, updateBookingData: {
-    checkInDate: Date;
-    checkOutDate: Date;
-    noOfAdults: number;
-    noOfChildrens: number;
-    categoryId: number;
+  updateBookingStatus: (bookingId: number, updateBookingData: {
+    status: BookingStatus
   }) => Promise<void>;
   deleteBooking: (bookingId: number) => Promise<void>;
 }
@@ -130,6 +126,7 @@ const useBookingsStore = create<BookingStore>((set) => ({
         },
       });
       set((state) => ({ bookings: [...state.bookings, response.data] }));
+      toast.success('Booking created successfully!');
     } catch (error) {
       console.error('Failed to create booking:', error);
       
@@ -144,7 +141,7 @@ const useBookingsStore = create<BookingStore>((set) => ({
   },
 
 
-  updateBooking: async (bookingId, updateBookingData) => {
+  updateBookingStatus: async (bookingId: number, updateBookingData: { status: BookingStatus }) => {
     try {
       const token = sessionStorage.getItem('token') ?? '';
       const response = await axios.patch<Booking>(`${API_URL}/bookings/${bookingId}`, updateBookingData, {
@@ -162,6 +159,7 @@ const useBookingsStore = create<BookingStore>((set) => ({
       console.error('Failed to update booking:', error);
     }
   },
+  
 
   deleteBooking: async (bookingId) => {
     try {
@@ -177,16 +175,12 @@ const useBookingsStore = create<BookingStore>((set) => ({
       }));
     } catch (error:any) {
       if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
         console.error('Failed to delete booking:', error.response.data.message);
-        toast.error(error.response.data.message); // Display error message to the user
+        toast.error(error.response.data.message); 
       } else if (error.request) {
-        // The request was made but no response was received
         console.error('Failed to delete booking:', error.request);
         alert('No response received from server.');
       } else {
-        // Something happened in setting up the request that triggered an Error
         console.error('Failed to delete booking:', error.message);
         alert('Error in setting up request.');
       }

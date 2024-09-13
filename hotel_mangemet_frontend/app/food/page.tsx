@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import useAuthStore from "../store/loginStore";
 import Navbar from "../navbar";
+import axios from "axios";
 
 const FoodOrderPage = () => {
   const { foodItems, getAllFoodItems } = useFoodItemsStore();
@@ -78,10 +79,11 @@ const FoodOrderPage = () => {
       const orderData = {
         userId,
         orderItems: selectedItems,
+        bookingId:bookingId
       };
 
       console.log(orderData);
-      await createOrder(userId, orderData.orderItems);
+      await createOrder(userId, orderData.orderItems,bookingId ||0);
 
       // Clear selected items and other states
       setSelectedItems([]);
@@ -113,6 +115,25 @@ const FoodOrderPage = () => {
       ? { name: foodItem.food_name, price: foodItem.food_price }
       : { name: "Unknown", price: 0 };
   };
+  const [bookingId, setBookingId] = useState<number | null>(null);
+  useEffect(() => {
+    if (isAuthenticated && userId !== undefined) {
+      // Fetch booking IDs from the backend
+      axios.get(`http://localhost:5000/bookings/users/${userId}/BookingId`)
+        .then(response => {
+          const ids = response.data;
+          if (ids.length > 0) {
+            setBookingId(ids[0]); // Use the first booking ID or handle multiple IDs
+          } else {
+            console.error('No bookings found with status "checked-in".');
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching booking IDs:', error);
+        });
+    }
+  }, [isAuthenticated, userId]);
+
 
   return (
     <div className="relative container mx-auto ">

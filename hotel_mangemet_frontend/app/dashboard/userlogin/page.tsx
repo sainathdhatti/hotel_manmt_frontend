@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/app/store/loginStore";
@@ -14,6 +13,9 @@ import {
   UserIcon,
   LogoutIcon,
 } from "@heroicons/react/outline";
+import useSpaBookingStore, { BookingStatus } from "@/app/store/spaBookingStore";
+import useSpaServiceStore from "@/app/store/spaServiceStore";
+import useTimeSlotStore from "@/app/store/timeSlotStore";
 
 interface User {
   id: number;
@@ -38,14 +40,39 @@ const UserDashboard = () => {
     updateOrder: state.updateOrder,
   }));
 
-  const { users, getAllUsers, updateUser, deleteUser, fetchUserById } =
-    useUserStore((state) => ({
-      users: state.users,
-      getAllUsers: state.getAllUsers,
-      updateUser: state.updateUser,
-      deleteUser: state.deleteUser,
-      fetchUserById: state.fetchUserById,
-    }));
+  const {
+    getAllSpaBooking,
+    spabookings,
+    updateSpaBooking,
+  } = useSpaBookingStore((state) => ({
+    getAllSpaBooking: state.fetchBookings,
+    spabookings: state.spabookings,
+    updateSpaBooking: state.updateBooking,
+  }));
+
+  const { getAllSpaServices, spaServices } = useSpaServiceStore((state) => ({
+    getAllSpaServices: state.getAllSpaServices,
+    spaServices: state.spaServices,
+  }));
+
+  const { getAllTimeSlot, timeSlots } = useTimeSlotStore((state) => ({
+    getAllTimeSlot: state.getAllTimeSlots,
+    timeSlots: state.timeslots,
+  }));
+
+  const {
+    users,
+    getAllUsers,
+    updateUser,
+    deleteUser,
+    fetchUserById,
+  } = useUserStore((state) => ({
+    users: state.users,
+    getAllUsers: state.getAllUsers,
+    updateUser: state.updateUser,
+    deleteUser: state.deleteUser,
+    fetchUserById: state.getUserById,
+  }));
 
   const { bookings, fetchBookingsByUserId, deleteBooking } = useBookingsStore(
     (state) => ({
@@ -63,6 +90,10 @@ const UserDashboard = () => {
     if (isAuthenticated) {
       const fetchData = async () => {
         await getAllOrders();
+        await getAllSpaBooking();
+        await getAllSpaServices();
+        await getAllTimeSlot();
+        await getAllSpaServices();
         await getAllUsers();
         if (userId) {
           await fetchBookingsByUserId(userId);
@@ -78,6 +109,9 @@ const UserDashboard = () => {
     isAuthenticated,
     getAllOrders,
     getAllUsers,
+    getAllSpaBooking,
+    getAllSpaServices,
+    getAllTimeSlot,
     fetchBookingsByUserId,
     userId,
     fetchUserById,
@@ -112,10 +146,21 @@ const UserDashboard = () => {
     }
   };
 
+  const handleCancelSpaBooking = async (bookingId: number) => {
+    if (window.confirm("Are you sure you want to cancel this spa booking?")) {
+      await updateSpaBooking(bookingId, { status: BookingStatus.CANCELLED });
+      await getAllSpaBooking();
+    }
+  };
+
   const handleUpdateUser = async () => {
     if (editingUser && userId) {
-      const { aadharCardNumber, phoneNumber, firstName, lastName } =
-        editingUser;
+      const {
+        aadharCardNumber,
+        phoneNumber,
+        firstName,
+        lastName,
+      } = editingUser;
 
       const updatedUserData = {
         aadharCardNumber,
@@ -314,6 +359,106 @@ const UserDashboard = () => {
                 )}
               </tbody>
             </table>
+          </div>
+        );
+
+      case "spa":
+        return (
+          <div className="flex flex-col items-center justify-center">
+            <div className="w-full border-2 border-gray-200 p-6">
+              <h1 className="text-2xl font-bold mb-4 text-teal-500">
+                Spa Bookings List
+              </h1>
+              <table className="min-w-full bg-white border border-gray-300">
+                <thead className="bg-gray-100 text-teal-600">
+                  <tr>
+                    <th className="px-4 py-2 text-center">First Name</th>
+                    <th className="px-4 py-2 text-center">Last Name</th>
+                    <th className="px-4 py-2 text-center">Service</th>
+                    <th className="px-4 py-2 text-center">Amount</th>
+                    <th className="px-4 py-2 text-center">Booking Date</th>
+                    <th className="px-4 py-2 text-center">Time Slot</th>
+                    <th className="px-4 py-2 text-center">Status</th>
+                    <th className="px-4 py-2 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="text-gray-800">
+                  {spabookings.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={8}
+                        className="text-center py-4 text-gray-500"
+                      >
+                        No spa bookings available.
+                      </td>
+                    </tr>
+                  ) : (
+                    spabookings
+                      .filter((spa) => spa.user.id === userId)
+                      .map((spa) => (
+                        <tr key={spa.id} className="border-b hover:bg-gray-100">
+                          <td className="px-4 py-2 text-center text-blue-500">
+                            {spa.firstName}
+                          </td>
+                          <td className="px-4 py-2 text-center text-blue-500">
+                            {spa.lastName}
+                          </td>
+                          <td className="px-4 py-2 text-center text-red-500">
+                            {spa.spaservice
+                              ? spa.spaservice.name
+                              : "Unknown Service"}
+                          </td>
+                          <td className="px-4 py-2 text-center text-red-500">
+                            {spa.spaservice && spa.spaservice.price
+                              ? spa.spaservice.price
+                              : "Unknown Price"}
+                          </td>
+                          <td className="px-4 py-2 text-center text-purple-500">
+                            {spa.booking_date
+                              ? new Date(spa.booking_date).toLocaleDateString()
+                              : "N/A"}
+                          </td>
+                          <td className="px-4 py-2 text-center text-purple-500">
+                            {spa.timeslot.startTime.toLocaleString()}
+                          </td>
+                          <td className="px-4 py-2 text-center">
+                            <span
+                              className={`px-2 py-1 rounded-full ${
+                                spa.status === BookingStatus.DONE
+                                  ? "text-teal-700"
+                                  : spa.status === BookingStatus.PENDING
+                                  ? "text-yellow-500"
+                                  : spa.status === BookingStatus.CANCELLED
+                                  ? "text-red-500"
+                                  : "text-red-500"
+                              }`}
+                            >
+                              {spa.status}
+                            </span>
+                          </td>
+                          <td className="px-4 py-2 text-center">
+                            <button
+                              onClick={() => handleCancelSpaBooking(spa.id)}
+                              className={`bg-red-500 hover:bg-red-700 text-white px-4 py-2 rounded ${
+                                spa.status === BookingStatus.DONE ||
+                                spa.status === BookingStatus.CANCELLED
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
+                              disabled={
+                                spa.status === BookingStatus.DONE ||
+                                spa.status === BookingStatus.CANCELLED
+                              }
+                            >
+                              Cancel
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         );
 

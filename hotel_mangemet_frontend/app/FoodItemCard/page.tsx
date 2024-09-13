@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import useAuthStore from "../store/loginStore";
+import axios from "axios";
 
 interface FoodItem {
   food_id: number;
@@ -22,6 +24,10 @@ const FoodItemCard = ({
   isSelected: boolean;
 }) => {
   const [quantity, setQuantity] = useState(0);
+  const { isAuthenticated, userId } = useAuthStore((state) => ({
+    isAuthenticated: state.isAuthenticated,
+    userId: state.userId,
+  }));
 
   const handleAdd = () => {
     const newQuantity = quantity + 1;
@@ -43,6 +49,8 @@ const FoodItemCard = ({
     const { checked } = event.target;
     onSelect(foodItem.food_id, quantity, checked);
   };
+
+
 
   return (
     <div className="w-56 max-w-xs h-70 mx-auto rounded-lg overflow-hidden shadow-lg transition-transform transform hover:scale-105 bg-white border border-gray-200">

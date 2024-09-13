@@ -40,6 +40,7 @@ const Login = ({ params: { role } }: LoginProps) => {
         // If role is userlogin, redirect to the home page
         router.push('/');
       } else {
+        console.log(role);
         // Redirect to the dashboard or any other page for different roles
         router.push(`/dashboard/${role}`);
       }

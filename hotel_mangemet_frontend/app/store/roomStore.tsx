@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import { create } from 'zustand';
 
 const baseUrl = "http://localhost:5000";
