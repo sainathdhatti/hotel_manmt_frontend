@@ -132,9 +132,9 @@ const SpaBookingForm = () => {
 
   return (
     <>
-    <div className="p-6 flex relative">
-      <Navbar className="absolute top-0 left-0 w-full z-10" />
-      <div className="absolute inset-0  w-full">
+    <div className="p-6  relative">
+      <Navbar/>
+      <div className="absolute  flex inset-0  w-full">
         <img
           src="/images/abc.jpg"
           alt="Background"
