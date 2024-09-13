@@ -20,9 +20,7 @@ const SpaService = () => {
     getSpaServiceById: state.getSpaServiceById,
   }));
 
-  const [selectedServiceId, setSelectedServiceId] = useState<number | null>(
-    null
-  );
+  const [selectedServiceId, setSelectedServiceId] = useState<number | null>(null);
   const [isClient, setIsClient] = useState<boolean>(false);
 
   useEffect(() => {
@@ -61,20 +59,20 @@ const SpaService = () => {
     }
   };
 
-  const displaySpaService =
-    spaService || (spaServices.length > 0 ? spaServices[0] : null);
+  const displaySpaService = spaService || (spaServices.length > 0 ? spaServices[0] : null);
 
   return (
     <>
-      <Navbar className="absolute top-0 left-0 w-full z-10" />
-      <div className="relative flex overflow-hidden justify-center min-h-screen pt-16">
-        <div className="absolute inset-0">
+      <Navbar />
+      <div className="relative flex overflow-hidden justify-center min-h-screen ">
+        {/* Remove or comment out the following block to eliminate the background image */}
+        {/* <div className="absolute inset-0">
           <img
             src="images/abc.jpg"
             className="opacity-35 w-full h-full object-cover"
           />
-        </div>
-        <div className="flex w-full max-w-screen-xl mx-auto pt-10">
+        </div> */}
+        <div className="flex w-full max-w-screen-xl mx-auto ">
           <nav className="w-1/4 min-h-screen p-6 py-8">
             <h1 className="text-3xl font-bold mb-6 ml-4 text-black">
               Enhance Your Service
@@ -107,7 +105,7 @@ const SpaService = () => {
               )}
             </ul>
           </nav>
-          <main className="ml-4 w-3/4 p-6 flex flex-col relative rounded-lg">
+          <main className="ml-4 w-3/4 p-6 flex flex-col relative rounded-lg bg-white shadow-md">
             {displaySpaService ? (
               <div className="flex flex-col">
                 {displaySpaService.service_image ? (
@@ -152,12 +150,12 @@ const SpaService = () => {
                     <div>
                       <input
                         type="checkbox"
-                        id="cancellation"
+                        id="appointment-limit"
                         checked
                         readOnly
-                        className="form-checkbox h-5 w-5 text-green-600 "
+                        className="form-checkbox h-5 w-5 text-green-600"
                       />
-                      <label htmlFor="cancellation" className="text-lg ml-3 ">
+                      <label htmlFor="appointment-limit" className="text-lg ml-3">
                         You can book up to 3 spa appointments per user
                       </label>
                     </div>

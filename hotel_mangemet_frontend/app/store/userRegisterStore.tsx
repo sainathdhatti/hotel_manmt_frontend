@@ -4,10 +4,9 @@ import { toast } from "react-toastify";
 
 const API_URL = "http://localhost:5000"; // Adjust if necessary
 
-interface User {
-  role: string; // Adjust the type if necessary
-  phone: string; // Adjust the type if necessary
-  name: string; // Adjust the type if necessary
+
+export interface User {
+
   id: number;
   email: string;
   password: string;
@@ -25,6 +24,7 @@ interface UserStore {
   getAllUsers: () => Promise<void>;
   getUserById: (id: number) => Promise<void>;
   checkEmailExists: (email: string) => Promise<boolean>;
+
   registerUser: (userData: {
     firstName: string;
     lastName: string;
@@ -61,9 +61,9 @@ const useUserStore = create<UserStore>((set) => ({
       if (!token) throw new Error("No token found");
 
       const response = await axios.get(`${API_URL}/users`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+
+        headers: { Authorization: `Bearer ${token}` },
+
       });
       set({ users: response.data, loading: false });
     } catch (error) {
@@ -76,24 +76,19 @@ const useUserStore = create<UserStore>((set) => ({
   getUserById: async (id: number) => {
     set({ loading: true });
     try {
-      const token = sessionStorage.getItem("token");
-      if (!token) throw new Error("No token found");
 
-      const response = await axios.get(`${API_URL}/users/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      set({ users: [response.data], loading: false }); // Assuming single user response
+      const response = await axios.get(`${API_URL}/users/${id}`);
+      set({ users: [response.data], loading: false });
+      return response.data; // Ensure this line is included
     } catch (error) {
-      const axiosError = error as AxiosError;
-      console.error("Error fetching user:", axiosError);
-      set({
-        loading: false,
-        error: "Failed to fetch user."
-      });
+      console.error("Error fetching user:", error);
+      set({ loading: false, error: "Failed to fetch user." });
+      return null; // or handle error appropriately
+
+      
     }
   },
+  
 
   checkEmailExists: async (email: string): Promise<boolean> => {
     try {
@@ -102,14 +97,15 @@ const useUserStore = create<UserStore>((set) => ({
 
       const response = await axios.get(`${API_URL}/users/check-email`, {
         params: { email },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       return response.data.exists; // Assuming the API returns { exists: boolean }
     } catch (error) {
+
       const axiosError = error as AxiosError;
-      console.error("Error checking email:", axiosError);
+      
+      console.error("Error checking email:", error);
+
       return false; // Default to false if there's an error
     }
   },
@@ -118,20 +114,15 @@ const useUserStore = create<UserStore>((set) => ({
     set({ loading: true, registrationStatus: null });
     try {
       await axios.post(`${API_URL}/users`, userData, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+
+        headers: { "Content-Type": "application/json" },
       });
       set({ registrationStatus: "User registered successfully", error: null });
       toast.success("User registered successfully");
-    } catch (error) {
-      const axiosError = error as AxiosError;
-      if (axiosError.response) {
-        console.error("Registration failed:", (axiosError.response.data as { message: string }).message);
-        toast.error((axiosError.response.data as { message: string }).message);
-      } else {
-        console.error("Error registering user:", axiosError);
-      }
+    } catch (error: any) {
+      console.error("Error registering user:", error);
+      toast.error(error.response?.data?.message || "Error registering user");
+
       set({
         registrationStatus: `Error registering user: ${axiosError.message}`,
         error: axiosError.message,
@@ -141,16 +132,9 @@ const useUserStore = create<UserStore>((set) => ({
     }
   },
 
-  updateUser: async (
-    id: number,
-    userData: {
-      firstName?: string;
-      lastName?: string;
-      email?: string;
-      phoneNumber?: string;
-      aadharCardNumber?: string;
-    }
-  ) => {
+
+  updateUser: async (id, userData) => {
+
     set({ loading: true });
     try {
       if (!id || !userData) {
@@ -187,9 +171,8 @@ const useUserStore = create<UserStore>((set) => ({
       if (!token) throw new Error("No token found");
 
       await axios.delete(`${API_URL}/users/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+
+        headers: { Authorization: `Bearer ${token}` },
       });
       set({ registrationStatus: "User deleted successfully", error: null });
     } catch (error) {
@@ -204,7 +187,7 @@ const useUserStore = create<UserStore>((set) => ({
     }
   },
 
-  forgetPassword: async (email: string) => {
+  forgetPassword: async (email) => {
     set({ loading: true });
     try {
       await axios.post(`${API_URL}/users/forgetpassword`, { email });
@@ -221,13 +204,10 @@ const useUserStore = create<UserStore>((set) => ({
     }
   },
 
-  resetPassword: async (token: string, newPassword: string) => {
+  resetPassword: async (token, newPassword) => {
     set({ loading: true });
     try {
-      await axios.post(`${API_URL}/users/reset-password`, {
-        token,
-        newPassword,
-      });
+      await axios.post(`${API_URL}/users/reset-password`, { token, newPassword });
       set({ registrationStatus: "Password reset successfully", error: null });
     } catch (error) {
       const axiosError = error as AxiosError;

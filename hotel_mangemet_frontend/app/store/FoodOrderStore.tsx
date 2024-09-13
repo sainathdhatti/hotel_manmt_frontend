@@ -1,11 +1,11 @@
 import { create } from 'zustand';
 
-interface OrderItem {
+export interface OrderItem {
   id: number;
   foodItemId: number;
   quantity: number;
   price: number;
-  food_Name:string
+  food_name:string
 }
 
 interface User {

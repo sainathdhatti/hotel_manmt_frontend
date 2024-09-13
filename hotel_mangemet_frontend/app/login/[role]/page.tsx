@@ -64,7 +64,7 @@ const Login = ({ params: { role } }: LoginProps) => {
       {/* Login Form */}
       <div className="relative flex items-center justify-center w-full h-full">
         <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg mt-9 mb-9">
-          <h1 className="text-3xl font-bold mb-6 text-center text-gray-900">{role}</h1>
+          <h1 className="text-3xl font-bold mb-6 text-center text-gray-900">Login</h1>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>

@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 
 const API_URL = 'http://localhost:5000';
 
-interface SpaService {
+export interface SpaService {
   id: number;
   name: string;
   description: string;
@@ -17,7 +17,7 @@ interface SpaServiceStore {
   spaService: SpaService | null;
   getAllSpaServices: () => Promise<void>;
   getSpaServiceById: (id: number) => Promise<void>;
-  addSpaService: (service:{name: string; description: string; price: number; service_image: string}) => Promise<void>;
+  addSpaService: (service: {name: string; description: string; price: number}) => Promise<void>;
   updateSpaService: (data: SpaService) => Promise<void>;
   deleteSpaService: (id: number) => Promise<void>;
 }
@@ -41,7 +41,8 @@ const useSpaServiceStore = create<SpaServiceStore>((set) => ({
       console.error('Failed to fetch spa service by ID:', error);
     }
   },
-  addSpaService: async (service: { name: string; description: string; price: number; service_image: string }) => {
+
+  addSpaService: async (service: {name: string; description: string; price: number}) => {
     try {
       const { data } = await axios.post<SpaService>(`${API_URL}/spa-service`, service);
       set((state) => ({
