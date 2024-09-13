@@ -21,7 +21,7 @@ const useAuthStore = create<AuthState>((set) => {
     userId = Number(sessionStorage.getItem('userId')) || null;
     userName = sessionStorage.getItem('userName') || null;
   }
-
+ 
   return {
     token,
     isAuthenticated: !!token,

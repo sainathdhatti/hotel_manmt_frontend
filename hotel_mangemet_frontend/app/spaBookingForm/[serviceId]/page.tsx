@@ -12,6 +12,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import Navbar from "@/app/navbar";
 import Footer from "@/app/footer/page";
 
+import axios from "axios";
+
 // Schema for validation
 const schema = yup.object().shape({
   firstName: yup.string().required("First name is required"),
@@ -49,12 +51,32 @@ const SpaBookingForm = () => {
     serviceId ? +serviceId : null
   );
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<number | null>(null);
+  const [bookingId, setBookingId] = useState<number | null>(null);
+
 
   useEffect(() => {
     fetchSpaServices();
     fetchTimeSlots();
     fetchUsers();
   }, [fetchSpaServices, fetchTimeSlots, fetchUsers]);
+
+  useEffect(() => {
+    if (isAuthenticated && userId !== undefined) {
+      // Fetch booking IDs from the backend
+      axios.get(`http://localhost:5000/bookings/users/${userId}/BookingId`)
+        .then(response => {
+          const ids = response.data;
+          if (ids.length > 0) {
+            setBookingId(ids[0]); // Use the first booking ID or handle multiple IDs
+          } else {
+            console.error('No bookings found with status "checked-in".');
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching booking IDs:', error);
+        });
+    }
+  }, [isAuthenticated, userId]);
 
   const router = useRouter();
 
@@ -94,6 +116,7 @@ const SpaBookingForm = () => {
           return;
         }
 
+
         console.log(
           firstName,
           lastName,
@@ -101,7 +124,10 @@ const SpaBookingForm = () => {
           bookingDate,
           selectedService.id,
           selectedSlot.id,
-          userId
+
+          userId,
+          bookingId
+
         );
         await addBooking({
           firstName,
@@ -111,6 +137,7 @@ const SpaBookingForm = () => {
           userId: userId,
           spaserviceId: selectedService.id,
           timeslotId: selectedSlot.id,
+          bookingId:bookingId || 0
         });
       } else {
         alert(

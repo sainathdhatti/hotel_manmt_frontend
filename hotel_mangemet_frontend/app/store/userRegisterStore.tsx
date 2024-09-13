@@ -1,10 +1,12 @@
 import { create } from "zustand";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { toast } from "react-toastify";
 
 const API_URL = "http://localhost:5000"; // Adjust if necessary
 
+
 export interface User {
+
   id: number;
   email: string;
   password: string;
@@ -22,8 +24,25 @@ interface UserStore {
   getAllUsers: () => Promise<void>;
   getUserById: (id: number) => Promise<void>;
   checkEmailExists: (email: string) => Promise<boolean>;
-  registerUser: (userData: Omit<User, 'id'>) => Promise<void>;
-  updateUser: (id: number, userData: Partial<Omit<User, 'id'>>) => Promise<void>;
+
+  registerUser: (userData: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber: string;
+    password: string;
+    aadharCardNumber: string;
+  }) => Promise<void>;
+  updateUser: (
+    id: number,
+    userData: {
+      firstName?: string;
+      lastName?: string;
+      email?: string;
+      phoneNumber?: string;
+      aadharCardNumber?: string;
+    }
+  ) => Promise<void>;
   deleteUser: (userId: number) => Promise<void>;
   forgetPassword: (email: string) => Promise<void>;
   resetPassword: (token: string, newPassword: string) => Promise<void>;
@@ -42,11 +61,14 @@ const useUserStore = create<UserStore>((set) => ({
       if (!token) throw new Error("No token found");
 
       const response = await axios.get(`${API_URL}/users`, {
+
         headers: { Authorization: `Bearer ${token}` },
+
       });
       set({ users: response.data, loading: false });
     } catch (error) {
-      console.error("Error fetching users:", error);
+      const axiosError = error as AxiosError;
+      console.error("Error fetching users:", axiosError);
       set({ loading: false, error: "Failed to fetch users." });
     }
   },
@@ -54,6 +76,7 @@ const useUserStore = create<UserStore>((set) => ({
   getUserById: async (id: number) => {
     set({ loading: true });
     try {
+
       const response = await axios.get(`${API_URL}/users/${id}`);
       set({ users: [response.data], loading: false });
       return response.data; // Ensure this line is included
@@ -61,6 +84,8 @@ const useUserStore = create<UserStore>((set) => ({
       console.error("Error fetching user:", error);
       set({ loading: false, error: "Failed to fetch user." });
       return null; // or handle error appropriately
+
+      
     }
   },
   
@@ -76,7 +101,11 @@ const useUserStore = create<UserStore>((set) => ({
       });
       return response.data.exists; // Assuming the API returns { exists: boolean }
     } catch (error) {
+
+      const axiosError = error as AxiosError;
+      
       console.error("Error checking email:", error);
+
       return false; // Default to false if there's an error
     }
   },
@@ -85,6 +114,7 @@ const useUserStore = create<UserStore>((set) => ({
     set({ loading: true, registrationStatus: null });
     try {
       await axios.post(`${API_URL}/users`, userData, {
+
         headers: { "Content-Type": "application/json" },
       });
       set({ registrationStatus: "User registered successfully", error: null });
@@ -92,16 +122,19 @@ const useUserStore = create<UserStore>((set) => ({
     } catch (error: any) {
       console.error("Error registering user:", error);
       toast.error(error.response?.data?.message || "Error registering user");
+
       set({
-        registrationStatus: `Error registering user: ${error.message}`,
-        error: error.message,
+        registrationStatus: `Error registering user: ${axiosError.message}`,
+        error: axiosError.message,
       });
     } finally {
       set({ loading: false });
     }
   },
 
+
   updateUser: async (id, userData) => {
+
     set({ loading: true });
     try {
       if (!id || !userData) {
@@ -119,10 +152,11 @@ const useUserStore = create<UserStore>((set) => ({
       });
 
       set({ registrationStatus: "User updated successfully", error: null });
-    } catch (error: any) {
-      console.error("Error updating user:", error);
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("Error updating user:", axiosError);
       set({
-        error: `Error updating user: ${error.message}`,
+        error: `Error updating user: ${axiosError.message}`,
         registrationStatus: null,
       });
     } finally {
@@ -130,20 +164,22 @@ const useUserStore = create<UserStore>((set) => ({
     }
   },
 
-  deleteUser: async (userId) => {
+  deleteUser: async (userId: number) => {
     set({ loading: true });
     try {
       const token = sessionStorage.getItem("token");
       if (!token) throw new Error("No token found");
 
       await axios.delete(`${API_URL}/users/${userId}`, {
+
         headers: { Authorization: `Bearer ${token}` },
       });
       set({ registrationStatus: "User deleted successfully", error: null });
-    } catch (error: any) {
-      console.error("Error deleting user:", error);
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("Error deleting user:", axiosError);
       set({
-        error: `Error deleting user: ${error.message}`,
+        error: `Error deleting user: ${axiosError.message}`,
         registrationStatus: null,
       });
     } finally {
@@ -156,10 +192,11 @@ const useUserStore = create<UserStore>((set) => ({
     try {
       await axios.post(`${API_URL}/users/forgetpassword`, { email });
       set({ registrationStatus: "Password reset email sent", error: null });
-    } catch (error: any) {
-      console.error("Error sending password reset email:", error);
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("Error sending password reset email:", axiosError);
       set({
-        error: `Error sending password reset email: ${error.message}`,
+        error: `Error sending password reset email: ${axiosError.message}`,
         registrationStatus: null,
       });
     } finally {
@@ -172,10 +209,11 @@ const useUserStore = create<UserStore>((set) => ({
     try {
       await axios.post(`${API_URL}/users/reset-password`, { token, newPassword });
       set({ registrationStatus: "Password reset successfully", error: null });
-    } catch (error: any) {
-      console.error("Error resetting password:", error);
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("Error resetting password:", axiosError);
       set({
-        error: `Error resetting password: ${error.message}`,
+        error: `Error resetting password: ${axiosError.message}`,
         registrationStatus: null,
       });
     } finally {
