@@ -88,7 +88,7 @@ const AdminDashboard = () => {
   const getAllBookings = useBookingsStore((state) => state.fetchBookings);
   const deleteBooking = useBookingsStore((state) => state.deleteBooking);
   const updateBooking = useBookingsStore((state) => state.updateBooking);
-  const { isAuthenticated, userId } = useAuthStore((state) => ({
+  const { isAuthenticated, userId} = useAuthStore((state) => ({
     isAuthenticated: state.isAuthenticated,
     userId: state.userId,
   }));
@@ -242,7 +242,6 @@ const AdminDashboard = () => {
       bookings: filteredBookings,
       roomCategories: roomCategories,
       rooms: rooms,
-      contacts: contacts,
       foodItems: foodItems,
       amenities: amenities,
       spaServices: spaServices,
