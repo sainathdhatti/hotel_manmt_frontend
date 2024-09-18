@@ -23,6 +23,7 @@ interface FoodOrder {
   status: string;
   orderItems: OrderItem[]; // Adjust based on actual structure
   user: User; // User object
+  bookingId: number;
 }
 
 interface FoodOrderStoreState {
@@ -30,7 +31,7 @@ interface FoodOrderStoreState {
   currentOrder: FoodOrder | null;
   getAllOrders: () => Promise<void>;
   getOrderById: (id: number) => Promise<void>;
-  createOrder: (userId: number, orderItems: { foodItemId: number; quantity: number }[]) => Promise<void>;
+  createOrder: (userId: number, orderItems: { foodItemId: number; quantity: number }[],bookingId:number) => Promise<void>;
   updateOrder: (id: number, updatedOrder: Partial<FoodOrder>) => Promise<void>;
   deleteOrder: (id: number) => Promise<void>;
   calculateTotalAmount: (orderItems: { price: number; quantity: number }[]) => number;
@@ -56,13 +57,13 @@ const useFoodOrderStore = create<FoodOrderStoreState>((set) => ({
     set({ currentOrder: data });
   },
 
-  createOrder: async (userId: number, orderItems: { foodItemId: number; quantity: number }[]) => {
+  createOrder: async (userId: number, orderItems: { foodItemId: number; quantity: number }[],bookingId:number) => {
     const response = await fetch(`${baseUrl}/orders`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ userId, orderItems }),
+      body: JSON.stringify({ userId, orderItems ,bookingId}),
     });
     const newOrder = await response.json();
     set((state) => ({ orders: [...state.orders, newOrder] }));

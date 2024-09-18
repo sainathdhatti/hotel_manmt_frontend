@@ -21,38 +21,6 @@ import { faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import Pagination from "./pagination/page";
 
-// interface room {
-//   id: number;
-//   roomNumber: number;
-//   roomCategory: RoomCategory;
-//   status: string;
-// }
-// interface booking {
-//   bookingId: number;
-//   user: {
-//     firstName: string;
-//   };
-//   checkInDate: string;
-//   checkOutDate: string;
-//   noOfAdults: number;
-//   noOfChildrens: number;
-//   noOfDays: number;
-//   room?: {
-//     roomNumber: string;
-//   };
-//   TotalAmount: number;
-//   status: string;
-// }
-// interface roomCategory {
-//   id: number;
-//   name: string;
-//   description?: string;
-//   price?: number;
-//   imageUrl?: string ;
-//   amenities?: { id: number; name: string }[];
-//   noOfChildren?: number;
-//   noOfAdults?: number;
-// }
 
 const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState<string>("bookings");
@@ -87,11 +55,11 @@ const AdminDashboard = () => {
   const bookings = useBookingsStore((state) => state.bookings);
   const getAllBookings = useBookingsStore((state) => state.fetchBookings);
   const deleteBooking = useBookingsStore((state) => state.deleteBooking);
-  const updateBooking = useBookingsStore((state) => state.updateBooking);
-  const { isAuthenticated, userId} = useAuthStore((state) => ({
-    isAuthenticated: state.isAuthenticated,
-    userId: state.userId,
-  }));
+  const updateBooking = useBookingsStore((state) => state.updateBookingStatus);
+  // const { isAuthenticated, userId } = useAuthStore((state) => ({
+  //   isAuthenticated: state.isAuthenticated,
+  //   userId: state.userId,
+  // }));
 
   useEffect(() => {
     if (activeSection === "amenities") {
@@ -242,6 +210,7 @@ const AdminDashboard = () => {
       bookings: filteredBookings,
       roomCategories: roomCategories,
       rooms: rooms,
+      contacts: contacts,
       foodItems: foodItems,
       amenities: amenities,
       spaServices: spaServices,
@@ -302,7 +271,6 @@ const AdminDashboard = () => {
                     <th className="px-4 py-2 text-center">Total Days</th>
                     <th className="px-4 py-2 text-center">Total Amount</th>
                     <th className="px-4 py-2 text-center">Status</th>
-                    <th className="px-4 py-2 text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -319,7 +287,7 @@ const AdminDashboard = () => {
                           {booking.noOfAdults ?? "N/A"}
                         </td>
                         <td className="px-4 py-2 text-center">
-                          {booking.noOfChildrens ?? "N/A"}
+                          {booking.noOfChildrens ?? 0}
                         </td>
                         <td className="px-4 py-2 text-center">
                           {new Date(booking.checkInDate).toLocaleDateString()}
@@ -337,36 +305,6 @@ const AdminDashboard = () => {
                         </td>
                         <td className="px-4 py-2 text-center">
                           {booking.status ?? "N/A"}
-                        </td>
-                        <td className="px-4 py-2 flex justify-center space-x-5">
-                          <Link href={`/bookings/${booking.bookingId}`}>
-                            <button
-                              className={`btn ${
-                                isCancelled(booking.status)
-                                  ? "btn-disabled"
-                                  : "btn-warning"
-                              } btn-outlin`}
-                              disabled={isCancelled(booking.status)}
-                            >
-                              <FontAwesomeIcon icon={faEdit} />
-                            </button>
-                          </Link>
-                          <button
-                            className={`btn ${
-                              isCancelled(booking.status)
-                                ? "btn-disabled"
-                                : "btn-error"
-                            } btn-outlin`}
-                            onClick={() =>
-                              handleDeleteBooking(booking.bookingId)
-                            }
-                            disabled={isCancelled(booking.status)}
-                          >
-                            <FontAwesomeIcon
-                              icon={faTrash}
-                              className="text-red-500"
-                            />
-                          </button>
                         </td>
                       </tr>
                     ))
@@ -457,7 +395,7 @@ const AdminDashboard = () => {
                           {data.noOfAdults || "N/A"}
                         </td>
                         <td className="px-4 py-2 text-gray-900">
-                          {data.noOfChildren || "N/A"}
+                          {data.noOfChildren || 0}
                         </td>
                         <td className="px-4 py-2 text-gray-900">
                           {data.amenities && data.amenities.length > 0 ? (
@@ -505,7 +443,7 @@ const AdminDashboard = () => {
       case "rooms":
         return (
           <div className="flex flex-col items-center justify-center">
-            <div className="w-full max-w-2xl">
+            <div className="w-full max-w-3xl">
               <div className="mb-6 flex justify-center">
                 <button
                   onClick={() => router.push("/dashboard/adminlogin/rooms/new")}
@@ -516,7 +454,7 @@ const AdminDashboard = () => {
               </div>
               <div className="flex justify-center">
                 <table
-                  className={`w-3/4 border border-gray-300 ${tableColorClass} rounded-lg overflow-hidden`}
+                  className={`w-full border border-gray-300 ${tableColorClass} rounded-lg overflow-hidden`}
                 >
                   <thead className="bg-gray-200 text-gray-700">
                     <tr>
@@ -537,7 +475,7 @@ const AdminDashboard = () => {
                   <tbody>
                     {currentItems.map((r: Rooms) => (
                       <tr key={r.id} className="border-b hover:bg-gray-100">
-                        <td className="px-6 py-1.5 text-gray-900">
+                        <td className="px-6 py-1.5 text-gray-900 ">
                           {r.roomNumber || "N/A"}
                         </td>
                         <td className="px-6 py-1.5 text-gray-900">
@@ -583,11 +521,11 @@ const AdminDashboard = () => {
       case "amenities":
         return (
           <div className="flex flex-col items-center justify-center">
-            <div className="w-full max-w-2xl">
+            <div className="w-full max-w-3xl">
               <div className="mb-6 flex justify-center">
                 <button
                   onClick={() =>
-                    router.push("/dashboard/adminlogin/amenities/new")
+                    router.push("/dashboard/adminlogin/amenities/add")
                   }
                   className="bg-blue-500 text-white px-6 py-1.5 rounded-md shadow-md hover:bg-blue-600 transition duration-300"
                 >
@@ -648,7 +586,7 @@ const AdminDashboard = () => {
       case "foodItems":
         return (
           <div className="flex flex-col items-center justify-center">
-            <div className="w-full max-w-2xl">
+            <div className="w-full max-w-3xl">
               <div className="mb-6 flex justify-center">
                 <button
                   onClick={() =>
@@ -742,7 +680,7 @@ const AdminDashboard = () => {
       case "spaServices":
         return (
           <div className="flex flex-col items-center justify-center">
-            <div className="w-full max-w-2xl">
+            <div className="w-full max-w-4xl">
               <div className="mb-6 flex justify-center">
                 <button
                   onClick={() =>
@@ -755,20 +693,20 @@ const AdminDashboard = () => {
               </div>
               <div className="flex justify-center">
                 <table
-                  className={`w-3/4 border border-gray-300 ${tableColorClass} rounded-lg overflow-hidden`}
+                  className={`w-full border border-gray-300 ${tableColorClass} rounded-lg overflow-hidden`}
                 >
                   <thead className="bg-gray-200 text-gray-700">
                     <tr>
-                      <th className="px-6 py-1.5 text-left font-semibold">
+                      <th className="px-4 py-1.5 text-left font-semibold">
                         Name
                       </th>
-                      <th className="px-6 py-1.5 text-left font-semibold">
+                      <th className="px-4 py-1.5 text-left font-semibold">
                         Description
                       </th>
-                      <th className="px-6 py-1.5 text-left font-semibold">
+                      <th className="px-4 py-1.5 text-left font-semibold">
                         Price
                       </th>
-                      <th className="px-6 py-1.5 text-center font-semibold">
+                      <th className="px-4 py-1.5 text-center font-semibold">
                         Actions
                       </th>
                     </tr>

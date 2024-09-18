@@ -39,10 +39,11 @@ const Login = ({ params: { role } }: LoginProps) => {
       if (role === 'userlogin') {
         // If role is userlogin, redirect to the home page
         router.push('/');
-       } //else {
-      //   // Redirect to the dashboard or any other page for different roles
-      //   router.push(`/dashboard/${role}`);
-      // }
+      } else {
+        console.log(role);
+        // Redirect to the dashboard or any other page for different roles
+        router.push(`/dashboard/${role}`);
+      }
     } catch (error: any) {
       console.error(error);
       alert(error.message || 'Login failed');

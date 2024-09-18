@@ -118,19 +118,19 @@ const FoodItemsForm = ({ params: { foodId } }: Props) => {
         await updateFoodItem({
           // food_id: parseInt(foodId), // Include food_id here
           // ...foodItemData,
-          id: parseInt(foodId), // Ensure this matches the expected property name and type
-          name: foodItemData.food_name,
-          description: foodItemData.food_description,
-          price: foodItemData.food_price,
-          image: foodItemData.food_image,
+          food_id: parseInt(foodId), // Ensure this matches the expected property name and type
+          food_name: foodItemData.food_name,
+          food_description: foodItemData.food_description,
+          food_price: foodItemData.food_price,
+          food_image: foodItemData.food_image,
+     
         });
       }
   
       reset();
-      router.push("/dashboard/adminlogin?section=fooditems");
+      router.push("/dashboard/adminlogin");
     } catch (error) {
       console.error("Error submitting form:", error);
-      // Handle the error appropriately
     }
   };
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {

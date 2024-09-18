@@ -131,29 +131,46 @@ const UserDashboard = () => {
   //   // Filter bookings that belong to the user
   //   setFilteredBookings(bookings.filter((booking) => booking.user.id === userId));
 
-    // Function to handle sending revie
+  // Function to handle sending revie
   useEffect(() => {
     if (userId && bookings.length > 0) {
       // Filter bookings that belong to the user
-      setFilteredBookings(bookings.filter((booking) => booking.user.id === userId));
+      setFilteredBookings(
+        bookings.filter((booking) => booking.user.id === userId)
+      );
 
       // Ensure review links are only sent once
       const sendPendingReviewLinks = async () => {
         const promises = bookings.map(async (booking) => {
           // Check if booking is "CHECKED_OUT" and review link hasn't been sent
-          if (booking.status === BookingStatuss.CHECKED_OUT && !booking.reviewLinkSent) {
+          if (
+            booking.status === BookingStatuss.CHECKED_OUT &&
+            !booking.reviewLinkSent
+          ) {
             try {
-              console.log("Sending review link for booking:", booking.bookingId);
+              console.log(
+                "Sending review link for booking:",
+                booking.bookingId
+              );
               await sendReviewLink(booking.bookingId); // Send the review link
-              alert("Review link sent successfully for booking " + booking.bookingId);
+              alert(
+                "Review link sent successfully for booking " + booking.bookingId
+              );
             } catch (err: any) {
               if (
                 err.response?.data?.message ===
                 "Review link has already been sent for this booking."
               ) {
-                console.log("Review link already sent for booking:", booking.bookingId);
+                console.log(
+                  "Review link already sent for booking:",
+                  booking.bookingId
+                );
               } else {
-                console.error("Error sending review link for booking:", booking.bookingId, err);
+                console.error(
+                  "Error sending review link for booking:",
+                  booking.bookingId,
+                  err
+                );
               }
             }
           }
@@ -257,8 +274,8 @@ const UserDashboard = () => {
       case "bookings":
         return (
           <div className="flex flex-col items-center justify-center">
-            <div className="w-full border-2 border-gray-200   p-6">
-              <h1 className="text-2xl font-bold mb-4  text-teal-500">
+            <div className="w-full border-2 border-gray-200 p-6">
+              <h1 className="text-2xl font-bold mb-4 text-teal-500">
                 Bookings List
               </h1>
               <table className="min-w-full bg-white border border-gray-300">
@@ -287,7 +304,7 @@ const UserDashboard = () => {
                       </td>
                     </tr>
                   ) : (
-                    filteredBookings.map((booking) => (
+                    [...filteredBookings].reverse().map((booking) => (
                       <tr
                         key={booking.bookingId}
                         className="border-b hover:bg-gray-100"
@@ -305,7 +322,7 @@ const UserDashboard = () => {
                           {booking.noOfAdults || "N/A"}
                         </td>
                         <td className="px-4 py-2 text-center text-teal-500">
-                          {booking.noOfChildrens || "N/A"}
+                          {booking.noOfChildrens || 0}
                         </td>
                         <td className="px-4 py-2 text-center text-indigo-500">
                           {booking.noOfDays}
@@ -321,8 +338,21 @@ const UserDashboard = () => {
                         </td>
                         <td className="px-4 py-2 flex justify-center space-x-2">
                           <button
-                            onClick={() => handleDelete(booking.bookingId)}
-                            className="bg-red-500 text-white py-1 px-2 rounded-md shadow-sm hover:bg-red-600"
+                            onClick={() => {
+                              handleDelete(booking.bookingId);
+                            }}
+                            disabled={
+                              booking.status === BookingStatuss.CHECKED_IN ||
+                              booking.status === BookingStatuss.CANCELLED ||
+                              booking.status === BookingStatuss.CHECKED_OUT
+                            }
+                            className={`py-1 px-2 rounded-md shadow-sm ${
+                              booking.status === BookingStatuss.CHECKED_IN ||
+                              booking.status === BookingStatuss.CANCELLED ||
+                              booking.status === BookingStatuss.CHECKED_OUT
+                                ? "bg-gray-400 cursor-not-allowed"
+                                : "bg-red-500 text-white hover:bg-red-600"
+                            }`}
                           >
                             Cancel
                           </button>
@@ -388,7 +418,8 @@ const UserDashboard = () => {
                             onClick={() => handleCancelOrder(order.id)}
                             disabled={order.status === "delivered"}
                             className={`py-1 px-2 rounded-md ${
-                              order.status === "delivered"
+                              order.status === "delivered" ||
+                              order.status === "confirmed"
                                 ? "bg-gray-400 cursor-not-allowed"
                                 : "bg-red-500 text-white hover:bg-red-600"
                             }`}

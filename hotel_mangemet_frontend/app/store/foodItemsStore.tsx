@@ -1,3 +1,4 @@
+
 import { create } from "zustand";
 
 const baseUrl = "http://localhost:5000/fooditem";
@@ -12,19 +13,19 @@ export interface FoodItemsStoreState {
     food_price: number;
     food_description: string;
     food_image: string;
+   // bookingId:number;
   }) => Promise<void>;
   updateFoodItem: (data: FoodItem) => Promise<void>;
   deleteFoodItem: (id: number) => Promise<void>;
 }
 
 export interface FoodItem {
-  id: number;
-  imageUrl: any;
   food_id: number;
   food_name: string;
   food_price: number;
   food_description: string;
   food_image: string;
+ // bookingId:number;
 }
 
 const useFoodItemsStore = create<FoodItemsStoreState>((set) => ({
@@ -56,6 +57,7 @@ const useFoodItemsStore = create<FoodItemsStoreState>((set) => ({
     food_price: number;
     food_description: string;
     food_image: string;
+   // bookingId:number;
   }) => {
     const response = await fetch(`${baseUrl}`, {
       method: "POST",
