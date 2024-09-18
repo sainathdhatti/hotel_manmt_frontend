@@ -60,7 +60,7 @@ interface SpaBooking {
       id: number;
       name: string;
     };
-
+  }
 }
 }
 

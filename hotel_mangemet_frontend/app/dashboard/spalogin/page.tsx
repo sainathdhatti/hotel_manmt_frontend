@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import useAuthStore from '@/app/store/loginStore';
 
-const SpaBookings: React.FC = () => {
+const SpaBookings = () => {
   const router = useRouter();
   const { spabookings, fetchBookings, updateBooking } = useSpaBookingStore((state) => ({
     spabookings: state.spabookings,

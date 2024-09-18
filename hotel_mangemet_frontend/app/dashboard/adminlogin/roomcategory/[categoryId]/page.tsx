@@ -26,7 +26,7 @@ const schema = yup.object().shape({
   imageUrl: yup.string().url().notRequired(),
   noOfAdults: yup.number().positive().integer().required(),
   noOfChildren: yup.number().positive().integer().required(),
-  amenities: yup.array().of(yup.number()).required(), // Changed to number[]
+  amenities: yup.array().of(yup.number()).required(), 
 });
 
 interface Props {

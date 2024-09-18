@@ -57,12 +57,12 @@ const useUserStore = create<UserStore>((set) => ({
   getAllUsers: async () => {
     set({ loading: true });
     try {
-      const token = sessionStorage.getItem("token");
-      if (!token) throw new Error("No token found");
+      // const token = sessionStorage.getItem("token");
+      // if (!token) throw new Error("No token found");
 
       const response = await axios.get(`${API_URL}/users`, {
 
-        headers: { Authorization: `Bearer ${token}` },
+        // headers: { Authorization: `Bearer ${token}` },
 
       });
       set({ users: response.data, loading: false });
@@ -118,15 +118,15 @@ const useUserStore = create<UserStore>((set) => ({
         headers: { "Content-Type": "application/json" },
       });
       set({ registrationStatus: "User registered successfully", error: null });
-      toast.success("User registered successfully");
+      toast.success("User registered successfully! please login");
     } catch (error: any) {
       console.error("Error registering user:", error);
       toast.error(error.response?.data?.message || "Error registering user");
 
       set({
-        registrationStatus: `Error registering user: ${axiosError.message}`,
-        error: axiosError.message,
-      });
+        registrationStatus: `Error registering user: ${AxiosError.ERR_BAD_RESPONSE}`,
+        error: AxiosError.ERR_BAD_RESPONSE,
+    });
     } finally {
       set({ loading: false });
     }

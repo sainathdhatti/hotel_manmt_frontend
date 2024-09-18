@@ -16,6 +16,7 @@ const Navbar = ({ className }: NavbarProps) => {
   }));
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // State for mobile menu
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -24,6 +25,10 @@ const Navbar = ({ className }: NavbarProps) => {
 
   const handleDropdownToggle = () => {
     setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  const handleMobileMenuToggle = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen); // Toggle mobile menu
   };
 
   const handleLogout = () => {
@@ -36,7 +41,6 @@ const Navbar = ({ className }: NavbarProps) => {
 
   return (
     <div>
-      {/* Render based on client-side only */}
       {isClient && (
         <nav>
           <div className="container mx-auto flex items-center justify-between p-4 relative">
@@ -52,7 +56,8 @@ const Navbar = ({ className }: NavbarProps) => {
               </div>
             </div>
 
-            <div className="hidden md:block bg-white-800">
+            {/* Desktop Menu */}
+            <div className="hidden md:block">
               <ul className="flex justify-center space-x-3 p-4 text-black text-sm font-bold">
                 {[
                   "OVERVIEW",
@@ -74,6 +79,30 @@ const Navbar = ({ className }: NavbarProps) => {
                   </li>
                 ))}
               </ul>
+            </div>
+
+            {/* Mobile Menu Toggle Button */}
+            <div className="md:hidden">
+              <button
+                onClick={handleMobileMenuToggle}
+                className="text-black focus:outline-none"
+              >
+                {/* Hamburger Icon */}
+                <svg
+                  className="h-8 w-8"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d={isMobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+                  />
+                </svg>
+              </button>
             </div>
 
             <div className="flex items-center space-x-4">
@@ -123,14 +152,14 @@ const Navbar = ({ className }: NavbarProps) => {
 
           {/* Mobile Menu */}
           <div
-            className={`md:hidden ${isDropdownOpen ? "block" : "hidden"} bg-white border-t border-gray-200`}
+            className={`md:hidden ${isMobileMenuOpen ? "block" : "hidden"} bg-white border-t border-gray-200`}
           >
             <ul className="flex flex-col space-y-4 p-4">
               {[
                 "OVERVIEW",
                 "ABOUT US",
                 "ROOMS",
-                "Food",
+                "FOOD",
                 "SPASERVICE",
                 "GALLERY",
                 "AMENITIES",

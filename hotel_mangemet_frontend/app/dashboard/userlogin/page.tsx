@@ -157,11 +157,18 @@ const UserDashboard = () => {
     fetchUserById,
   ]);
 
+<
+
   useEffect(() => {
     if (userId && bookings.length > 0) {
+      // Filter bookings that belong to the user
       setFilteredBookings(
         bookings.filter((booking) => booking.user.id === userId)
       );
+
+    
+
+
       const sendPendingReviewLinks = async () => {
         const promises = bookings.map(async (booking) => {
           // Check if booking is "CHECKED_OUT" and review link hasn't been sent
@@ -170,6 +177,8 @@ const UserDashboard = () => {
             !booking.reviewLinkSent
           ) {
             try {
+
+              
               // console.log(
               //   "Sending review link for booking:",
               //   booking.bookingId
@@ -197,6 +206,7 @@ const UserDashboard = () => {
                 }
               } else {
                 console.error("Unknown error:", err);
+
               }
             }
           }
@@ -305,8 +315,8 @@ const UserDashboard = () => {
       case "bookings":
         return (
           <div className="flex flex-col items-center justify-center">
-            <div className="w-full border-2 border-gray-200   p-6">
-              <h1 className="text-2xl font-bold mb-4  text-teal-500">
+            <div className="w-full border-2 border-gray-200 p-6">
+              <h1 className="text-2xl font-bold mb-4 text-teal-500">
                 Bookings List
               </h1>
               <table className="min-w-full bg-white border border-gray-300">
@@ -335,7 +345,7 @@ const UserDashboard = () => {
                       </td>
                     </tr>
                   ) : (
-                    filteredBookings.map((booking) => (
+                    [...filteredBookings].reverse().map((booking) => (
                       <tr
                         key={booking.bookingId}
                         className="border-b hover:bg-gray-100"
@@ -369,17 +379,24 @@ const UserDashboard = () => {
                         </td>
                         <td className="px-4 py-2 flex justify-center space-x-2">
                           <button
-                            onClick={() => handleDelete(booking.bookingId)}
-                            className={`bg-red-500 text-white py-1 px-2 rounded-md shadow-sm ${
-                              booking.status === BookingStatuss.CHECKED_OUT ||
-                              booking.status === BookingStatuss.CANCELLED
-                                ? "cursor-not-allowed bg-gray-500 hover:bg-gray-500"
-                                : "hover:bg-red-600"
-                            }`}
+
+                            onClick={() => {
+                              handleDelete(booking.bookingId);
+                            }}
                             disabled={
-                              booking.status === BookingStatuss.CHECKED_OUT ||
-                              booking.status === BookingStatuss.CANCELLED
+                              booking.status === BookingStatuss.CHECKED_IN ||
+                              booking.status === BookingStatuss.CANCELLED ||
+                              booking.status === BookingStatuss.CHECKED_OUT
                             }
+                            className={`py-1 px-2 rounded-md shadow-sm ${
+                              booking.status === BookingStatuss.CHECKED_IN ||
+                              booking.status === BookingStatuss.CANCELLED ||
+                              booking.status === BookingStatuss.CHECKED_OUT
+                                ? "bg-gray-400 cursor-not-allowed"
+                                : "bg-red-500 text-white hover:bg-red-600"
+                            }`}
+
+             
                           >
                             Cancel
                           </button>
@@ -445,7 +462,8 @@ const UserDashboard = () => {
                             onClick={() => handleCancelOrder(order.id)}
                             disabled={order.status === "delivered"}
                             className={`py-1 px-2 rounded-md ${
-                              order.status === "delivered"
+                              order.status === "delivered" ||
+                              order.status === "confirmed"
                                 ? "bg-gray-400 cursor-not-allowed"
                                 : "bg-red-500 text-white hover:bg-red-600"
                             }`}

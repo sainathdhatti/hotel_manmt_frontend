@@ -1,10 +1,14 @@
 "use client";
 
+
+
+
 import useBookingsStore, {
   AvailableRoom,
   Booking,
   BookingStatuss,
 } from "@/app/store/bookingStore";
+
 import useFinalBillingStore from "@/app/store/final_billingStore";
 import useAuthStore from "@/app/store/loginStore";
 import useRoomCategoryStore from "@/app/store/roomCategory";
@@ -120,10 +124,14 @@ const Receptionist = () => {
     fetchData();
   }, [fetchBookings]);
 
+
+ 
+
   const handleStatusChange = async (
     bookingId: number,
     status: BookingStatuss
   ) => {
+
     try {
       await updateBookingStatus(bookingId, { status });
       toast.success("Booking status updated successfully.");
@@ -138,8 +146,14 @@ const Receptionist = () => {
     }
   };
 
+
+  console.log(finalbillings);
+
   const statusOptions = Object.values(BookingStatuss);
+
+ 
   console.log("availableRooms",availableRooms);
+
 
   const renderContent = () => {
     switch (currentView) {
@@ -205,40 +219,34 @@ const Receptionist = () => {
                           ₹{booking.TotalAmount || "0.00"}
                         </td>
                         <td className="px-4 py-2 text-center text-pink-500">
-                          <select
-                            value={booking.status}
-                            onChange={(e) => {
-                              const newStatus = e.target
-                                .value as BookingStatuss;
-                              if (
-                                booking.status !== BookingStatuss.CHECKED_OUT &&
-                                booking.status !== BookingStatuss.CANCELLED
-                              ) {
-                                handleStatusChange(
-                                  booking.bookingId,
-                                  newStatus
-                                );
-                              }
-                            }}
-                            className={`border border-gray-300 rounded-md p-1 ${
-                              booking.status === BookingStatuss.CHECKED_OUT
-                                ? "bg-gray-200 cursor-not-allowed"
-                                : ""
-                            }`}
-                            disabled={
-                              booking.status === BookingStatuss.CHECKED_OUT ||
-                              booking.status === BookingStatuss.CANCELLED
-                            }
-                          >
-                            {statusOptions.map((status) => (
-                              <option
-                                key={status as string}
-                                value={status as string}
-                              >
-                                {status as string}
-                              </option>
-                            ))}
-                          </select>
+                         <select
+  value={booking.status}
+  onChange={(e) => {
+    const newStatus = e.target.value as BookingStatuss;
+    if (
+      booking.status !== BookingStatuss.CHECKED_OUT &&
+      booking.status !== BookingStatuss.CANCELLED
+    ) {
+      handleStatusChange(booking.bookingId, newStatus);
+    }
+  }}
+  className={`border border-gray-300 rounded-md p-1 ${
+    booking.status === BookingStatuss.CHECKED_OUT
+      ? "bg-gray-200 cursor-not-allowed"
+      : ""
+  }`}
+  disabled={
+    booking.status === BookingStatuss.CHECKED_OUT ||
+    booking.status === BookingStatuss.CANCELLED
+  }
+>
+  {statusOptions.map((status) => (
+    <option key={status as string} value={status as string}>
+      {status as string}
+    </option>
+  ))}
+</select>
+
                         </td>
                       </tr>
                     ))

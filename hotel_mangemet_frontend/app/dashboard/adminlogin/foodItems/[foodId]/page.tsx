@@ -127,10 +127,9 @@ const FoodItemsForm = ({ params: { foodId } }: Props) => {
       }
   
       reset();
-      router.push("/dashboard/adminlogin?section=fooditems");
+      router.push("/dashboard/adminlogin");
     } catch (error) {
       console.error("Error submitting form:", error);
-      // Handle the error appropriately
     }
   };
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
