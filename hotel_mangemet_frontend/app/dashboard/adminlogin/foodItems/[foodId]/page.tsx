@@ -123,7 +123,6 @@ const FoodItemsForm = ({ params: { foodId } }: Props) => {
           food_description: foodItemData.food_description,
           food_price: foodItemData.food_price,
           food_image: foodItemData.food_image,
-     
         });
       }
   

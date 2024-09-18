@@ -57,7 +57,11 @@ const useFoodItemsStore = create<FoodItemsStoreState>((set) => ({
     food_price: number;
     food_description: string;
     food_image: string;
+
    // bookingId:number;
+
+  
+
   }) => {
     const response = await fetch(`${baseUrl}`, {
       method: "POST",

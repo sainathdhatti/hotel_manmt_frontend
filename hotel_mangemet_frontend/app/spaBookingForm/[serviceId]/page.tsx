@@ -89,7 +89,7 @@ const SpaBookingForm = () => {
         gender,
         spaserviceId: selectedSpaService,
         timeslotId: selectedTimeSlot,
-        userId: userId ?? -1, // Handle null case
+        userId: userId ?? -1, 
       });
 
       if (

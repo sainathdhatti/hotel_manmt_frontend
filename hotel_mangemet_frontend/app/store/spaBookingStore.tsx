@@ -62,6 +62,7 @@ interface SpaBooking {
     };
   }
 }
+}
 
 interface SpaBookingStore {
   spabookings: SpaBooking[];

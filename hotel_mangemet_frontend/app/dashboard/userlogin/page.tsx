@@ -21,6 +21,10 @@ import useSpaBookingStore, { BookingStatus } from "@/app/store/spaBookingStore";
 import useSpaServiceStore from "@/app/store/spaServiceStore";
 import useTimeSlotStore from "@/app/store/timeSlotStore";
 import useReviewStore from "@/app/store/reviewStore";
+import useFinalBillingStore, {
+  FinalBilling,
+} from "@/app/store/final_billingStore";
+import axios from "axios";
 
 interface User {
   id: number;
@@ -45,21 +49,15 @@ const UserDashboard = () => {
     updateOrder: state.updateOrder,
   }));
 
-  // const { spabookings, fetchBookings } = useSpaBookingStore(state => ({
-  //   spabookings: state.spabookings,
-  //   fetchBookings: state.fetchBookings,
-  // }));
-
-  // useEffect(() => {
-  //   fetchBookings();
-  // }, [fetchBookings]);
-
-  const { getAllSpaBooking, spabookings, updateSpaBooking } =
-    useSpaBookingStore((state) => ({
-      getAllSpaBooking: state.fetchBookings,
-      spabookings: state.spabookings,
-      updateSpaBooking: state.updateBooking,
-    }));
+  const {
+    getAllSpaBooking,
+    spabookings,
+    updateSpaBooking,
+  } = useSpaBookingStore((state) => ({
+    getAllSpaBooking: state.fetchBookings,
+    spabookings: state.spabookings,
+    updateSpaBooking: state.updateBooking,
+  }));
 
   const { getAllSpaServices, spaServices } = useSpaServiceStore((state) => ({
     getAllSpaServices: state.getAllSpaServices,
@@ -70,15 +68,26 @@ const UserDashboard = () => {
     getAllTimeSlot: state.getAllTimeSlots,
     timeSlots: state.timeslots,
   }));
+  const { getFinalBillingsByUser, finalBillings } = useFinalBillingStore(
+    (state) => ({
+      getFinalBillingsByUser: state.getFinalBillingsByUser,
+      finalBillings: state.finalBillings,
+    })
+  );
 
-  const { users, getAllUsers, updateUser, deleteUser, fetchUserById } =
-    useUserStore((state) => ({
-      users: state.users,
-      getAllUsers: state.getAllUsers,
-      updateUser: state.updateUser,
-      deleteUser: state.deleteUser,
-      fetchUserById: state.getUserById,
-    }));
+  const {
+    users,
+    getAllUsers,
+    updateUser,
+    deleteUser,
+    fetchUserById,
+  } = useUserStore((state) => ({
+    users: state.users,
+    getAllUsers: state.getAllUsers,
+    updateUser: state.updateUser,
+    deleteUser: state.deleteUser,
+    fetchUserById: state.getUserById,
+  }));
 
   const { bookings, fetchBookingsByUserId, deleteBooking } = useBookingsStore(
     (state) => ({
@@ -94,6 +103,28 @@ const UserDashboard = () => {
   const [currentView, setCurrentView] = useState("bookings");
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
+  const [billings, setFinalBilling] = useState<FinalBilling[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (userId) {
+      const fetchFinalBillings = async () => {
+        setLoading(true);
+        try {
+          const billings = await getFinalBillingsByUser(userId);
+          setFinalBilling(billings);
+        } catch (err) {
+          setError("Failed to fetch billing details.");
+          console.error("Error fetching final billings:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchFinalBillings();
+    }
+  }, [userId, getFinalBillingsByUser]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -126,12 +157,8 @@ const UserDashboard = () => {
     fetchUserById,
   ]);
 
-  // useEffect(() => {
-  // if (userId && bookings.length > 0) {
-  //   // Filter bookings that belong to the user
-  //   setFilteredBookings(bookings.filter((booking) => booking.user.id === userId));
+<
 
-  // Function to handle sending revie
   useEffect(() => {
     if (userId && bookings.length > 0) {
       // Filter bookings that belong to the user
@@ -139,7 +166,9 @@ const UserDashboard = () => {
         bookings.filter((booking) => booking.user.id === userId)
       );
 
-      // Ensure review links are only sent once
+    
+
+
       const sendPendingReviewLinks = async () => {
         const promises = bookings.map(async (booking) => {
           // Check if booking is "CHECKED_OUT" and review link hasn't been sent
@@ -148,35 +177,43 @@ const UserDashboard = () => {
             !booking.reviewLinkSent
           ) {
             try {
-              console.log(
-                "Sending review link for booking:",
-                booking.bookingId
-              );
+
+              
+              // console.log(
+              //   "Sending review link for booking:",
+              //   booking.bookingId
+              // );
               await sendReviewLink(booking.bookingId); // Send the review link
-              alert(
-                "Review link sent successfully for booking " + booking.bookingId
-              );
-            } catch (err: any) {
-              if (
-                err.response?.data?.message ===
-                "Review link has already been sent for this booking."
-              ) {
-                console.log(
-                  "Review link already sent for booking:",
-                  booking.bookingId
-                );
+              // alert(
+              //   "Review link sent successfully for booking " + booking.bookingId
+              // );
+            } catch (err) {
+              if ("response" in err) {
+                // Now you can access err.response
+                if (
+                  err.response?.data?.message ===
+                  "Review link has already been sent for this booking."
+                ) {
+                  console.log(
+                    "Review link already sent for booking:",
+                    booking.bookingId
+                  );
+                } else {
+                  console.error(
+                    "Error sending review link for booking:",
+                    booking.bookingId
+                  );
+                }
               } else {
-                console.error(
-                  "Error sending review link for booking:",
-                  booking.bookingId,
-                  err
-                );
+                console.error("Unknown error:", err);
+
               }
             }
           }
         });
         await Promise.all(promises); // Ensure all promises are resolved before proceeding
       };
+      console.log("userId is ", userId);
 
       // Use a debounce technique to prevent the effect from running too frequently
       const timeoutId = setTimeout(() => {
@@ -218,8 +255,12 @@ const UserDashboard = () => {
 
   const handleUpdateUser = async () => {
     if (editingUser && userId) {
-      const { aadharCardNumber, phoneNumber, firstName, lastName } =
-        editingUser;
+      const {
+        aadharCardNumber,
+        phoneNumber,
+        firstName,
+        lastName,
+      } = editingUser;
 
       const updatedUserData = {
         aadharCardNumber,
@@ -338,6 +379,7 @@ const UserDashboard = () => {
                         </td>
                         <td className="px-4 py-2 flex justify-center space-x-2">
                           <button
+
                             onClick={() => {
                               handleDelete(booking.bookingId);
                             }}
@@ -353,6 +395,8 @@ const UserDashboard = () => {
                                 ? "bg-gray-400 cursor-not-allowed"
                                 : "bg-red-500 text-white hover:bg-red-600"
                             }`}
+
+             
                           >
                             Cancel
                           </button>
@@ -523,7 +567,7 @@ const UserDashboard = () => {
                                 spa.status === BookingStatus.CANCELLED
                               }
                             >
-                              Cance
+                              Cancel
                             </button>
                           </td>
                         </tr>
@@ -532,6 +576,78 @@ const UserDashboard = () => {
                 </tbody>
               </table>
             </div>
+          </div>
+        );
+
+      case "billings":
+        return (
+          <div className="overflow-x-auto w-full border-2 border-gray-200 p-6">
+            <h1 className="text-2xl font-bold mb-4 text-teal-500">
+              Billing Information
+            </h1>
+            <table className="min-w-full bg-white border border-gray-300 shadow-md">
+              <thead className="bg-gray-100 text-teal-600">
+                <tr>
+                  <th className="py-3 px-4 border-b text-center">ID</th>
+                  <th className="py-3 px-4 border-b text-center">
+                    Booking Amount
+                  </th>
+                  <th className="py-3 px-4 border-b text-center">Spa Amount</th>
+                  <th className="py-3 px-4 border-b text-center">
+                    Food Amount
+                  </th>
+                  <th className="py-3 px-4 border-b text-center">
+                    Total Amount
+                  </th>
+                  <th className="py-3 px-4 border-b text-center">
+                    Advance Payment
+                  </th>
+                  <th className="py-3 px-4 border-b text-center">
+                    Remaining Payment
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="text-gray-800">
+                {finalBillings.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="text-center py-4 text-gray-500">
+                      No billing information available.
+                    </td>
+                  </tr>
+                ) : (
+                  finalBillings.map((billing) => (
+                    <tr key={billing.id} className="border-b hover:bg-gray-100">
+                      <td className="py-3 px-4 border-b text-center">
+                        {billing.id}
+                      </td>
+                      <td className="py-3 px-4 border-b text-center">
+                        ₹{billing.bookingAmount}
+                      </td>
+                      <td className="py-3 px-4 border-b text-center">
+                        ₹{billing.spaAmount}
+                      </td>
+                      <td className="py-3 px-4 border-b text-center">
+                        ₹{billing.foodAmount}
+                      </td>
+                      <td className="py-3 px-4 border-b text-center">
+                        ₹{billing.totalAmount}
+                      </td>
+                      <td className="py-3 px-4 border-b text-center">
+                        ₹{billing.booking.advancePayment}
+                      </td>
+                      <td className="py-3 px-4 border-b text-center">
+                        ₹
+                        {(billing.totalAmount - billing.booking.advancePayment).toFixed(
+                          2
+                        )}
+                      </td>
+                      {/* <td className="py-3 px-4 border-b text-center">₹{billing.}</td>
+                      <td className="py-3 px-4 border-b text-center">₹{billing.booking}</td> */}
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         );
 
@@ -670,7 +786,7 @@ const UserDashboard = () => {
             </li>
             <li>
               <button
-                onClick={() => setCurrentView("billing")}
+                onClick={() => setCurrentView("billings")}
                 className="flex items-center w-full text-left p-3 text-teal-300 hover:bg-gray-700 rounded-md transition"
               >
                 <CreditCardIcon className="w-6 h-6 mr-3 text-teal-300" />
