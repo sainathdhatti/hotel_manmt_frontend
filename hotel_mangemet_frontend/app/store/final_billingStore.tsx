@@ -25,6 +25,7 @@ export interface FinalBilling {
     noOfAdults: number;
     noOfChildrens: number;
     TotalAmount: number;
+    advancePayment:number;
     user: {
       id: number;
       email: string;
@@ -47,20 +48,29 @@ export interface FinalBilling {
 interface FinalBillingStore {
   finalBillings: FinalBilling[];
   getFinalBillings: () => Promise<void>;
-  calculateFinalBillings: (userId:number,bookingId:number) => Promise<void>;
+  calculateTotalAmount: (userId:number, bookingId:number) => Promise<void>;
+  getFinalBillingsByUser:(userId:number)=>Promise<void>;
 }
 
 const useFinalBillingStore=create<FinalBillingStore>((set)=>({
   finalBillings: [],
   getFinalBillings: async () => {
-    const response = await fetch(`${API_URL}/final-billings`);
+    const response = await fetch(`${API_URL}/final_billing`);
     const data = await response.json();
     set({ finalBillings: data });
   },
-  calculateFinalBillings: async (userId:number,bookingId:number) => {
-    const response = await fetch(`${API_URL}/final_billing/users/${userId}/bookings/${bookingId}`);
+  calculateTotalAmount: async (userId:number, bookingId:number) => {
+    const response = await fetch(`${API_URL}/final_billing/user/${userId}/booking/${bookingId}`);
+    //const response= await fetch(`http://localhost:5000/final_billing/user/${userId}/booking/${bookingId}`);
     const data = await response.json();
     set({ finalBillings: data });
   },
+
+
+  getFinalBillingsByUser: async (userId:number) => {
+    const response = await fetch(`${API_URL}/final_billing/user/${userId}`);
+    const data = await response.json();
+    set({ finalBillings: data });
+  }
 }))
 export default  useFinalBillingStore;

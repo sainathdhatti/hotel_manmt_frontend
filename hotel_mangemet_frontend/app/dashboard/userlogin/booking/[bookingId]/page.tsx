@@ -18,7 +18,7 @@ const schema = yup.object().shape({
 
 const UpdateBooking = () => {
     const { bookingId } = useParams();
-    const updateBooking = useBookingsStore((state) => state.updateBooking);
+    const updateBooking = useBookingsStore((state) => state.updateBookingStatus);
     const getBookingById = useBookingsStore((state) => state.fetchBookingById);
     const booking = useBookingsStore((state) => state.booking);
     const [isUpdate, setIsUpdate] = useState(false);

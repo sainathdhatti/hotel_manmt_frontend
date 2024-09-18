@@ -40,13 +40,22 @@ const useRoomCategoryStore = create<RoomCategoryStoreState>((set) => ({
   getAllRoomCategories: async () => {
     try {
       const response = await fetch(`${baseUrl}/room-categories`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(`Error: ${errorData.message || 'Failed to fetch room categories'}`);
+        throw new Error('Network response was not ok');
+      }
+  
       const data = await response.json();
-      console.log("Fetched Room Categories:", data); // Add this line to verify the fetched data
+      console.log("Fetched Room Categories:", data);
       set(() => ({ roomCategories: data }));
     } catch (error) {
       console.error("Failed to fetch room categories:", error);
+      alert('An error occurred while fetching room categories. Please try again.');
     }
   },
+  
   deleteRoomCategory: async (id: number) => {
     try {
       const response = await fetch(`${baseUrl}/room-categories/${id}`, {

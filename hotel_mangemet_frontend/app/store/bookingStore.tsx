@@ -6,9 +6,20 @@ import { toast } from 'react-toastify';
 export enum BookingStatuss {
   AVAILABLE = 'AVAILABLE',
   BOOKED = 'BOOKED',
-  CHECKED_OUT = 'checked_out',
+  CHECKED_OUT = 'CHECKED_OUT',
   CANCELLED = 'CANCELLED',
   CHECKED_IN = 'CHECKED_IN'
+}
+
+// types.ts or interfaces.ts
+export interface AvailableRoom {
+  roomId: number;
+  roomNumber: number;
+  roomCategory: string;
+  bookingStatus: string;
+  noOfAdults: number,
+  noOfChildren: number,
+  price: number,
 }
 
 const API_URL = 'http://localhost:5000';
@@ -24,6 +35,7 @@ export interface Booking {
   noOfAdults: number;
   noOfChildrens: number;
   reviewLinkSent: boolean;
+  advancePayment:number;
   userId:number;
   user: {
     id: number;
@@ -48,11 +60,35 @@ export interface Booking {
   };
 }
 
+// interface BookingStore {
+//   bookings: Booking[];
+//   booking: Booking | null;
+//   availableRooms:AvailableRoom[]
+//   fetchBookings: () => Promise<void>;
+//   fetchBookingsByUserId: (userId: number) => Promise<void>; 
+//   fetchBookingById: (bookingId: number) => Promise<Booking | undefined>;
+//   addBooking: (bookingData: {
+//     checkInDate: Date;
+//     checkOutDate: Date;
+//     noOfAdults: number;
+//     noOfChildrens: number;
+//     userId: number;
+//     categoryId: number;
+//   }) => Promise<void>;
+//   updateBookingStatus: (bookingId: number, updateBookingData: {
+//     status: BookingStatuss
+//   }) => Promise<void>;
+//   deleteBooking: (bookingId: number) => Promise<void>;
+//   getAvailableRooms: (checkInDate: string, checkOutDate: string) => Promise<Booking[]>;
+// }
+
+
 interface BookingStore {
   bookings: Booking[];
   booking: Booking | null;
+  availableRooms: AvailableRoom[]; // Use AvailableRoom[] here
   fetchBookings: () => Promise<void>;
-  fetchBookingsByUserId: (userId: number) => Promise<void>; 
+  fetchBookingsByUserId: (userId: number) => Promise<void>;
   fetchBookingById: (bookingId: number) => Promise<Booking | undefined>;
   addBooking: (bookingData: {
     checkInDate: Date;
@@ -63,14 +99,20 @@ interface BookingStore {
     categoryId: number;
   }) => Promise<void>;
   updateBookingStatus: (bookingId: number, updateBookingData: {
-    status: BookingStatus
+    status: BookingStatuss
   }) => Promise<void>;
   deleteBooking: (bookingId: number) => Promise<void>;
+  getAvailableRooms: (checkInDate: string, checkOutDate: string) => Promise<AvailableRoom[]>; // Update the return type here
+  setAvailableRooms: (rooms: AvailableRoom[]) => void; // New method
+
 }
+
 
 const useBookingsStore = create<BookingStore>((set) => ({
   bookings: [],
   booking: null,
+  availableRooms:[], 
+  setAvailableRooms: (rooms) => set({ availableRooms: rooms }), // Store available rooms
 
   fetchBookings: async () => {
     try {
@@ -143,7 +185,7 @@ const useBookingsStore = create<BookingStore>((set) => ({
   },
 
 
-  updateBookingStatus: async (bookingId: number, updateBookingData: { status: BookingStatus }) => {
+  updateBookingStatus: async (bookingId: number, updateBookingData: { status: BookingStatuss }) => {
     try {
       const token = sessionStorage.getItem('token') ?? '';
       const response = await axios.patch<Booking>(`${API_URL}/bookings/${bookingId}`, updateBookingData, {
@@ -186,6 +228,24 @@ const useBookingsStore = create<BookingStore>((set) => ({
         console.error('Failed to delete booking:', error.message);
         alert('Error in setting up request.');
       }
+    }
+  },
+
+  getAvailableRooms: async (checkInDate: string, checkOutDate: string): Promise<AvailableRoom[]> => {
+    console.log("checkindate", checkInDate, "checkoutdate", checkOutDate);
+    try {
+      const token = sessionStorage.getItem('token') || '';
+      const response = await axios.get<AvailableRoom[]>(`${API_URL}/bookings/available/${checkInDate}/${checkOutDate}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(response.data); // Log the response data to check structure
+      set({ availableRooms: response.data }); // Store result in availableRooms
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching available rooms:', error);
+      return [];
     }
   },
   
