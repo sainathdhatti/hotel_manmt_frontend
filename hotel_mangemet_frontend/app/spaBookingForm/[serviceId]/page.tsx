@@ -1,10 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import useSpaBookingStore, {
-  BookingStatus,
-  Gender,
-} from "@/app/store/spaBookingStore";
+import useSpaBookingStore, { Gender } from "@/app/store/spaBookingStore";
 import useAuthStore from "@/app/store/loginStore";
 import useSpaServiceStore from "@/app/store/spaServiceStore";
 import useTimeSlotStore from "@/app/store/timeSlotStore";
@@ -14,7 +11,6 @@ import * as yup from "yup";
 import "react-datepicker/dist/react-datepicker.css";
 import Navbar from "@/app/navbar";
 import Footer from "@/app/footer/page";
-
 import axios from "axios";
 import { Booking } from "@/app/store/bookingStore";
 
@@ -32,12 +28,10 @@ const schema = yup.object().shape({
 });
 
 const SpaBookingForm = () => {
-  const { serviceId } = useParams(); // Retrieves serviceId from URL parameters
+  const { serviceId } = useParams();
   const addBooking = useSpaBookingStore((state) => state.addBooking);
   const spaServices = useSpaServiceStore((state) => state.spaServices);
-  const fetchSpaServices = useSpaServiceStore(
-    (state) => state.getAllSpaServices
-  );
+  const fetchSpaServices = useSpaServiceStore((state) => state.getAllSpaServices);
   const timeSlots = useTimeSlotStore((state) => state.timeslots);
   const fetchTimeSlots = useTimeSlotStore((state) => state.getAllTimeSlots);
   const users = useUserStore((state) => state.users);
@@ -81,17 +75,14 @@ const SpaBookingForm = () => {
             setBookingId(bookingId); // Set the bookingId state
             console.log("Booking ID set:", bookingId);
           } else {
-            console.error('No bookings found with status "checked-in".');
-            setBookingId(null); // Clear the booking ID if none found
+            console.error('No bookings found with status "CHECKED_IN".');
           }
         })
         .catch((error) => {
-          console.error("Error fetching booking IDs:", error);
+          console.error('Error fetching booking IDs:', error);
         });
     }
   }, [isAuthenticated, userId]);
-
-  const router = useRouter();
 
   const handleSubmit = async () => {
     try {
@@ -105,12 +96,7 @@ const SpaBookingForm = () => {
         userId: userId ?? -1,
       });
 
-      if (
-        isAuthenticated &&
-        selectedSpaService &&
-        selectedTimeSlot &&
-        bookingDate
-      ) {
+      if (isAuthenticated && selectedSpaService && selectedTimeSlot && bookingDate) {
         const selectedService = spaServices.find(
           (service) => service.id === selectedSpaService
         );
@@ -124,11 +110,6 @@ const SpaBookingForm = () => {
           return;
         }
 
-        if (userId === undefined || userId === null) {
-          alert("User is not authenticated.");
-          return;
-        }
-
         console.log(
           firstName,
           lastName,
@@ -136,10 +117,10 @@ const SpaBookingForm = () => {
           bookingDate,
           selectedService.id,
           selectedSlot.id,
-
           userId,
           bookingId
         );
+
         await addBooking({
           firstName,
           lastName,
@@ -151,9 +132,7 @@ const SpaBookingForm = () => {
           bookingId: bookingId || 0,
         });
       } else {
-        alert(
-          "Please complete all required fields and ensure you are logged in."
-        );
+        alert("Please complete all required fields and ensure you are logged in.");
       }
     } catch (err) {
       if (err instanceof yup.ValidationError) {
@@ -165,114 +144,112 @@ const SpaBookingForm = () => {
     }
   };
 
-  const spaService =
-    spaServices.find((service) => service.id === Number(serviceId)) || null;
+  const spaService = spaServices.find((service) => service.id === Number(serviceId)) || null;
 
   return (
     <>
-  <Navbar />
-  <div className="flex flex-col lg:flex-row">
-    <div className="w-full lg:w-1/3 mt-6">
-      {spaService ? (
-        <>
-          <img
-            src={spaService.service_image}
-            alt={spaService.name || "Spa Service"}
-            className="w-full h-auto object-cover m-6 rounded-md" // Ensures the image covers the container
-          />
-          <h1 className="m-6 text-2xl text-center lg:text-left">
-            {spaService.name || "Spa Service"}
-          </h1>
-        </>
-      ) : (
-        <p>No image available</p>
-      )}
-    </div>
-    <div className="w-full lg:w-2/3 lg:ml-6">
-      <div className="flex flex-col mb-4 mt-8 mx-4 lg:mx-10">
-        <div className="flex flex-col lg:flex-row mb-4">
-          <div className="flex-1 mb-2 lg:mr-2">
-            <label className="block text-lg mb-2">First Name</label>
-            <input
-              type="text"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              className="w-full sm:w-60 border border-gray-300 rounded-md p-2"
-              placeholder="Enter First Name"
-            />
-          </div>
-
-          <div className="flex-1 mb-2 lg:ml-2">
-            <label className="block text-lg mb-2">Last Name</label>
-            <input
-              type="text"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              className="w-full sm:w-60 border border-gray-300 rounded-md p-2"
-              placeholder="Enter Last Name"
-            />
-          </div>
+      <Navbar />
+      <div className="flex flex-col lg:flex-row">
+        <div className="w-full lg:w-1/3 mt-6">
+          {spaService ? (
+            <>
+              <img
+                src={spaService.service_image}
+                alt={spaService.name || "Spa Service"}
+                className="w-full h-auto object-cover m-6 rounded-md" // Ensures the image covers the container
+              />
+              <h1 className="m-6 text-2xl text-center lg:text-left">
+                {spaService.name || "Spa Service"}
+              </h1>
+            </>
+          ) : (
+            <p>No image available</p>
+          )}
         </div>
+        <div className="w-full lg:w-2/3 lg:ml-6">
+          <div className="flex flex-col mb-4 mt-8 mx-4 lg:mx-10">
+            <div className="flex flex-col lg:flex-row mb-4">
+              <div className="flex-1 mb-2 lg:mr-2">
+                <label className="block text-lg mb-2">First Name</label>
+                <input
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className="w-full sm:w-60 border border-gray-300 rounded-md p-2"
+                  placeholder="Enter First Name"
+                />
+              </div>
 
-        <div className="flex flex-col lg:flex-row mb-4">
-          <div className="flex-1 mb-2 lg:mr-2">
-            <label className="block text-lg mb-2">Booking Date</label>
-            <DatePicker
-              selected={bookingDate}
-              onChange={(date: Date | null) => setBookingDate(date)}
-              dateFormat="yyyy-MM-dd"
-              minDate={new Date()}
-              placeholderText="Select booking date"
-              className="w-full sm:w-60 border border-gray-300 rounded-md pl-5 h-11"
-            />
-          </div>
-          <div className="flex-1 mb-2 lg:ml-2">
-            <label className="block text-lg mb-2">Gender</label>
-            <select
-              value={gender}
-              onChange={(e) => setGender(e.target.value as Gender)}
-              className="w-full sm:w-60 border border-gray-300 rounded-md p-2"
-            >
-              <option value={Gender.MALE}>Male</option>
-              <option value={Gender.FEMALE}>Female</option>
-            </select>
-          </div>
-        </div>
+              <div className="flex-1 mb-2 lg:ml-2">
+                <label className="block text-lg mb-2">Last Name</label>
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="w-full sm:w-60 border border-gray-300 rounded-md p-2"
+                  placeholder="Enter Last Name"
+                />
+              </div>
+            </div>
 
-        <div className="flex flex-col mb-4">
-          <div className="flex-1">
-            <label className="block text-lg mb-2">Select Time Slot</label>
-            <select
-              value={selectedTimeSlot || ""}
-              onChange={(e) => setSelectedTimeSlot(Number(e.target.value))}
-              className="w-full sm:w-60 border border-gray-300 rounded-md p-2"
-            >
-              <option value="" disabled>
-                Select a time slot
-              </option>
-              {timeSlots.map((slot) => (
-                <option key={slot.id} value={slot.id}>
-                  {slot.startTime} - {slot.endTime}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+            <div className="flex flex-col lg:flex-row mb-4">
+              <div className="flex-1 mb-2 lg:mr-2">
+                <label className="block text-lg mb-2">Booking Date</label>
+                <DatePicker
+                  selected={bookingDate}
+                  onChange={(date: Date | null) => setBookingDate(date)}
+                  dateFormat="yyyy-MM-dd"
+                  minDate={new Date()}
+                  placeholderText="Select booking date"
+                  className="w-full sm:w-60 border border-gray-300 rounded-md pl-5 h-11"
+                />
+              </div>
+              <div className="flex-1 mb-2 lg:ml-2">
+                <label className="block text-lg mb-2">Gender</label>
+                <select
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value as Gender)}
+                  className="w-full sm:w-60 border border-gray-300 rounded-md p-2"
+                >
+                  <option value={Gender.MALE}>Male</option>
+                  <option value={Gender.FEMALE}>Female</option>
+                </select>
+              </div>
+            </div>
 
-        <div className="mt-6 mx-4 lg:mx-10">
-          <button
-            onClick={handleSubmit}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md w-full sm:w-60"
-          >
-            Confirm Booking
-          </button>
+            <div className="flex flex-col mb-4">
+              <div className="flex-1">
+                <label className="block text-lg mb-2">Select Time Slot</label>
+                <select
+                  value={selectedTimeSlot || ""}
+                  onChange={(e) => setSelectedTimeSlot(Number(e.target.value))}
+                  className="w-full sm:w-60 border border-gray-300 rounded-md p-2"
+                >
+                  <option value="" disabled>
+                    Select a time slot
+                  </option>
+                  {timeSlots.map((slot) => (
+                    <option key={slot.id} value={slot.id}>
+                      {slot.startTime} - {slot.endTime}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="mt-6 mx-4 lg:mx-10">
+              <button
+                onClick={handleSubmit}
+                className="bg-blue-500 text-white px-4 py-2 rounded-md w-full sm:w-60"
+              >
+                Confirm Booking
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
-</>
-
-  
+      <Footer />
+    </>
   );
 };
 

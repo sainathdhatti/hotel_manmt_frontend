@@ -124,9 +124,11 @@ const useUserStore = create<UserStore>((set) => ({
       toast.error(error.response?.data?.message || "Error registering user");
 
       set({
+
         registrationStatus: `Error registering user: ${AxiosError.ERR_BAD_RESPONSE}`,
         error: AxiosError.ERR_BAD_RESPONSE,
     });
+
     } finally {
       set({ loading: false });
     }
