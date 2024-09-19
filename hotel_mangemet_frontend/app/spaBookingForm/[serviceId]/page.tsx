@@ -270,6 +270,7 @@ const SpaBookingForm = () => {
       </div>
     </div>
   </div>
+  <Footer />
 </>
 
   

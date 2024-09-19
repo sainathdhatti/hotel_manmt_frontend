@@ -9,6 +9,7 @@ import * as yup from "yup";
 import "react-datepicker/dist/react-datepicker.css";
 import { useRouter } from 'next/navigation';
 import Navbar from '@/app/navbar';
+import Footer from '@/app/footer/page';
 
 // Schema for validation
 const schema = yup.object().shape({
@@ -198,6 +199,7 @@ const BookingForm = () => {
         </div>
       </div>
     </div>
+        <Footer/>
     </>
   );
 };
