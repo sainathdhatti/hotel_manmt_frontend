@@ -1,3 +1,4 @@
+import { toast } from 'react-toastify';
 import { create } from 'zustand';
 
 export interface OrderItem {
@@ -57,17 +58,32 @@ const useFoodOrderStore = create<FoodOrderStoreState>((set) => ({
     set({ currentOrder: data });
   },
 
-  createOrder: async (userId: number, orderItems: { foodItemId: number; quantity: number }[],bookingId:number) => {
-    const response = await fetch(`${baseUrl}/orders`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ userId, orderItems ,bookingId}),
-    });
-    const newOrder = await response.json();
-    set((state) => ({ orders: [...state.orders, newOrder] }));
+  createOrder: async (userId: number, orderItems: { foodItemId: number; quantity: number }[], bookingId: number) => {
+    try {
+      const response = await fetch(`${baseUrl}/orders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId, orderItems, bookingId }),
+      });
+  
+      // Check if the response is ok (status in the range 200-299)
+      if (!response.ok) {
+        const errorData = await response.json(); // Attempt to parse error response
+        throw new Error(errorData.message || 'Failed to create order'); // Customize based on your API's error structure
+      }
+  
+      const newOrder = await response.json();
+      set((state) => ({ orders: [...state.orders, newOrder] }));
+      toast.success("Order placed successfully!");
+    } catch (error:any) {
+      console.error('Error creating order:', error);
+      // You can also show a toast or alert with the error message here if you want
+      toast.error(`you must be CHECKED_IN to order food.`);
+    }
   },
+  
 
   updateOrder: async (id: number, updatedOrder: Partial<FoodOrder>) => {
     const response = await fetch(`${baseUrl}/orders/${id}`, {

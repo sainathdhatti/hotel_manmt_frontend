@@ -1,8 +1,5 @@
 "use client";
 
-
-
-
 import useBookingsStore, {
   AvailableRoom,
   Booking,
@@ -32,12 +29,14 @@ const Receptionist = () => {
   const [availableRooms, setAvailableRooms] = useState<AvailableRoom[]>([]);
   const [checkInDate, setCheckInDate] = useState(today);
   const [checkOutDate, setCheckOutDate] = useState(tomorrow);
-  const [selectedCategory, setSelectedCategory] = useState('');
-  
-  const { roomCategories, getAllRoomCategories } = useRoomCategoryStore(state => ({
-    roomCategories: state.roomCategories,
-    getAllRoomCategories: state.getAllRoomCategories,
-  }));
+  const [selectedCategory, setSelectedCategory] = useState("");
+
+  const { roomCategories, getAllRoomCategories } = useRoomCategoryStore(
+    (state) => ({
+      roomCategories: state.roomCategories,
+      getAllRoomCategories: state.getAllRoomCategories,
+    })
+  );
 
   useEffect(() => {
     const fetchRoomCategories = async () => {
@@ -46,15 +45,12 @@ const Receptionist = () => {
     fetchRoomCategories();
   }, [getAllRoomCategories]);
 
-  const {
-    finalBillings,
-    fetchBillings,
-    calculateFinalBillings,
-  } = useFinalBillingStore((state) => ({
-    finalBillings: state.finalBillings,
-    fetchBillings: state.getFinalBillings,
-    calculateFinalBillings: state.calculateTotalAmount,
-  }));
+  const { finalBillings, fetchBillings, calculateFinalBillings } =
+    useFinalBillingStore((state) => ({
+      finalBillings: state.finalBillings,
+      fetchBillings: state.getFinalBillings,
+      calculateFinalBillings: state.calculateTotalAmount,
+    }));
 
   useEffect(() => {
     const fetchData = async () => {
@@ -68,17 +64,13 @@ const Receptionist = () => {
     fetchData();
   }, [fetchBillings]);
 
-  const {
-    bookings,
-    fetchBookings,
-    updateBookingStatus,
-    getAvailableRooms,
-  } = useBookingsStore((state) => ({
-    bookings: state.bookings,
-    fetchBookings: state.fetchBookings,
-    updateBookingStatus: state.updateBookingStatus,
-    getAvailableRooms: state.getAvailableRooms,
-  }));
+  const { bookings, fetchBookings, updateBookingStatus, getAvailableRooms } =
+    useBookingsStore((state) => ({
+      bookings: state.bookings,
+      fetchBookings: state.fetchBookings,
+      updateBookingStatus: state.updateBookingStatus,
+      getAvailableRooms: state.getAvailableRooms,
+    }));
 
   const cancelLogout = () => {
     setShowConfirm(false);
@@ -98,9 +90,14 @@ const Receptionist = () => {
       if (checkInDate && checkOutDate) {
         try {
           const formattedCheckInDate = checkInDate.toISOString().split("T")[0]; // YYYY-MM-DD
-          const formattedCheckOutDate = checkOutDate.toISOString().split("T")[0]; // YYYY-MM-DD
-          
-          const rooms = await getAvailableRooms(formattedCheckInDate, formattedCheckOutDate);
+          const formattedCheckOutDate = checkOutDate
+            .toISOString()
+            .split("T")[0]; // YYYY-MM-DD
+
+          const rooms = await getAvailableRooms(
+            formattedCheckInDate,
+            formattedCheckOutDate
+          );
           console.log(rooms);
           setAvailableRooms(rooms);
         } catch (error) {
@@ -108,10 +105,10 @@ const Receptionist = () => {
         }
       }
     };
-    
+
     fetchAvailableRooms();
   }, [checkInDate, checkOutDate, getAvailableRooms]);
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -124,14 +121,10 @@ const Receptionist = () => {
     fetchData();
   }, [fetchBookings]);
 
-
- 
-
   const handleStatusChange = async (
     bookingId: number,
     status: BookingStatuss
   ) => {
-
     try {
       await updateBookingStatus(bookingId, { status });
       toast.success("Booking status updated successfully.");
@@ -146,14 +139,11 @@ const Receptionist = () => {
     }
   };
 
-
-  console.log(finalbillings);
+  //console.log(finalbillings);
 
   const statusOptions = Object.values(BookingStatuss);
 
- 
-  console.log("availableRooms",availableRooms);
-
+  console.log("availableRooms", availableRooms);
 
   const renderContent = () => {
     switch (currentView) {
@@ -219,34 +209,40 @@ const Receptionist = () => {
                           ₹{booking.TotalAmount || "0.00"}
                         </td>
                         <td className="px-4 py-2 text-center text-pink-500">
-                         <select
-  value={booking.status}
-  onChange={(e) => {
-    const newStatus = e.target.value as BookingStatuss;
-    if (
-      booking.status !== BookingStatuss.CHECKED_OUT &&
-      booking.status !== BookingStatuss.CANCELLED
-    ) {
-      handleStatusChange(booking.bookingId, newStatus);
-    }
-  }}
-  className={`border border-gray-300 rounded-md p-1 ${
-    booking.status === BookingStatuss.CHECKED_OUT
-      ? "bg-gray-200 cursor-not-allowed"
-      : ""
-  }`}
-  disabled={
-    booking.status === BookingStatuss.CHECKED_OUT ||
-    booking.status === BookingStatuss.CANCELLED
-  }
->
-  {statusOptions.map((status) => (
-    <option key={status as string} value={status as string}>
-      {status as string}
-    </option>
-  ))}
-</select>
-
+                          <select
+                            value={booking.status}
+                            onChange={(e) => {
+                              const newStatus = e.target
+                                .value as BookingStatuss;
+                              if (
+                                booking.status !== BookingStatuss.CHECKED_OUT &&
+                                booking.status !== BookingStatuss.CANCELLED
+                              ) {
+                                handleStatusChange(
+                                  booking.bookingId,
+                                  newStatus
+                                );
+                              }
+                            }}
+                            className={`border border-gray-300 rounded-md p-1 ${
+                              booking.status === BookingStatuss.CHECKED_OUT
+                                ? "bg-gray-200 cursor-not-allowed"
+                                : ""
+                            }`}
+                            disabled={
+                              booking.status === BookingStatuss.CHECKED_OUT ||
+                              booking.status === BookingStatuss.CANCELLED
+                            }
+                          >
+                            {statusOptions.map((status) => (
+                              <option
+                                key={status as string}
+                                value={status as string}
+                              >
+                                {status as string}
+                              </option>
+                            ))}
+                          </select>
                         </td>
                       </tr>
                     ))
@@ -318,119 +314,119 @@ const Receptionist = () => {
           </div>
         );
 
-        case "rooms_available":
-          return (
-            <div className="flex flex-col items-center justify-center">
-              <div className="w-full border-2 border-gray-200 p-6">
-                <h1 className="text-2xl font-bold mb-4 text-teal-500">
-                  Available Rooms
-                </h1>
-  
-                <div className="flex items-center mb-4">
-                  {" "}
-                  {/* Flex container */}
-                  {/* Check-In Date Picker */}
-                  <div className="mr-4">
-                    <label className="block mb-2 text-sm font-medium text-gray-700">
-                      Check-In Date
-                    </label>
-                    <input
-                      type="date"
-                      value={checkInDate.toISOString().split("T")[0]}
-                      onChange={(e) => setCheckInDate(new Date(e.target.value))}
-                      min={today.toISOString().split("T")[0]} // Set minimum to today
-                      className="border border-gray-300 p-2 rounded"
-                    />
-                  </div>
-                  {/* Check-Out Date Picker */}
-                  <div className="mr-4">
-                    <label className="block mb-2 text-sm font-medium text-gray-700">
-                      Check-Out Date
-                    </label>
-                    <input
-                      type="date"
-                      value={checkOutDate.toISOString().split("T")[0]}
-                      onChange={(e) => setCheckOutDate(new Date(e.target.value))}
-                      min={checkInDate.toISOString().split("T")[0]} // Set minimum to selected check-in date
-                      className="border border-gray-300 p-2 rounded"
-                    />
-                  </div>
-                  {/* Room Category Dropdown */}
-                  <div className="flex-1 mr-4">
-                    <label className="block mb-2 text-sm font-medium text-gray-700">
-                      Room Category
-                    </label>
-                    <select
-                      value={selectedCategory}
-                      onChange={(e) => setSelectedCategory(e.target.value)}
-                      className="border border-gray-300 p-2 rounded w-60"
-                    >
-                      <option value="">All Categories</option>
-                      {roomCategories.map((category) => (
-                        <option key={category.id} value={category.name}>
-                          {category.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+      case "rooms_available":
+        return (
+          <div className="flex flex-col items-center justify-center">
+            <div className="w-full border-2 border-gray-200 p-6">
+              <h1 className="text-2xl font-bold mb-4 text-teal-500">
+                Available Rooms
+              </h1>
+
+              <div className="flex items-center mb-4">
+                {" "}
+                {/* Flex container */}
+                {/* Check-In Date Picker */}
+                <div className="mr-4">
+                  <label className="block mb-2 text-sm font-medium text-gray-700">
+                    Check-In Date
+                  </label>
+                  <input
+                    type="date"
+                    value={checkInDate.toISOString().split("T")[0]}
+                    onChange={(e) => setCheckInDate(new Date(e.target.value))}
+                    min={today.toISOString().split("T")[0]} // Set minimum to today
+                    className="border border-gray-300 p-2 rounded"
+                  />
                 </div>
-  
-                {/* Available Rooms Table */}
-                <table className="min-w-full bg-white border border-gray-300">
-                  <thead className="bg-gray-100 text-teal-600">
-                    <tr>
-                      <th className="px-4 py-2 text-center">Room Number</th>
-                      <th className="px-4 py-2 text-center">Room Type</th>
-                      <th className="px-4 py-2 text-center">No Of Adults</th>
-                      <th className="px-4 py-2 text-center">No Of Children</th>
-                      <th className="px-4 py-2 text-center">Price per Night</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-gray-800">
-                    {availableRooms.length === 0 ? (
-                      <tr>
-                        <td
-                          colSpan={5}
-                          className="text-center py-4 text-gray-500"
-                        >
-                          No rooms available.
-                        </td>
-                      </tr>
-                    ) : (
-                      availableRooms
-                        .filter((room) =>
-                          selectedCategory
-                            ? room.roomCategory === selectedCategory
-                            : true
-                        )
-                        .map((room) => (
-                          <tr
-                            key={room.roomId}
-                            className="border-b hover:bg-gray-100"
-                          >
-                            <td className="px-4 py-2 text-center text-blue-500">
-                              {room.roomNumber || "N/A"}
-                            </td>
-                            <td className="px-4 py-2 text-center text-green-500">
-                              {room.roomCategory || "N/A"}
-                            </td>
-                            <td className="px-4 py-2 text-center text-red-500">
-                              {room.noOfAdults || "0"}
-                            </td>
-                            <td className="px-4 py-2 text-center text-purple-500">
-                              {room.noOfChildren || "N/A"}
-                            </td>
-                            <td className="px-4 py-2 text-center text-teal-500">
-                              ₹{room.price || "Available"}
-                            </td>
-                          </tr>
-                        ))
-                    )}
-                  </tbody>
-                </table>
+                {/* Check-Out Date Picker */}
+                <div className="mr-4">
+                  <label className="block mb-2 text-sm font-medium text-gray-700">
+                    Check-Out Date
+                  </label>
+                  <input
+                    type="date"
+                    value={checkOutDate.toISOString().split("T")[0]}
+                    onChange={(e) => setCheckOutDate(new Date(e.target.value))}
+                    min={checkInDate.toISOString().split("T")[0]} // Set minimum to selected check-in date
+                    className="border border-gray-300 p-2 rounded"
+                  />
+                </div>
+                {/* Room Category Dropdown */}
+                <div className="flex-1 mr-4">
+                  <label className="block mb-2 text-sm font-medium text-gray-700">
+                    Room Category
+                  </label>
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="border border-gray-300 p-2 rounded w-60"
+                  >
+                    <option value="">All Categories</option>
+                    {roomCategories.map((category) => (
+                      <option key={category.id} value={category.name}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
+
+              {/* Available Rooms Table */}
+              <table className="min-w-full bg-white border border-gray-300">
+                <thead className="bg-gray-100 text-teal-600">
+                  <tr>
+                    <th className="px-4 py-2 text-center">Room Number</th>
+                    <th className="px-4 py-2 text-center">Room Type</th>
+                    <th className="px-4 py-2 text-center">No Of Adults</th>
+                    <th className="px-4 py-2 text-center">No Of Children</th>
+                    <th className="px-4 py-2 text-center">Price per Night</th>
+                  </tr>
+                </thead>
+                <tbody className="text-gray-800">
+                  {availableRooms.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        className="text-center py-4 text-gray-500"
+                      >
+                        No rooms available.
+                      </td>
+                    </tr>
+                  ) : (
+                    availableRooms
+                      .filter((room) =>
+                        selectedCategory
+                          ? room.roomCategory === selectedCategory
+                          : true
+                      )
+                      .map((room) => (
+                        <tr
+                          key={room.roomId}
+                          className="border-b hover:bg-gray-100"
+                        >
+                          <td className="px-4 py-2 text-center text-blue-500">
+                            {room.roomNumber || "N/A"}
+                          </td>
+                          <td className="px-4 py-2 text-center text-green-500">
+                            {room.roomCategory || "N/A"}
+                          </td>
+                          <td className="px-4 py-2 text-center text-red-500">
+                            {room.noOfAdults || "0"}
+                          </td>
+                          <td className="px-4 py-2 text-center text-purple-500">
+                            {room.noOfChildren || "N/A"}
+                          </td>
+                          <td className="px-4 py-2 text-center text-teal-500">
+                            ₹{room.price || "Available"}
+                          </td>
+                        </tr>
+                      ))
+                  )}
+                </tbody>
+              </table>
             </div>
-          );
+          </div>
+        );
 
       default:
         return (
