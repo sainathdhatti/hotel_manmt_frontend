@@ -12,7 +12,7 @@ const schema = yup.object().shape({
     firstName: yup.string().required("First name is required").min(3).max(10),
     lastName: yup.string().required("Last name is required").min(3).max(10),
     email: yup.string().email("Invalid email").required("Email is required"),
-    phone: yup.string().required("Phone number is required"),
+    phone: yup.string().required("Phone number is required").matches(/^\d{10}$/, "Phone number must be exactly 10 digits"),
     password: yup.string().required("Password is required").min(6).max(10),
     gender: yup.string().oneOf(['male', 'female'], 'Invalid gender').required("Gender is required"),
     staffcategory: yup.number().positive().required("Staff category is required"),

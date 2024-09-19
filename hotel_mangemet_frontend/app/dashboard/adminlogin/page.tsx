@@ -29,19 +29,31 @@ const AdminDashboard = () => {
   };
 
   const { amenities, getAllAmenities, deleteAmenity } = useAmenitiesStore();
-  const { roomCategories, getAllRoomCategories, deleteRoomCategory } =
-    useRoomCategoryStore();
+  const {
+    roomCategories,
+    getAllRoomCategories,
+    deleteRoomCategory,
+  } = useRoomCategoryStore();
 
   const { contacts, getAllContacts } = useContactStore();
   const { foodItems, getAllFoodItems, deleteFoodItem } = useFoodItemsStore();
   const { rooms, getAllRooms, deleteRoom } = useRoomStore();
   const { users, getAllUsers } = useUserStore();
-  const { spaServices, getAllSpaServices, deleteSpaService } =
-    useSpaServiceStore();
-  const { staffCategories, fetchStaffCategories, deleteStaffCategory } =
-    useStaffCategoryStore();
-  const { staffMembers, getAllStaffMembers, deleteStaffMember } =
-    useStaffMemberStore();
+  const {
+    spaServices,
+    getAllSpaServices,
+    deleteSpaService,
+  } = useSpaServiceStore();
+  const {
+    staffCategories,
+    fetchStaffCategories,
+    deleteStaffCategory,
+  } = useStaffCategoryStore();
+  const {
+    staffMembers,
+    getAllStaffMembers,
+    deleteStaffMember,
+  } = useStaffMemberStore();
 
   const bookings = useBookingsStore((state) => state.bookings);
   const getAllBookings = useBookingsStore((state) => state.fetchBookings);
@@ -213,7 +225,7 @@ const AdminDashboard = () => {
                       <td className="px-4 py-2 text-center">
                         {booking.status ?? "N/A"}
                       </td>
-                      <td className="px-4 py-2 flex justify-center space-x-5">
+                      {/* <td className="px-4 py-2 flex justify-center space-x-5">
                         <Link href={`/bookings/${booking.bookingId}`}>
                           <button
                             className={`btn ${
@@ -240,7 +252,7 @@ const AdminDashboard = () => {
                             className="text-red-500"
                           />
                         </button>
-                      </td>
+                      </td> */}
                     </tr>
                   ))}
                 </tbody>
@@ -315,10 +327,10 @@ const AdminDashboard = () => {
                           )}
                         </td>
                         <td className="px-4 py-2 text-gray-900">
-                          {data.noOfAdults || "N/A"}
+                          {data.noOfAdults || 0}
                         </td>
                         <td className="px-4 py-2 text-gray-900">
-                          {data.noOfChildren || "N/A"}
+                          {data.noOfChildren || 0}
                         </td>
                         <td className="px-4 py-2 text-gray-900">
                           {data.amenities && data.amenities.length > 0 ? (
@@ -338,15 +350,18 @@ const AdminDashboard = () => {
                                 `/dashboard/adminlogin/roomcategory/${data.id}`
                               )
                             }
-                            className="bg-yellow-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-yellow-600 transition duration-300 mr-2"
+                            className=" text-black"
                           >
-                            Edit
+                            <FontAwesomeIcon icon={faEdit} />
                           </button>
                           <button
                             onClick={() => handleDeleteRoomCategory(data.id)}
-                            className="bg-red-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-red-600 transition duration-300"
+                            className=" text-white"
                           >
-                            Delete
+                            <FontAwesomeIcon
+                              icon={faTrash}
+                              className="text-red-500 pl-3"
+                            />
                           </button>
                         </td>
                       </tr>
@@ -358,85 +373,87 @@ const AdminDashboard = () => {
           </div>
         );
 
-        case "rooms":
-          return (
-            <div className="flex flex-col items-center justify-center">
-              <div className="w-full max-w-2xl">
-                <div className="mb-6 flex justify-center">
-                  <button
-                    onClick={() => router.push("/dashboard/adminlogin/rooms/new")}
-                    className="bg-blue-500 text-white px-6 py-1.5 rounded-md shadow-md hover:bg-blue-600 transition duration-300"
-                  >
-                    Add Rooms
-                  </button>
-                </div>
-                <div className="flex justify-center">
-                  <table
-                    className={`w-3/4 border border-gray-300 ${tableColorClass} rounded-lg overflow-hidden`}
-                  >
-                    <thead className="bg-gray-200 text-gray-700">
-                      <tr>
-                        <th className="px-6 py-1.5 text-left font-semibold">
-                          Room Number
-                        </th>
-                        <th className="px-6 py-1.5 text-left font-semibold">
-                          Room Status
-                        </th>
-                        <th className="px-6 py-1.5 text-left font-semibold">
-                          Room Category Name
-                        </th>
-                        <th className="px-6 py-1.5 text-center font-semibold">
-                          Actions
-                        </th>
+      case "rooms":
+        return (
+          <div className="flex flex-col items-center justify-center">
+            <div className="w-full ">
+              <div className="mb-6 flex justify-center">
+                <button
+                  onClick={() => router.push("/dashboard/adminlogin/rooms/new")}
+                  className="bg-blue-500 text-white px-6 py-1.5 rounded-md shadow-md hover:bg-blue-600 transition duration-300"
+                >
+                  Add Rooms
+                </button>
+              </div>
+              <div className="flex justify-center">
+                <table
+                  className={`w-3/4 border border-gray-300 ${tableColorClass} rounded-lg overflow-hidden`}
+                >
+                  <thead className="bg-gray-200 text-gray-700">
+                    <tr>
+                      <th className="px-6 py-1.5 text-left font-semibold">
+                        Room Number
+                      </th>
+                      <th className="px-6 py-1.5 text-left font-semibold">
+                        Room Status
+                      </th>
+                      <th className="px-6 py-1.5 text-left font-semibold">
+                        Room Category Name
+                      </th>
+                      <th className="px-6 py-1.5 text-center font-semibold">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rooms.map((r) => (
+                      <tr key={r.id} className="border-b hover:bg-gray-100">
+                        <td className="px-6 py-1.5 text-gray-900">
+                          {r.roomNumber || "N/A"}
+                        </td>
+                        <td className="px-6 py-1.5 text-gray-900">
+                          {r.status || "N/A"}
+                        </td>
+                        <td className="px-6 py-1.5 text-gray-900">
+                          {r.roomCategory?.name || "N/A"}
+                        </td>
+                        <td className="px-6 py-1.5 text-center">
+                          <div className="flex justify-center gap-2">
+                            <button
+                              onClick={() =>
+                                router.push(
+                                  `/dashboard/adminlogin/rooms/${r.id}`
+                                )
+                              }
+                              className=" text-black "
+                            >
+                              <FontAwesomeIcon icon={faEdit} />
+                            </button>
+                            <button onClick={() => handleDeleteRoom(r.id)}>
+                              <FontAwesomeIcon
+                                icon={faTrash}
+                                className="text-red-500 pl-3"
+                              />
+                            </button>
+                          </div>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {rooms.map((r) => (
-                        <tr key={r.id} className="border-b hover:bg-gray-100">
-                          <td className="px-6 py-1.5 text-gray-900">
-                            {r.roomNumber || "N/A"}
-                          </td>
-                          <td className="px-6 py-1.5 text-gray-900">
-                            {r.status || "N/A"}
-                          </td>
-                          <td className="px-6 py-1.5 text-gray-900">
-                            {r.roomCategory?.name || "N/A"}
-                          </td>
-                          <td className="px-6 py-1.5 text-center">
-                            <div className="flex justify-center gap-2">
-                              <button
-                                onClick={() =>
-                                  router.push(`/dashboard/adminlogin/rooms/${r.id}`)
-                                }
-                                className="bg-yellow-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-yellow-600 transition duration-300"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => handleDeleteRoom(r.id)}
-                                className="bg-red-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-red-600 transition duration-300"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
-          );
-        
+          </div>
+        );
+
       case "amenities":
         return (
           <div className="flex flex-col items-center justify-center">
-            <div className="w-full max-w-2xl">
+            <div className="w-full">
               <div className="mb-6 flex justify-center">
                 <button
                   onClick={() =>
-                    router.push("/dashboard/adminlogin/amenities/new")
+                    router.push("/dashboard/adminlogin/amenities/add")
                   }
                   className="bg-blue-500 text-white px-6 py-1.5 rounded-md shadow-md hover:bg-blue-600 transition duration-300"
                 >
@@ -470,15 +487,18 @@ const AdminDashboard = () => {
                                 `/dashboard/adminlogin/amenities/${a.id}`
                               )
                             }
-                            className="bg-yellow-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-yellow-600 transition duration-300 mr-2"
+                            className="text-black"
                           >
-                            Edit
+                            <FontAwesomeIcon icon={faEdit} />
                           </button>
                           <button
                             onClick={() => deleteAmenity(a.id)}
-                            className="bg-red-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-red-600 transition duration-300"
+                            className=" text-white"
                           >
-                            Delete
+                            <FontAwesomeIcon
+                              icon={faTrash}
+                              className="text-red-500 pl-7"
+                            />
                           </button>
                         </td>
                       </tr>
@@ -489,10 +509,11 @@ const AdminDashboard = () => {
             </div>
           </div>
         );
+
       case "foodItems":
         return (
           <div className="flex flex-col items-center justify-center">
-            <div className="w-full max-w-2xl">
+            <div className="w-full">
               <div className="mb-6 flex justify-center">
                 <button
                   onClick={() =>
@@ -558,15 +579,18 @@ const AdminDashboard = () => {
                                 `/dashboard/adminlogin/foodItems/${item.food_id}`
                               )
                             }
-                            className="bg-yellow-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-yellow-600 transition duration-300"
+                            className=" text-black" 
                           >
-                            Edit
+                            <FontAwesomeIcon icon={faEdit} />
+
                           </button>
                           <button
                             onClick={() => handleDeleteFood(item.food_id)}
-                            className="bg-red-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-red-600 transition duration-300"
                           >
-                            Delete
+                             <FontAwesomeIcon
+                              icon={faTrash}
+                              className="text-red-500 pl-4"
+                            />
                           </button>
                         </td>
                       </tr>
@@ -578,86 +602,86 @@ const AdminDashboard = () => {
           </div>
         );
 
-      case "spaServices":
-        return (
-          <div className="flex flex-col items-center justify-center">
-            <div className="w-full max-w-2xl">
-              <div className="mb-6 flex justify-center">
-                <button
-                  onClick={() =>
-                    router.push("/dashboard/adminlogin/spaservices/new")
-                  }
-                  className="bg-blue-500 text-white px-6 py-1.5 rounded-md shadow-md hover:bg-blue-600 transition duration-300"
-                >
-                  Add Spa Service
-                </button>
-              </div>
-              <div className="flex justify-center">
-                <table
-                  className={`w-3/4 border border-gray-300 ${tableColorClass} rounded-lg overflow-hidden`}
-                >
-                  <thead className="bg-gray-200 text-gray-700">
-                    <tr>
-                      <th className="px-6 py-1.5 text-left font-semibold">
-                        Name
-                      </th>
-                      <th className="px-6 py-1.5 text-left font-semibold">
-                        Description
-                      </th>
-                      <th className="px-6 py-1.5 text-left font-semibold">
-                        Price
-                      </th>
-                      <th className="px-6 py-1.5 text-center font-semibold">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {spaServices.map((service) => (
-                      <tr
-                        key={service.id}
-                        className="border-b hover:bg-gray-100"
-                      >
-                        <td className="px-6 py-1.5 text-gray-900">
-                          {service.name || "N/A"}
-                        </td>
-                        <td className="px-6 py-1.5 text-gray-900">
-                          {service.description || "N/A"}
-                        </td>
-                        <td className="px-6 py-1.5 text-gray-900">
-                          {service.price ? `₹${service.price}` : "N/A"}
-                        </td>
-                        <td className="px-6 py-1.5 text-center">
-                          <button
-                            onClick={() =>
-                              router.push(
-                                `/dashboard/adminlogin/spaServices/${service.id}`
-                              )
-                            }
-                            className="bg-yellow-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-yellow-600 transition duration-300 mr-2"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteSpaService(service.id)}
-                            className="bg-red-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-red-600 transition duration-300"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        );
+     case "spaServices":
+  return (
+    <div className="flex flex-col items-center justify-center">
+      <div className="w-full">
+        <div className="mb-6 flex justify-center">
+          <button
+            onClick={() =>
+              router.push("/dashboard/adminlogin/spaServices/new")
+            }
+            className="bg-blue-500 text-white px-6 py-1.5 rounded-md shadow-md hover:bg-blue-600 transition duration-300"
+          >
+            Add Spa Service
+          </button>
+        </div>
+        <div className="flex justify-center">
+          <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
+            <thead className="bg-gray-200 text-gray-700">
+              <tr>
+                <th className="px-6 py-1.5 text-left font-semibold">Name</th>
+                <th className="px-6 py-1.5 text-left font-semibold">Description</th>
+                <th className="px-6 py-1.5 text-left font-semibold">Price</th>
+                <th className="px-6 py-1.5 text-center font-semibold">Image</th>
+                <th className="px-6 py-1.5 text-center font-semibold">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {spaServices.map((service) => (
+                <tr key={service.id} className="border-b hover:bg-gray-100">
+                  <td className="px-6 py-1.5 text-gray-900">
+                    {service.name || "N/A"}
+                  </td>
+                  <td className="px-6 py-1.5 text-gray-900">
+                    {service.description || "N/A"}
+                  </td>
+                  <td className="px-6 py-1.5 text-gray-900">
+                    {service.price ? `₹${service.price}` : "N/A"}
+                  </td>
+                  <td className="px-4 py-2 text-center">
+                    {service.service_image ? (
+                      <img
+                        src={service.service_image}
+                        alt={service.name}
+                        className="w-10 h-10 object-cover"
+                      />
+                    ) : (
+                      "No Image"
+                    )}
+                  </td>
+                  <td className="px-6 py-1.5 text-center flex space-x-2 mt-7">
+                    <button
+                      onClick={() =>
+                        router.push(`/dashboard/adminlogin/spaServices/${service.id}`)
+                      }
+                      className="text-black"
+                    >
+                      <FontAwesomeIcon icon={faEdit} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteSpaService(service.id)}
+                    >
+                      <FontAwesomeIcon
+                        icon={faTrash}
+                        className="text-red-500 pl-4"
+                      />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
 
       case "staffCategories":
         return (
           <div className="flex flex-col items-center justify-center">
-            <div className="w-full max-w-2xl">
+            <div className="w-full">
               <div className="mb-6 flex justify-center">
                 <button
                   onClick={() =>
@@ -695,15 +719,15 @@ const AdminDashboard = () => {
                                 `/dashboard/adminlogin/staffcategories/${sc.id}`
                               )
                             }
-                            className="bg-yellow-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-yellow-600 transition duration-300 mr-2"
+                            className=" text-black"
                           >
-                            Edit
+                            <FontAwesomeIcon icon={faEdit} />
                           </button>
-                          <button
-                            onClick={() => handleDeleteCategory(sc.id)}
-                            className="bg-red-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-red-600 transition duration-300"
-                          >
-                            Delete
+                          <button onClick={() => handleDeleteCategory(sc.id)}>
+                            <FontAwesomeIcon
+                              icon={faTrash}
+                              className="text-red-500 pl-4"
+                            />
                           </button>
                         </td>
                       </tr>
@@ -718,7 +742,7 @@ const AdminDashboard = () => {
       case "staffMembers":
         return (
           <div className="flex flex-col items-center justify-center">
-            <div className="w-full max-w-2xl">
+            <div className="w-full ">
               <div className="mb-6 flex justify-center">
                 <button
                   onClick={() =>
@@ -794,15 +818,17 @@ const AdminDashboard = () => {
                                   `/dashboard/adminlogin/staffmembers/${member.id}`
                                 )
                               }
-                              className="bg-yellow-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-yellow-600 transition duration-300 mr-2"
+                              className=" text-black "
                             >
-                              Edit
+                              <FontAwesomeIcon icon={faEdit} />
                             </button>
                             <button
                               onClick={() => handleDeleteStaffMember(member.id)}
-                              className="bg-red-500 text-white px-4 py-1.5 rounded-md shadow-md hover:bg-red-600 transition duration-300"
                             >
-                              Delete
+                              <FontAwesomeIcon
+                                icon={faTrash}
+                                className="text-red-500 pl-4"
+                              />
                             </button>
                           </td>
                         </tr>
@@ -818,7 +844,7 @@ const AdminDashboard = () => {
       case "users":
         return (
           <div className="flex flex-col items-center justify-center">
-            <div className="w-full max-w-2xl p-6 ">
+            <div className="w-full p-6 ">
               <div className="flex justify-center">
                 <table className="w-full border border-gray-300 bg-blue-50 rounded-lg overflow-hidden">
                   <thead className="bg-gray-200 text-gray-700">
@@ -867,7 +893,7 @@ const AdminDashboard = () => {
       case "UserQueries":
         return (
           <div className="flex flex-col items-center justify-center">
-            <div className="w-full max-w-6xl p-6">
+            <div className="w-full  p-6">
               <div className="flex justify-center">
                 <table className="w-full border border-gray-300 bg-blue-50 rounded-lg overflow-hidden">
                   <thead className="bg-gray-200 text-gray-700">

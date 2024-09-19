@@ -70,22 +70,38 @@ const useRoomStore = create<RoomStoreState>((set) => ({
         }));
     },
     addRoom: async (data: { roomNumber: number; roomCategoryId: number }) => {
-        const response = await fetch(`${baseUrl}/rooms`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                // authorization: sessionStorage.token || "",
-            },
-            body: JSON.stringify({
-                roomNumber: data.roomNumber,
-                roomCategoryId: data.roomCategoryId
-            }),
-        });
-        const newRoom = await response.json();
-        set((state) => ({
-            rooms: [...state.rooms, newRoom],
-        }));
+        try {
+            const response = await fetch(`${baseUrl}/rooms`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    // authorization: sessionStorage.token || "",
+                },
+                body: JSON.stringify({
+                    roomNumber: data.roomNumber,
+                    roomCategoryId: data.roomCategoryId
+                }),
+            });
+    
+            if (!response.ok) {
+                // If the response is not ok, throw an error
+                const errorData = await response.json();
+                alert(errorData.message || "Failed to add room");
+                return; // Exit the function if there's an error
+            }
+    
+            const newRoom = await response.json();
+            set((state) => ({
+                rooms: [...state.rooms, newRoom],
+            }));
+        } catch (error) {
+            // Handle unknown error type
+            const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+            alert("An error occurred while adding the room: " + errorMessage);
+        }
     },
+    
+    
     getRoom: async (id: number) => {
         const response = await fetch(`${baseUrl}/rooms/${id}`);
         const data = await response.json();
