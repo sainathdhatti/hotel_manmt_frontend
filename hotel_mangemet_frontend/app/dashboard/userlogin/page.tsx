@@ -113,7 +113,7 @@ const UserDashboard = () => {
         setLoading(true);
         try {
           const billings = await getFinalBillingsByUser(userId);
-          setFinalBilling(billings);
+          setFinalBilling(billings); // Here, billings is of type FinalBilling[]
         } catch (err) {
           setError("Failed to fetch billing details.");
           console.error("Error fetching final billings:", err);
@@ -178,7 +178,7 @@ const UserDashboard = () => {
               // alert(
               //   "Review link sent successfully for booking " + booking.bookingId
               // );
-            } catch (err) {
+            } catch (err:any) {
               if ("response" in err) {
                 // Now you can access err.response
                 if (

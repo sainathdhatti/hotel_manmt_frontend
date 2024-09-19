@@ -63,7 +63,7 @@ const StaffMembers = ({ params: { staffmemberId } }: Props) => {
           setValue("lastName", staffMember.lastName);
           setValue("email", staffMember.email);
           setValue("phone", staffMember.phone);
-          setValue("password", staffMember.password);
+          //setValue("password", staffMember.password);
           if (staffMember.gender === "male" || staffMember.gender === "female") {
               setValue("gender", staffMember.gender);
           } else {

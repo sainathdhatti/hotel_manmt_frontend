@@ -6,6 +6,7 @@ import { faBed, faVectorSquare } from "@fortawesome/free-solid-svg-icons";
 import Footer from "../footer/page";
 import Navbar from "../navbar";
 import { useRouter } from "next/navigation";
+import LoadingSpinner from "../loading";
 
 const Rooms = () => {
   const router = useRouter();
@@ -50,7 +51,7 @@ const Rooms = () => {
 
   const handleClick = () => {
     if (isClient) {
-      const sessionItem = sessionStorage.getItem('token');
+      const sessionItem = sessionStorage.getItem("token");
       if (sessionItem) {
         router.push(`/bookingForm/${selectedCategoryId}`);
       } else {
@@ -65,28 +66,22 @@ const Rooms = () => {
   return (
     <>
       <Navbar />
-      <div className="relative flex overflow-hidden justify-center min-h-screen ">
-        {/* Remove or comment out the following block to eliminate the background image */}
-        {/* <div className="absolute inset-0">
-          <img
-            src='images/Oroom1.jpeg'
-            className="opacity-80 w-full h-full object-cover"
-          />
-        </div> */}
-        <div className="flex w-full max-w-screen-xl mx-auto  ">
-          <nav className="w-1/4 min-h-screen p-6 py-8">
-            <h1 className="text-3xl font-bold mb-6 ml-4 text-black">Enhance Your Stay</h1>
+      <div className="relative flex justify-center min-h-screen bg-gray-100">
+        <div className="flex w-full max-w-screen-xl mx-auto flex-col lg:flex-row">
+          {/* Sidebar for Categories */}
+          <nav className="w-full lg:w-1/4 p-6 py-8 bg-white shadow-md lg:min-h-screen">
+            <h1 className="text-2xl font-bold mb-6 text-black">Enhance Your Stay</h1>
             <ul className="space-y-2 font-bold">
               {roomCategories.length > 0 ? (
                 roomCategories.map((category) => (
                   <li key={category.id} className="mb-4">
                     <button
                       onClick={() => handleCategoryClick(category.id)}
-                      className={`relative text-xl font-bold ${
+                      className={`relative text-lg lg:text-xl font-bold ${
                         selectedCategoryId === category.id
                           ? "text-red-500"
                           : "text-gray-800"
-                      } transition duration-300 ease-in-out ml-4 pb-2`}
+                      } transition duration-300 ease-in-out pb-2`}
                     >
                       {category.name}
                       <span
@@ -100,78 +95,71 @@ const Rooms = () => {
                   </li>
                 ))
               ) : (
-                <li className="text-lg">Loading categories...</li>
+                <li className="text-lg">
+                  <LoadingSpinner />
+                </li>
               )}
             </ul>
           </nav>
-          <main className="ml-4 w-3/4 p-6 flex flex-col relative rounded-lg bg-white shadow-lg">
+
+          {/* Main Content Area */}
+          <main className="w-full lg:w-3/4 p-6 flex flex-col bg-white shadow-lg rounded-lg">
             {displayRoomCategory ? (
               <div className="flex flex-col">
+                {/* Image */}
                 {displayRoomCategory.imageUrl ? (
                   <img
                     src={displayRoomCategory.imageUrl}
                     alt={displayRoomCategory.name}
-                    className="w-full h-[70vh] object-cover mb-4 rounded-lg shadow-md"
+                    className="w-full h-64 lg:h-[70vh] object-cover mb-4 rounded-lg shadow-md"
                   />
                 ) : (
                   <p className="text-lg text-center">Image not available</p>
                 )}
-                <div className="flex items-center space-x-8 mb-6">
-                  <div>
-                    <h1 className="text-2xl font-bold">{displayRoomCategory.name}</h1>
-                  </div>
-                  <div>
-                    <p className="text-xl font-bold">
-                      Price: <span className="text-red-500">&#8377;{displayRoomCategory.price}</span>
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xl flex items-center">
-                      <FontAwesomeIcon icon={faBed} className="mr-2 text-xl" />
-                      {displayRoomCategory.noOfAdults} Adults + {displayRoomCategory.noOfChildren} Children
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xl flex items-center">
-                      <FontAwesomeIcon icon={faVectorSquare} className="mr-2 text-xl" />
-                      424 Sq. Ft.
-                    </p>
-                  </div>
+
+                {/* Room Info */}
+                <div className="flex flex-col lg:flex-row items-center justify-between space-y-4 lg:space-y-0 lg:space-x-8 mb-6">
+                  <h1 className="text-2xl font-bold">{displayRoomCategory.name}</h1>
+                  <p className="text-xl font-bold">
+                    Price: <span className="text-red-500">&#8377;{displayRoomCategory.price}</span>
+                  </p>
+                  <p className="text-xl flex items-center">
+                    <FontAwesomeIcon icon={faBed} className="mr-2 text-xl" />
+                    {displayRoomCategory.noOfAdults} Adults + {displayRoomCategory.noOfChildren} Children
+                  </p>
+                  <p className="text-xl flex items-center">
+                    <FontAwesomeIcon icon={faVectorSquare} className="mr-2 text-xl" />
+                    424 Sq. Ft.
+                  </p>
                 </div>
+
+                {/* Description */}
                 <p className="text-lg mb-4">{displayRoomCategory.description}</p>
-                <div className="mt-8 border-t pt-4 border-black flex flex-wrap justify-between">
-                  <div className="flex items-center mb-2 space-x-2">
-                    <input
-                      type="checkbox"
-                      id="check-in"
-                      checked
-                      readOnly
-                      className="form-checkbox h-5 w-5 text-green-600"
-                    />
-                    <label htmlFor="check-in" className="text-lg">Check-in: 12:00 NOON</label>
-                  </div>
-                  <div className="flex items-center mb-2 space-x-2">
-                    <input
-                      type="checkbox"
-                      id="check-out"
-                      checked
-                      readOnly
-                      className="form-checkbox h-5 w-5 text-green-600"
-                    />
-                    <label htmlFor="check-out" className="text-lg">Check-out: 10:00 AM</label>
-                  </div>
-                  <div className="flex items-center mb-2 space-x-2">
-                    <input
-                      type="checkbox"
-                      id="cancellation"
-                      checked
-                      readOnly
-                      className="form-checkbox h-5 w-5 text-green-600"
-                    />
-                    <label htmlFor="cancellation" className="text-lg">Cancellation: 48 Hours</label>
-                  </div>
+
+                {/* Room Details */}
+                <div className="mt-8 border-t pt-4 border-gray-300 flex flex-col lg:flex-row justify-between space-y-4 lg:space-y-0">
+                  {[
+                    { id: "check-in", label: "Check-in: 12:00 NOON" },
+                    { id: "check-out", label: "Check-out: 10:00 AM" },
+                    { id: "cancellation", label: "Cancellation: 48 Hours" },
+                  ].map((item) => (
+                    <div className="flex items-center space-x-2" key={item.id}>
+                      <input
+                        type="checkbox"
+                        id={item.id}
+                        checked
+                        readOnly
+                        className="form-checkbox h-5 w-5 text-green-600"
+                      />
+                      <label htmlFor={item.id} className="text-lg">
+                        {item.label}
+                      </label>
+                    </div>
+                  ))}
                 </div>
-                <div className="mt-8 flex-1">
+
+                {/* Amenities */}
+                <div className="mt-8">
                   <h2 className="text-xl font-semibold mb-2">Amenities:</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     {displayRoomCategory.amenities?.length ? (
@@ -194,6 +182,8 @@ const Rooms = () => {
                     )}
                   </div>
                 </div>
+
+                {/* Book Now Button */}
                 <div className="mt-8 flex justify-end">
                   <button
                     onClick={handleClick}

@@ -18,9 +18,17 @@ const config: Config = {
         'text-color':"#3C3C3C",
         "customBlue": '#1ca1dd',
       },
-      
+      keyframes: {
+        spin: {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        },
+      },
+      animation: {
+        spin: 'spin 1s linear infinite',
+      },
     },
   },
-  plugins: [],
+  plugins: [require('daisyui')],
 };
 export default config;

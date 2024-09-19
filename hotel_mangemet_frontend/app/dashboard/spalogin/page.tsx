@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import useAuthStore from '@/app/store/loginStore';
 
-const SpaBookings: React.FC = () => {
+const SpaBookings = () => {
   const router = useRouter();
   const { spabookings, fetchBookings, updateBooking } = useSpaBookingStore((state) => ({
     spabookings: state.spabookings,
@@ -85,7 +85,7 @@ const SpaBookings: React.FC = () => {
                 <tr key={booking.id} className="border-b hover:bg-gray-50 even:bg-gray-100">
                   <td className="px-6 py-4 text-gray-800">{booking.firstName}</td>
                   <td className="px-6 py-4 text-gray-800">{booking.lastName}</td>
-                  <td className="px-6 py-4 text-gray-800">{booking.spaservice.name}</td>
+                  <td className="px-6 py-4 text-gray-800">{booking.spaservice.name||"N/A"}</td>
                   <td className="px-6 py-4 text-gray-800">{formatDate(booking.booking_date)}</td>
                   <td className="px-6 py-4 text-gray-800">{booking.timeslot.startTime.toLocaleString()}</td>
                   <td className="px-6 py-4 text-gray-800">{booking.status}</td>

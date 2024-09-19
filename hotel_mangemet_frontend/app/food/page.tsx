@@ -8,6 +8,8 @@ import { useRouter } from "next/navigation";
 import useAuthStore from "../store/loginStore";
 import Navbar from "../navbar";
 import axios from "axios";
+import { log } from "node:console";
+import { Booking } from "../store/bookingStore";
 
 const FoodOrderPage = () => {
   const { foodItems, getAllFoodItems } = useFoodItemsStore();
@@ -94,7 +96,7 @@ const FoodOrderPage = () => {
       // Refresh food items
       await getAllFoodItems();
 
-      toast.success("Order placed successfully!");
+      //toast.success("Order placed successfully!");
     } catch (error) {
       console.error("Failed to place order:", error);
       toast.error("Failed to place order. Please try again.");
@@ -118,14 +120,21 @@ const FoodOrderPage = () => {
   const [bookingId, setBookingId] = useState<number | null>(null);
   useEffect(() => {
     if (isAuthenticated && userId !== undefined) {
-      // Fetch booking IDs from the backend
-      axios.get(`http://localhost:5000/bookings/users/${userId}/BookingId`)
+      axios.get(`http://localhost:5000/bookings/users/${userId}?t=${Date.now()}`)
         .then(response => {
-          const ids = response.data;
-          if (ids.length > 0) {
-            setBookingId(ids[0]); // Use the first booking ID or handle multiple IDs
+          const bookings: Booking[] = response.data; // Assuming this is an array of booking objects
+          console.log('Bookings:', bookings);
+  
+          // Filter for checked-in bookings
+          const checkedInBookings = bookings.filter(booking => booking.status === "CHECKED_IN");
+  
+          if (checkedInBookings.length > 0) {
+            const bookingId = checkedInBookings[0].bookingId; // Use the first checked-in booking ID
+            setBookingId(bookingId); // Set the bookingId state
+            console.log('Booking ID set:', bookingId);
           } else {
             console.error('No bookings found with status "checked-in".');
+            setBookingId(null); // Clear the booking ID if none found
           }
         })
         .catch(error => {
@@ -133,7 +142,8 @@ const FoodOrderPage = () => {
         });
     }
   }, [isAuthenticated, userId]);
-
+  
+  
 
   return (
     <div className="relative container mx-auto ">

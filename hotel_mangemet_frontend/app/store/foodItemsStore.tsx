@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+
 import { create } from "zustand";
 
 const baseUrl = "http://localhost:5000/fooditem";
@@ -25,6 +25,7 @@ export interface FoodItem {
   food_price: number;
   food_description: string;
   food_image: string;
+ // bookingId:number;
 }
 
 const useFoodItemsStore = create<FoodItemsStoreState>((set) => ({
@@ -56,7 +57,11 @@ const useFoodItemsStore = create<FoodItemsStoreState>((set) => ({
     food_price: number;
     food_description: string;
     food_image: string;
-    //bookingId:number;
+
+   // bookingId:number;
+
+  
+
   }) => {
     const response = await fetch(`${baseUrl}`, {
       method: "POST",

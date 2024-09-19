@@ -118,15 +118,17 @@ const useUserStore = create<UserStore>((set) => ({
         headers: { "Content-Type": "application/json" },
       });
       set({ registrationStatus: "User registered successfully", error: null });
-      toast.success("User registered successfully");
+      toast.success("User registered successfully! please login");
     } catch (error: any) {
       console.error("Error registering user:", error);
       toast.error(error.response?.data?.message || "Error registering user");
 
       set({
-        registrationStatus: `Error registering user: ${AxiosError}`,
+
+        registrationStatus: `Error registering user: ${AxiosError.ERR_BAD_RESPONSE}`,
         error: AxiosError.ERR_BAD_RESPONSE,
-      });
+    });
+
     } finally {
       set({ loading: false });
     }

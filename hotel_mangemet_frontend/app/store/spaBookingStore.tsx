@@ -60,9 +60,9 @@ interface SpaBooking {
       id: number;
       name: string;
     };
+  }
+}
 
-}
-}
 
 interface SpaBookingStore {
   spabookings: SpaBooking[];
