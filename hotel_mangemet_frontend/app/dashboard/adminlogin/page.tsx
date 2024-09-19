@@ -207,7 +207,7 @@ const AdminDashboard = () => {
     const tableColorClass =
       activeSection === "dashboard" ? "bg-blue-50" : "bg-white";
     const data: { [key: string]: any } = {
-      bookings: filteredBookings,
+      bookings: bookings,
       roomCategories: roomCategories,
       rooms: rooms,
       contacts: contacts,
@@ -929,10 +929,10 @@ const AdminDashboard = () => {
           </div>
         );
 
-      case "users":
+      case "users": 
         return (
           <div className="flex flex-col items-center justify-center">
-            <div className="w-full max-w-2xl p-6 ">
+            <div className="w-full max-w-4xl  ">
               <div className="flex justify-center">
                 <table className="w-full border border-gray-300 bg-blue-50 rounded-lg overflow-hidden">
                   <thead className="bg-gray-200 text-gray-700">
