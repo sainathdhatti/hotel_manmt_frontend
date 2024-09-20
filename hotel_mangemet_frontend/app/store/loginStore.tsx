@@ -30,6 +30,7 @@ const useAuthStore = create<AuthState>((set) => {
     userName,
 
     login: async (data, role) => {
+      console.log(data, role)
       try {
         const response = await axios.post(`http://localhost:5000/${role}/login`, data, {
           headers: {

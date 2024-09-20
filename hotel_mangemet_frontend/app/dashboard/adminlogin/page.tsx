@@ -27,14 +27,21 @@ const AdminDashboard = () => {
   const [roomFilter, setRoomFilter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [nameFilter, setNameFilter] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
 
-  const { logout } = useAuthStore();
+  const { login, isAuthenticated,logout } = useAuthStore((state) => ({
+    login: state.login,
+    isAuthenticated: state.isAuthenticated,
+    logout: state.logout
+  }))
   const router = useRouter();
 
   const handleLogout = async () => {
     if (window.confirm("Are you sure you want to log out?")) {
       logout();
-      router.push("/");
+      router.push("/dashboard/adminlogin");
     }
   };
 
@@ -83,6 +90,7 @@ const AdminDashboard = () => {
     } else if (activeSection === "bookings") {
       getAllBookings();
     }
+    setLoading(false); 
   }, [
     activeSection,
     getAllAmenities,
@@ -203,6 +211,26 @@ const AdminDashboard = () => {
     return data.slice(indexOfFirstItem, indexOfLastItem);
   };
 
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await login({ email, password }, "adminlogin");
+      if (isAuthenticated) {
+        setEmail(""); // Clear email on successful login
+        setPassword(""); // Clear password on successful login
+      }
+    } catch (error:any) {
+      console.error("Login failed:", error);
+      alert("Login failed. Please check your email and password.");
+    }
+  };
+
+  // Render loading state until authentication is confirmed
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+
   const renderContent = () => {
     const tableColorClass =
       activeSection === "dashboard" ? "bg-blue-50" : "bg-white";
@@ -318,7 +346,7 @@ const AdminDashboard = () => {
                 </tbody>
               </table>
             </div>
-            <Pagination 
+            <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
               onPageChange={setCurrentPage}
@@ -929,12 +957,12 @@ const AdminDashboard = () => {
           </div>
         );
 
-      case "users": 
+      case "users":
         return (
           <div className="flex flex-col items-center justify-center">
             <div className="w-full max-w-4xl  ">
               <div className="flex justify-center">
-                <table className="w-full border border-gray-300 bg-blue-50 rounded-lg overflow-hidden">
+                <table className="w-full border border-gray-300  rounded-lg overflow-hidden">
                   <thead className="bg-gray-200 text-gray-700">
                     <tr>
                       <th className="px-4 py-2 text-left font-semibold">
@@ -988,7 +1016,7 @@ const AdminDashboard = () => {
           <div className="flex flex-col items-center justify-center">
             <div className="w-full max-w-6xl p-6">
               <div className="flex justify-center">
-                <table className="w-full border border-gray-300 bg-blue-50 rounded-lg overflow-hidden">
+                <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
                   <thead className="bg-gray-200 text-gray-700">
                     <tr>
                       <th className="px-2 py-2 text-left font-semibold">
@@ -1055,49 +1083,86 @@ const AdminDashboard = () => {
     }
   };
   return (
-    <>
-      <header className="fixed top-0 left-0 w-full bg-slate-900 text-white p-2 z-10 flex justify-between items-center">
-        <div className="text-xl font-bold">Hotel Enhance</div>
-        <div className="text-xl font-bold">Admin Dashboard</div>
-        <button className="bg-red-500 px-4 py-2 rounded" onClick={handleLogout}>
-          Logout
-        </button>
-      </header>
-
-      <div className="flex h-screen pt-14">
-        <nav className="fixed w-60 bg-slate-900  p-2 ">
-          <ul className="space-y-2 text-teal-400">
-            {[
-              { name: "Dashboard", key: "dashboard" },
-              { name: "Bookings", key: "bookings" },
-              { name: "Room Categories", key: "roomCategories" },
-              { name: "Amenities", key: "amenities" },
-              { name: "Rooms", key: "rooms" },
-              { name: "Food Items", key: "foodItems" },
-              { name: "Spa Services", key: "spaServices" },
-              { name: "Staff Categories", key: "staffCategories" },
-              { name: "Staff Members", key: "staffMembers" },
-              { name: "Users", key: "users" },
-              { name: "User Queries", key: "UserQueries" },
-            ].map(({ name, key }) => (
-              <li
-                key={key}
-                className={`cursor-pointer p-2 ${
-                  activeSection === key ? "bg-gray-700" : ""
-                }`}
-                onClick={() => setActiveSection(key)}
-              >
-                {name}
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <main className="flex-1 p-4 overflow-auto ml-60">
-          {renderContent()}
-        </main>
+    !isAuthenticated ? (
+      <div
+        className="absolute top-0 left-0 w-full h-full bg-cover bg-center"
+        style={{ backgroundImage: 'url("/images/login.jpeg")' }}
+      >
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded shadow-lg">
+          <h2 className="text-xl font-bold mb-4">Login</h2>
+          <form onSubmit={handleLoginSubmit}>
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="mb-4 p-2 border rounded w-full"
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="mb-4 p-2 border rounded w-full"
+            />
+            {/* {errorMessage && <p className="text-red-500">{errorMessage}</p>} */}
+            <button
+              type="submit"
+              className="bg-blue-500 text-white px-4 py-2 rounded"
+            >
+              Login
+            </button>
+          </form>
+        </div>
       </div>
-    </>
+    ) : (
+      <>
+        <header className="fixed top-0 left-0 w-full bg-slate-900 text-white p-2 z-10 flex justify-between items-center">
+          <div className="text-xl font-bold">Hotel Enhance</div>
+          <div className="text-xl font-bold">Admin Dashboard</div>
+          <button className="bg-red-500 px-4 py-2 rounded" onClick={handleLogout}>
+            Logout
+          </button>
+        </header>
+  
+        <div className="flex h-screen pt-14">
+          <nav className="fixed w-60 bg-slate-900 p-2">
+            <ul className="space-y-2 text-teal-400">
+              {[
+                { name: "Dashboard", key: "dashboard" },
+                { name: "Bookings", key: "bookings" },
+                { name: "Room Categories", key: "roomCategories" },
+                { name: "Amenities", key: "amenities" },
+                { name: "Rooms", key: "rooms" },
+                { name: "Food Items", key: "foodItems" },
+                { name: "Spa Services", key: "spaServices" },
+                { name: "Staff Categories", key: "staffCategories" },
+                { name: "Staff Members", key: "staffMembers" },
+                { name: "Users", key: "users" },
+                { name: "User Queries", key: "UserQueries" },
+              ].map(({ name, key }) => (
+                <li
+                  key={key}
+                  className={`cursor-pointer p-2 ${
+                    activeSection === key ? "bg-gray-700" : ""
+                  }`}
+                  onClick={() => setActiveSection(key)}
+                >
+                  {name}
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <main className="flex-1 p-4 overflow-auto ml-60">
+            {renderContent()}
+          </main>
+        </div>
+      </>
+    )
   );
+  
 };
 
 export default AdminDashboard;

@@ -130,11 +130,11 @@ const useBookingsStore = create<BookingStore>((set) => ({
 
   fetchBookingById: async (bookingId: number) => {
     try {
-      const token = sessionStorage.getItem('token') ?? '';
+      //const token = sessionStorage.getItem('token') ?? '';
       const response = await axios.get<Booking>(`${API_URL}/bookings/${bookingId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        // headers: {
+        //   Authorization: `Bearer ${token}`,
+        // },
       });
       set((state) => ({
         booking: response.data,
@@ -148,13 +148,14 @@ const useBookingsStore = create<BookingStore>((set) => ({
 
   fetchBookingsByUserId: async (userId: number) => {
     try {
-      const token = sessionStorage.getItem('token') ?? '';
+      //const token = sessionStorage.getItem('token') ?? '';
       const response = await axios.get<Booking[]>(`${API_URL}/bookings/users/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        // headers: {
+        //   Authorization: `Bearer ${token}`,
+        // },
       });
       set({ bookings: response.data });
+      console.log(response.data);
     } catch (error) {
       console.error('Error fetching bookings by user ID:', error);
     }
