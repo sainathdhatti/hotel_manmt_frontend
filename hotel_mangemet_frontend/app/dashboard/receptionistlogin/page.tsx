@@ -15,10 +15,11 @@ import { toast } from "react-toastify";
 
 const Receptionist = () => {
   const router = useRouter();
-  const { userId, isAuthenticated, logout } = useAuthStore((state) => ({
+  const { userId, isAuthenticated, logout,login } = useAuthStore((state) => ({
     userId: state.userId,
     isAuthenticated: state.isAuthenticated,
     logout: state.logout,
+    login:state.login
   }));
 
   const [currentView, setCurrentView] = useState("bookings");
@@ -30,6 +31,9 @@ const Receptionist = () => {
   const [checkInDate, setCheckInDate] = useState(today);
   const [checkOutDate, setCheckOutDate] = useState(tomorrow);
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
 
   const { roomCategories, getAllRoomCategories } = useRoomCategoryStore(
     (state) => ({
@@ -43,6 +47,7 @@ const Receptionist = () => {
       await getAllRoomCategories();
     };
     fetchRoomCategories();
+    setLoading(false)
   }, [getAllRoomCategories]);
 
   const { finalBillings, fetchBillings, calculateFinalBillings } =
@@ -82,9 +87,10 @@ const Receptionist = () => {
 
   const confirmLogout = () => {
     logout();
-    router.push("/");
+    router.push("/dashboard/receptionistlogin");
   };
 
+  
   useEffect(() => {
     const fetchAvailableRooms = async () => {
       if (checkInDate && checkOutDate) {
@@ -144,6 +150,24 @@ const Receptionist = () => {
   const statusOptions = Object.values(BookingStatuss);
 
   console.log("availableRooms", availableRooms);
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await login({ email, password }, "receptionistlogin");
+      if (isAuthenticated) {
+        setEmail(""); 
+        setPassword(""); 
+      }
+    } catch (error:any) {
+      console.error("Login failed:", error);
+      alert(error.message)
+    }
+  };
+
+  // Render loading state until authentication is confirmed
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   const renderContent = () => {
     switch (currentView) {
@@ -439,72 +463,91 @@ const Receptionist = () => {
 
   return (
     <div className="flex h-screen flex-col border-l-cyan-700">
-      <div className="flex flex-1">
-        <aside className="w-64 bg-slate-800 p-4 shadow-lg">
-          <h2 className="text-xl font-bold mb-6 text-teal-400">Dashboard</h2>
-          <ul className="space-y-2">
-            <li>
+      {!isAuthenticated ? (
+        <div
+          className="absolute top-0 left-0 w-full h-full bg-cover bg-center"
+          style={{ backgroundImage: 'url("/images/login.jpeg")' }}
+        >
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded shadow-lg">
+            <h2 className="text-xl font-bold mb-4">Login</h2>
+            <form onSubmit={handleLoginSubmit}>
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="mb-4 p-2 border rounded w-full"
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="mb-4 p-2 border rounded w-full"
+              />
+              {/* {errorMessage && <p className="text-red-500">{errorMessage}</p>} */}
               <button
-                onClick={() => setCurrentView("bookings")}
-                className="flex items-center w-full text-left p-3 text-teal-300 hover:bg-slate-700 rounded-md transition"
+                type="submit"
+                className="bg-blue-500 text-white px-4 py-2 rounded"
               >
-                Bookings
+                Login
               </button>
-            </li>
-            <li>
-              <button
-                onClick={() => setCurrentView("billings")}
-                className="flex items-center w-full text-left p-3 text-teal-300 hover:bg-gray-700 rounded-md transition"
-              >
-                Billings
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => setCurrentView("rooms_available")}
-                className="flex items-center w-full text-left p-3 text-teal-300 hover:bg-gray-700 rounded-md transition"
-              >
-                Rooms Available
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={handleLogout}
-                className="flex items-center w-full text-left p-3 text-teal-300 hover:bg-gray-700 rounded-md transition"
-              >
-                Logout
-              </button>
-              {showConfirm && (
-                <div className="fixed top-0 left-0 right-0 flex items-start justify-center z-50 p-4">
-                  <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-                    <h3 className="text-lg font-semibold mb-4">
-                      Confirm Logout
-                    </h3>
-                    <p className="mb-4">Are you sure you want to log out?</p>
-                    <div className="flex justify-end space-x-4">
-                      <button
-                        onClick={cancelLogout}
-                        className="bg-gray-500 text-white py-2 px-4 rounded-md shadow-sm hover:bg-gray-600"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={confirmLogout}
-                        className="bg-red-500 text-white py-2 px-4 rounded-md shadow-sm hover:bg-red-600"
-                      >
-                        Logout
-                      </button>
+            </form>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-1">
+          <aside className="w-64 bg-slate-800 p-4 shadow-lg">
+            <h2 className="text-xl font-bold mb-6 text-teal-400">Dashboard</h2>
+            <ul className="space-y-2">
+              {["Bookings", "Billings", "Rooms Available"].map((item) => (
+                <li key={item}>
+                  <button
+                    onClick={() => setCurrentView(item.toLowerCase().replace(" ", "_"))}
+                    className="flex items-center w-full text-left p-3 text-teal-300 hover:bg-slate-700 rounded-md transition"
+                  >
+                    {item}
+                  </button>
+                </li>
+              ))}
+              <li>
+                <button
+                  onClick={() => setShowConfirm(true)}
+                  className="flex items-center w-full text-left p-3 text-teal-300 hover:bg-gray-700 rounded-md transition"
+                >
+                  Logout
+                </button>
+                {showConfirm && (
+                  <div className="fixed top-0 left-0 right-0 flex items-start justify-center z-50 p-4">
+                    <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+                      <h3 className="text-lg font-semibold mb-4">Confirm Logout</h3>
+                      <p className="mb-4">Are you sure you want to log out?</p>
+                      <div className="flex justify-end space-x-4">
+                        <button
+                          onClick={cancelLogout}
+                          className="bg-gray-500 text-white py-2 px-4 rounded-md shadow-sm hover:bg-gray-600"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={confirmLogout}
+                          className="bg-red-500 text-white py-2 px-4 rounded-md shadow-sm hover:bg-red-600"
+                        >
+                          Logout
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </li>
-          </ul>
-        </aside>
-        <main className="flex-1 p-6">{renderContent()}</main>
-      </div>
+                )}
+              </li>
+            </ul>
+          </aside>
+          <main className="flex-1 p-6">{renderContent()}</main>
+        </div>
+      )}
     </div>
   );
-};
-
+}
 export default Receptionist;

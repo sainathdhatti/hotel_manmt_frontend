@@ -1,5 +1,6 @@
 import { toast } from 'react-toastify';
 import { create } from 'zustand';
+import { Booking } from './bookingStore';
 
 export interface OrderItem {
   id: number;
@@ -24,7 +25,7 @@ interface FoodOrder {
   status: string;
   orderItems: OrderItem[]; // Adjust based on actual structure
   user: User; // User object
-  bookingId: number;
+  bookingId:number;
 }
 
 interface FoodOrderStoreState {
